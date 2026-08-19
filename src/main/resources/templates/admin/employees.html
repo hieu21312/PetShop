@@ -1,0 +1,34 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-user-tie me-2"></i> Quản lý nhân viên</h2>
+                    <a th:href="@{/admin/employees/create}" class="btn add-btn"><i class="fas fa-plus"></i> Thêm nhân viên</a>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-pink">
+                            <tr><th>Mã NV</th><th>Nhân viên</th><th>Giới tính</th><th>Vai trò</th><th width="180">Thao tác</th></tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="e : ${employees}">
+                                <td><span class="fw-bold text-danger" th:text="${e.maNV}"></span></td>
+                                <td><div class="employee-info"><div class="employee-avatar"><i class="fas fa-user"></i></div><span th:text="${e.tenNV}"></span></div></td>
+                                <td><span class="gender-text" th:text="${e.gioiTinh}"></span></td>
+                                <td><span class="badge role-badge" th:text="${e.role != null ? e.role.tenVaiTro : 'Chưa phân'}"></span></td>
+                                <td><div class="action-group"><a th:href="@{/admin/employees/edit/{id}(id=${e.maNV})}" class="btn-action btn-edit-text"><i class="fas fa-pen-to-square me-1"></i> Sửa</a><a th:href="@{/admin/employees/delete/{id}(id=${e.maNV})}" class="btn-action btn-delete-text" onclick="return confirm('Xóa nhân viên?')"><i class="fas fa-trash me-1"></i> Xóa</a></div></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(employees)}"><td colspan="5" class="text-center py-4">Chưa có nhân viên nào</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-gradient">📅 Quản lý lịch đặt dịch vụ</h2>
+            </div>
+            <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-pink">
+                            <tr>
+                                <th>Mã</th>
+                                <th>Dịch vụ</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Giờ</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="b : ${bookings}">
+                                <td th:text="${b.maDatLich}"></td>
+                                <td th:text="${b.maDV}"></td>
+                                <td>
+                                    <strong th:text="${b.tenKhachHang}"></strong><br>
+                                    <small class="text-muted" th:text="${b.soDienThoai}"></small>
+                                </td>
+                                <td th:text="${#temporals.format(b.ngayDat, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${b.gioDat}"></td>
+                                <td>
+                                    <span class="badge" th:classappend="${b.trangThai == 'Chờ xác nhận' ? 'bg-warning' : (b.trangThai == 'Đã xác nhận' ? 'bg-primary' : (b.trangThai == 'Hoàn thành' ? 'bg-success' : 'bg-secondary'))}" th:text="${b.trangThai}"></span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/bookings/updateStatus}" method="post" class="d-inline">
+                                        <input type="hidden" name="id" th:value="${b.maDatLich}">
+                                        <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                                            <option value="Chờ xác nhận" th:selected="${b.trangThai == 'Chờ xác nhận'}">Chờ xác nhận</option>
+                                            <option value="Đã xác nhận" th:selected="${b.trangThai == 'Đã xác nhận'}">Đã xác nhận</option>
+                                            <option value="Hoàn thành" th:selected="${b.trangThai == 'Hoàn thành'}">Hoàn thành</option>
+                                            <option value="Hủy" th:selected="${b.trangThai == 'Hủy'}">Hủy</option>
+                                        </select>
+                                    </form>
+                                    <a th:href="@{/admin/bookings/delete/{id}(id=${b.maDatLich})}" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Xóa lịch đặt này?')">Xóa</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(bookings)}">
+                                <td colspan="7" class="text-center py-4">Chưa có lịch đặt nào</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

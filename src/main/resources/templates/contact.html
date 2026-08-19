@@ -1,0 +1,430 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section class="fade-in">
+        <!-- Style specific for Contact Page Chatbot -->
+        <style>
+            .contact-info-card {
+                border-radius: 20px;
+                border: none;
+                box-shadow: var(--shadow);
+                background: white;
+            }
+            .chat-container {
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: var(--shadow-lg);
+                border: 1px solid #f0f0f0;
+                background: white;
+                height: 550px;
+                display: flex;
+                flex-direction: column;
+            }
+            .chat-header {
+                background: var(--gradient-pink);
+                color: white;
+                padding: 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .chat-header img {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                border: 2px solid white;
+                object-fit: cover;
+            }
+            .bot-status {
+                font-size: 0.8rem;
+                color: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                background-color: #2ecc71;
+                border-radius: 50%;
+                display: inline-block;
+                animation: pulse 1.5s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(0.9); opacity: 0.6; }
+                50% { transform: scale(1.2); opacity: 1; }
+                100% { transform: scale(0.9); opacity: 0.6; }
+            }
+            .chat-messages {
+                flex: 1;
+                padding: 1.5rem;
+                overflow-y: auto;
+                background-color: #fcfcfc;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .chat-bubble {
+                max-width: 75%;
+                padding: 0.9rem 1.2rem;
+                border-radius: 18px;
+                line-height: 1.5;
+                font-size: 0.95rem;
+                word-wrap: break-word;
+                position: relative;
+                animation: bubbleUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            @keyframes bubbleUp {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .chat-bubble.bot {
+                background-color: #f1f2f6;
+                color: var(--dark);
+                align-self: flex-start;
+                border-bottom-left-radius: 4px;
+            }
+            .chat-bubble.user {
+                background: var(--gradient);
+                color: white;
+                align-self: flex-end;
+                border-bottom-right-radius: 4px;
+            }
+            .chat-quick-replies {
+                padding: 0.8rem 1.5rem;
+                background: #f8f9fa;
+                border-top: 1px solid #eee;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .quick-reply-btn {
+                background: white;
+                border: 1.5px solid var(--primary);
+                color: var(--primary) !important;
+                padding: 0.4rem 0.9rem;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: var(--transition);
+            }
+            .quick-reply-btn:hover {
+                background: var(--primary);
+                color: white !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(255, 107, 157, 0.15);
+            }
+            .chat-input-area {
+                padding: 1rem;
+                background: white;
+                border-top: 1px solid #eee;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            .chat-input-area input {
+                flex: 1;
+                border: 2px solid #e9ecef;
+                padding: 0.8rem 1.2rem;
+                border-radius: 30px;
+                outline: none;
+                transition: var(--transition);
+            }
+            .chat-input-area input:focus {
+                border-color: var(--primary);
+            }
+            .chat-send-btn {
+                background: var(--gradient-pink);
+                color: white;
+                border: none;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: var(--transition);
+                box-shadow: 0 4px 10px rgba(245, 87, 108, 0.2);
+            }
+            .chat-send-btn:hover {
+                transform: scale(1.05) translateY(-2px);
+                box-shadow: 0 6px 15px rgba(245, 87, 108, 0.3);
+            }
+            .typing-indicator {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 0.5rem 1rem;
+            }
+            .typing-indicator span {
+                width: 8px;
+                height: 8px;
+                background-color: #a4b0be;
+                border-radius: 50%;
+                animation: typing 1.4s infinite;
+            }
+            .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+            .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+            @keyframes typing {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); }
+            }
+        </style>
+
+        <!-- Banner Section -->
+        <div class="p-4 mb-5 rounded-3 text-white" style="background: var(--gradient); border-radius: 20px !important;">
+            <div class="container-fluid py-4 text-center">
+                <h1 class="display-5 fw-bold"><i class="fas fa-envelope-open-text"></i> Liên Hệ & Tư Vấn</h1>
+                <p class="fs-5 col-md-12 text-white-50">PetShop luôn sẵn sàng lắng nghe, hỗ trợ và tư vấn chu đáo nhất cho bé yêu nhà bạn.</p>
+            </div>
+        </div>
+
+        <div class="container my-5">
+            <div class="row g-5">
+                <!-- Left Column: Contact Form & Info -->
+                <div class="col-lg-6">
+                    <div class="card p-4 contact-info-card mb-4">
+                        <h3 class="fw-bold mb-4 text-gradient"><i class="fas fa-id-card"></i> Thông Tin Liên Hệ</h3>
+                        
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="fs-4 text-danger me-3"><i class="fas fa-map-marker-alt"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Địa Chỉ Cửa Hàng</h6>
+                                <p class="text-muted mb-0">140 Lê Trọng Tấn, Phường Tây Thạnh, Quận Tân Phú, TP.HCM</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="fs-4 text-primary me-3"><i class="fas fa-phone-alt"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Hotline Tư Vấn</h6>
+                                <p class="text-muted mb-0">(+84) 1800 4635 (Miễn phí cuộc gọi)</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="fs-4 text-success me-3"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Hòm Thư Điện Tử</h6>
+                                <p class="text-muted mb-0">contact@petshop.vn</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="fs-4 text-warning me-3"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Giờ Hoạt Động</h6>
+                                <p class="text-muted mb-0">Thứ 2 - Thứ 6: 09:00 - 20:00 | Thứ 7: 11:00 - 15:00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="card p-4 contact-info-card">
+                        <h3 class="fw-bold mb-4 text-gradient"><i class="fas fa-paper-plane"></i> Gửi Tin Nhắn Cho Chúng Tôi</h3>
+                        
+                        <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Họ và Tên</label>
+                                    <input type="text" class="form-control" required placeholder="Nhập tên của bạn...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Số Điện Thoại</label>
+                                    <input type="tel" class="form-control" required placeholder="Nhập SĐT...">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Địa chỉ Email</label>
+                                    <input type="email" class="form-control" placeholder="Nhập email...">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Nội dung liên hệ</label>
+                                    <textarea class="form-control" rows="4" required placeholder="Chúng tôi có thể giúp gì cho bạn?"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold"><i class="fas fa-paper-plane me-2"></i> Gửi Yêu Cầu</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="formSuccessAlert" class="alert alert-success mt-3 d-none rounded-20" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> Gửi thông tin liên hệ thành công! PetShop sẽ liên hệ với bạn trong thời gian sớm nhất.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Chatbot -->
+                <div class="col-lg-6">
+                    <div class="chat-container">
+                        <!-- Chat Header -->
+                        <div class="chat-header">
+                            <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=150&auto=format&fit=crop" alt="Bot Avatar">
+                            <div>
+                                <h5 class="fw-bold mb-0">Trợ Lý Ảo PetShop</h5>
+                                <div class="bot-status">
+                                    <span class="status-dot"></span>
+                                    <span>Tự động tư vấn online</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Container -->
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-bubble bot">
+                                Xin chào! Mình là trợ lý ảo PetShop 🐶🐱. Mình có thể hỗ trợ giải đáp nhanh các thắc mắc về giá dịch vụ, địa chỉ, khuyến mãi hay tư vấn chăm sóc bé yêu cho bạn ngay lập tức!
+                            </div>
+                        </div>
+
+                        <!-- Quick Replies -->
+                        <div class="chat-quick-replies">
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Địa chỉ cửa hàng ở đâu?')">Địa chỉ cửa hàng</button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Giá dịch vụ Spa & Tắm rửa?')">Giá dịch vụ Spa</button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Đang có khuyến mãi gì?')">Khuyến mãi mới</button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('Shop bán thức ăn gì?')">Thức ăn chó mèo</button>
+                            <button class="quick-reply-btn" onclick="sendQuickReply('SĐT liên hệ gấp?')">Hotline liên hệ</button>
+                        </div>
+
+                        <!-- Chat Input Box -->
+                        <div class="chat-input-area">
+                            <input type="text" id="chatInput" placeholder="Nhập câu hỏi của bạn tại đây..." onkeypress="handleKeyPress(event)">
+                            <button class="chat-send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Auto-Reply Logic Script -->
+        <script>
+            function handleContactSubmit(e) {
+                e.preventDefault();
+                document.getElementById('contactForm').reset();
+                var alertBox = document.getElementById('formSuccessAlert');
+                alertBox.classList.remove('d-none');
+                setTimeout(function() {
+                    alertBox.classList.add('d-none');
+                }, 5000);
+            }
+
+            function handleKeyPress(event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            }
+
+            function sendQuickReply(text) {
+                addUserMessage(text);
+                getBotReply(text);
+            }
+
+            function sendMessage() {
+                var input = document.getElementById('chatInput');
+                var text = input.value.trim();
+                if (text === '') return;
+                
+                addUserMessage(text);
+                input.value = '';
+                getBotReply(text);
+            }
+
+            function addUserMessage(text) {
+                var container = document.getElementById('chatMessages');
+                var bubble = document.createElement('div');
+                bubble.className = 'chat-bubble user';
+                bubble.innerText = text;
+                container.appendChild(bubble);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function addBotMessage(text) {
+                var container = document.getElementById('chatMessages');
+                var bubble = document.createElement('div');
+                bubble.className = 'chat-bubble bot';
+                bubble.innerHTML = text;
+                container.appendChild(bubble);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            function removeTypingIndicator() {
+                var indicator = document.getElementById('typingIndicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            function showTypingIndicator() {
+                removeTypingIndicator();
+                var container = document.getElementById('chatMessages');
+                var div = document.createElement('div');
+                div.id = 'typingIndicator';
+                div.className = 'align-self-start';
+                div.innerHTML = `
+                    <div class="chat-bubble bot py-2 px-3 d-flex align-items-center" style="border-bottom-left-radius: 4px;">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            // Normalizes Vietnamese string: removes diacritics
+            function removeVietnameseDiacritics(str) {
+                if (!str) return '';
+                return str.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/đ/g, 'd')
+                    .replace(/[^a-z0-9 ]/g, '');
+            }
+
+            function getBotReply(userText) {
+                showTypingIndicator();
+                
+                setTimeout(function() {
+                    removeTypingIndicator();
+                    var text = removeVietnameseDiacritics(userText);
+                    var reply = "";
+
+                    if (text.includes("chao") || text.includes("alo") || text.includes("hi") || text.includes("hello")) {
+                        reply = "Xin chào bạn! Mình rất vui được hỗ trợ bạn và bé cưng hôm nay. Bạn đang cần tìm sản phẩm hay muốn tham khảo dịch vụ Spa/Khách sạn cho bé ạ? 🐶🐱";
+                    } 
+                    else if (text.includes("dia chi") || text.includes("o dau") || text.includes("cua hang") || text.includes("chi nhanh")) {
+                        reply = "PetShop hiện có một cơ sở chính cực kỳ khang trang tại: <strong>140 Lê Trọng Tấn, Phường Tây Thạnh, Quận Tân Phú, TP.HCM</strong>. Shop mở cửa từ 9h đến 20h tất cả các ngày trong tuần (chủ nhật nghỉ). Bạn ghé shop chơi nhé!";
+                    } 
+                    else if (text.includes("spa") || text.includes("tam") || text.includes("cat tia") || text.includes("lam dep") || text.includes("ve sinh")) {
+                        reply = "Bên mình cung cấp dịch vụ <strong>Spa trọn gói cho chó mèo</strong> bao gồm: Tắm, sấy khô, chải tơ lông, cắt tỉa móng, vệ sinh tai, vắt tuyến hôi và cắt tạo kiểu thời thượng! Bạn có muốn biết giá chi tiết theo cân nặng của bé không?";
+                    } 
+                    else if (text.includes("gia") || text.includes("bao nhieu") || text.includes("nhieu tien") || text.includes("chi phi")) {
+                        reply = "Dạ, chi phí cụ thể như sau ạ:<br>• Dịch vụ tắm vệ sinh: từ 100.000đ - 250.000đ tùy cân nặng.<br>• Combo Cắt tỉa tạo kiểu: từ 250.000đ - 450.000đ.<br>• Khách sạn thú cưng (Pet Hotel): chỉ từ 150.000đ/ngày.<br>• Phụ kiện & Thức ăn hạt: từ 25.000đ - 500.000đ tùy loại.";
+                    } 
+                    else if (text.includes("khuyen mai") || text.includes("giam gia") || text.includes("uu dai")) {
+                        reply = "🎁 <strong>Khuyến mãi HOT tháng này:</strong><br>1. Giảm ngay 10% tổng hóa đơn cho dịch vụ Spa & Tắm rửa lần đầu tiên.<br>2. Free Ship toàn thành phố cho đơn hàng mua phụ kiện/thức ăn từ 300.000đ.<br>3. Mua 1 bao hạt Royal Canin tặng 1 pate Whiskas!";
+                    } 
+                    else if (text.includes("sdt") || text.includes("dien thoai") || text.includes("hotline") || text.includes("lien he") || text.includes("email")) {
+                        reply = "Bạn có thể liên lạc ngay với PetShop qua:<br>📞 Hotline miễn phí: <strong>1800 4635</strong><br>✉ Email: <strong>contact@petshop.vn</strong><br>Nhân viên tư vấn trực tiếp sẽ hỗ trợ bạn ngay lập tức!";
+                    } 
+                    else if (text.includes("thuc an") || text.includes("hat") || text.includes("pate") || text.includes("sua")) {
+                        reply = "Shop có sẵn rất nhiều loại thức ăn chất lượng cao từ các thương hiệu lớn như Royal Canin, Whiskas, Catsrang, Me-O cho mèo và SmartHeart, Pedigree cho cún cưng. Cả thức ăn hạt khô và pate đóng lon ướt dinh dưỡng nhé!";
+                    } 
+                    else if (text.includes("cho") || text.includes("cun") || text.includes("puppy")) {
+                        reply = "Gâu gâu! Cún cưng là khách hàng VIP tại PetShop. Bên mình có đầy đủ chuồng đệm, quần áo thời trang, dây dắt, xương gặm sạch răng và dịch vụ spa chăm sóc lông siêu mượt cho cún cưng nha!";
+                    } 
+                    else if (text.includes("meo") || text.includes("miu") || text.includes("kitten")) {
+                        reply = "Meo meo! Các bé mèo kiêu kỳ sẽ thích mê với thế giới đồ chơi cần câu, catnip thảo dược, nhà cây cào móng, hạt dinh dưỡng cao cấp và cát vệ sinh khử mùi tuyệt đối tại PetShop đó ạ!";
+                    } 
+                    else if (text.includes("dat lich") || text.includes("dat cho") || text.includes("book")) {
+                        reply = "Dạ để đặt lịch Spa hoặc Khách sạn thú cưng, bạn vui lòng gọi Hotline <strong>1800 4635</strong> hoặc gửi tin nhắn kèm <strong>Số điện thoại</strong> của bạn tại đây, nhân viên bên mình sẽ gọi điện xác nhận lịch hẹn tức thì ạ!";
+                    } 
+                    else {
+                        reply = "Cảm ơn bạn đã trò chuyện với trợ lý ảo PetShop. Câu hỏi này hơi sâu sắc một chút, mình chưa được học qua 😅. Bạn vui lòng liên hệ hotline <strong>1800 4635</strong> hoặc để lại thông tin ở form bên cạnh, tư vấn viên sẽ gọi hỗ trợ bé cưng ngay lập tức ạ! 🐶🐱";
+                    }
+
+                    addBotMessage(reply);
+                }, 800);
+            }
+        </script>
+    </section>
+</div>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<footer th:fragment="footer" class="site-footer bg-dark text-white pt-5 mt-5">
+    <style>
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            transition: var(--transition);
+            display: inline-block;
+        }
+        .footer-link:hover {
+            color: var(--primary) !important;
+            transform: translateX(5px);
+        }
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: var(--transition);
+        }
+        .social-link:hover {
+            background: var(--gradient-pink);
+            color: white !important;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
+        }
+        .footer-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer-contact-icon {
+            color: var(--primary);
+            width: 25px;
+            text-align: center;
+        }
+    </style>
+    <div class="container">
+        <div class="row g-4 pb-4">
+            <!-- Store Profile -->
+            <div class="col-lg-4 col-md-6">
+                <h4 class="fw-bold mb-3" style="font-size: 1.8rem; background: var(--gradient-pink); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PetShop</h4>
+                <p class="text-white-50 mb-3">Chúng tôi mang đến những sản phẩm tốt nhất, phụ kiện thời thượng cùng dịch vụ Spa & Đưa đón thú cưng chuyên nghiệp nhất.</p>
+                <div class="d-flex gap-2">
+                    <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-3 text-white">Thông Tin Cửa Hàng</h5>
+                <ul class="list-unstyled text-white-50">
+                    <li class="d-flex align-items-start mb-2">
+                        <span class="footer-contact-icon me-2"><i class="fas fa-map-marker-alt"></i></span>
+                        <span>140 Lê Trọng Tấn, Tây Thạnh, Tân Phú, TP.HCM</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <span class="footer-contact-icon me-2"><i class="fas fa-phone-alt"></i></span>
+                        <span>Hotline: (+84) 1800 4635</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <span class="footer-contact-icon me-2"><i class="fas fa-envelope"></i></span>
+                        <span>Email: contact@petshop.vn</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Support / Service Hours -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="fw-bold mb-3 text-white">Giờ Mở Cửa</h5>
+                <ul class="list-unstyled text-white-50">
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Thứ 2 - Thứ 6:</span>
+                        <span class="fw-semibold">9:00 - 20:00</span>
+                    </li>
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Thứ 7:</span>
+                        <span class="fw-semibold">11:00 - 15:00</span>
+                    </li>
+                    <li class="d-flex justify-content-between mb-2">
+                        <span>Chủ nhật:</span>
+                        <span class="text-danger fw-semibold">Đóng cửa</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Copy/Copyright Footer Line -->
+        <div class="footer-divider py-3 text-center text-white-50 fs-6">
+            © 2026 PetShop. Thiết kế với <i class="fas fa-heart text-danger"></i> dành cho Thú cưng. Bản quyền thuộc về PetShop.
+        </div>
+    </div>
+</footer>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4 th:if="${supplier.maNCC == null}">Thêm nhà cung cấp</h4>
+            <h4 th:unless="${supplier.maNCC == null}">Sửa nhà cung cấp</h4>
+        </div>
+        <div class="card-body">
+            <form th:action="${supplier.maNCC == null ? '/admin/suppliers/create' : '/admin/suppliers/edit/' + supplier.maNCC}" method="post">
+                <div class="mb-3">
+                    <label>Tên nhà cung cấp</label>
+                    <input type="text" name="tenNCC" class="form-control" th:value="${supplier.tenNCC}" required>
+                </div>
+                <div class="mb-3">
+                    <label>Địa chỉ</label>
+                    <input type="text" name="diaChi" class="form-control" th:value="${supplier.diaChi}">
+                </div>
+                <div class="mb-3">
+                    <label>Điện thoại</label>
+                    <input type="text" name="dienThoai" class="form-control" th:value="${supplier.dienThoai}">
+                </div>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a th:href="@{/admin/suppliers}" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

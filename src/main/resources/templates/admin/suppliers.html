@@ -1,0 +1,47 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-truck"></i> Quản lý nhà cung cấp</h2>
+                    <a th:href="@{/admin/suppliers/create}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Thêm nhà cung cấp
+                    </a>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-pink">
+                            <tr>
+                                <th>Mã NCC</th>
+                                <th>Tên NCC</th>
+                                <th>Địa chỉ</th>
+                                <th>Điện thoại</th>
+                                <th width="150">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="s : ${suppliers}">
+                                <td th:text="${s.maNCC}"></td>
+                                <td th:text="${s.tenNCC}"></td>
+                                <td th:text="${s.diaChi}"></td>
+                                <td th:text="${s.dienThoai}"></td>
+                                <td>
+                                    <a th:href="@{/admin/suppliers/edit/{id}(id=${s.maNCC})}" class="btn btn-sm btn-warning">Sửa</a>
+                                    <a th:href="@{/admin/suppliers/delete/{id}(id=${s.maNCC})}" class="btn btn-sm btn-danger" onclick="return confirm('Xóa?')">Xóa</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(suppliers)}">
+                                <td colspan="5" class="text-center py-4">Chưa có nhà cung cấp nào</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

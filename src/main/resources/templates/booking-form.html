@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold text-primary">
+                        <i class="fas fa-calendar-check me-2"></i> Đặt lịch dịch vụ
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Thông báo lỗi/thành công -->
+                    <div th:if="${param.error}" class="alert alert-danger" th:text="${param.error}"></div>
+                    <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
+
+                    <!-- Thông tin dịch vụ -->
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <h5 class="fw-bold" th:text="${service.tenDV}"></h5>
+                        <p class="text-muted" th:text="${service.moTa}"></p>
+                        <span class="badge bg-danger fs-6"
+                              th:text="${#numbers.formatDecimal(service.giaDichVu, 0, 0)} + ' đ'"></span>
+                    </div>
+
+                    <form th:action="@{/DatLich}" method="post">
+                        <input type="hidden" name="maDV" th:value="${service.maDV}">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Họ tên *</label>
+                                <input type="text" name="tenKhachHang" class="form-control" th:value="${tenKH}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Số điện thoại *</label>
+                                <input type="tel" name="soDienThoai" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email *</label>
+                                <input type="email" name="email" class="form-control" th:value="${emailKH}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Ngày đặt *</label>
+                                <input type="date" name="ngayDat" class="form-control" min="2024-01-01" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Giờ đặt *</label>
+                                <input type="time" name="gioDat" class="form-control" min="08:00" max="20:00" required>
+                                <small class="text-muted">Khung giờ: 08:00 - 20:00</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Ghi chú (nếu có)</label>
+                                <textarea name="ghiChu" class="form-control" rows="3" placeholder="Ví dụ: Bé cưng có nhu cầu đặc biệt..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a th:href="@{/DichVu}" class="btn btn-outline-secondary">Quay lại</a>
+                            <button type="submit" class="btn btn-primary px-4">Gửi đặt lịch</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

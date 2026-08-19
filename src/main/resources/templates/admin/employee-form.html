@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h4 th:if="${employee.maNV == null}">Thêm nhân viên mới</h4>
+      <h4 th:unless="${employee.maNV == null}">Sửa nhân viên</h4>
+    </div>
+    <div class="card-body">
+      <form th:action="${employee.maNV == null ? '/admin/employees/create' : '/admin/employees/edit/' + employee.maNV}" method="post">
+        <div class="mb-3">
+          <label>Họ tên</label>
+          <input type="text" name="tenNV" class="form-control" th:value="${employee.tenNV}" required>
+        </div>
+        <div class="mb-3">
+          <label>Giới tính</label>
+          <select name="gioiTinh" class="form-select">
+            <option value="Nam" th:selected="${employee.gioiTinh == 'Nam'}">Nam</option>
+            <option value="Nữ" th:selected="${employee.gioiTinh == 'Nữ'}">Nữ</option>
+            <option value="Khác" th:selected="${employee.gioiTinh == 'Khác'}">Khác</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label>Năm sinh</label>
+          <input type="number" name="namSinh" class="form-control" th:value="${employee.namSinh}">
+        </div>
+        <div class="mb-3">
+          <label>Vai trò</label>
+          <select name="vaiTro" class="form-select">
+            <option th:each="role : ${roles}" th:value="${role.idVaiTro}" th:text="${role.tenVaiTro}"
+                    th:selected="${employee.vaiTro == role.idVaiTro}"></option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label>Mật khẩu</label>
+          <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu mới (nếu muốn thay đổi)">
+          <small class="text-muted" th:if="${employee.maNV != null}">Để trống nếu không thay đổi mật khẩu</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a th:href="@{/admin/employees}" class="btn btn-secondary">Hủy</a>
+      </form>
+    </div>
+  </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

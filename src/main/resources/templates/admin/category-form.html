@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4 th:if="${category.maDanhMuc == null}">Thêm danh mục</h4>
+            <h4 th:unless="${category.maDanhMuc == null}">Sửa danh mục</h4>
+        </div>
+        <div class="card-body">
+            <form th:action="${category.maDanhMuc == null ? '/admin/categories/create' : '/admin/categories/edit/' + category.maDanhMuc}" method="post">
+                <div class="mb-3">
+                    <label>Tên danh mục</label>
+                    <input type="text" name="tenDanhMuc" class="form-control" th:value="${category.tenDanhMuc}" required>
+                </div>
+                <div class="mb-3">
+                    <label>Ghi chú</label>
+                    <textarea name="ghiChu" class="form-control" rows="3" th:text="${category.ghiChu}"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a th:href="@{/admin/categories}" class="btn btn-secondary">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

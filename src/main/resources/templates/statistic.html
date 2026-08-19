@@ -1,0 +1,38 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <h2 class="text-primary">Thống kê doanh thu</h2>
+        <form method="get" class="row bg-light p-3 rounded shadow-sm mb-4">
+            <div class="col-md-4 mb-2">
+                <label class="font-weight-bold">Từ ngày</label>
+                <input type="date" name="from" th:value="${param.from}" class="form-control">
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="font-weight-bold">Đến ngày</label>
+                <input type="date" name="to" th:value="${param.to}" class="form-control">
+            </div>
+            <div class="col-md-4 mb-2 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Xem thống kê</button>
+            </div>
+        </form>
+        <div class="alert alert-success d-flex justify-content-between">
+            <strong>Tổng doanh thu:</strong>
+            <span class="text-danger font-weight-bold" th:text="${#numbers.formatDecimal(tongDoanhThu, 0, 0, 'COMMA')} + ' đ'"></span>
+        </div>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+            <tr><th>Mã HĐ</th><th>Khách hàng</th><th>Ngày lập</th><th>Tổng tiền</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="hd : ${orders}">
+                <td th:text="${hd.maHD}">...</td>
+                <td th:text="${hd.customer != null ? hd.customer.tenKH : 'Khách lẻ'}">...</td>
+                <td th:text="${#temporals.format(hd.ngayLap, 'dd/MM/yyyy')}">...</td>
+                <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 0, 'COMMA')} + ' đ'">...</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(orders)}">
+                <td colspan="4" class="text-center">Không có đơn hàng nào trong khoảng thời gian này</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</div>

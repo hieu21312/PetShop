@@ -1,0 +1,23 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3"><div class="card stat-card product-card text-white p-3"><div class="fw-bold">Tổng sản phẩm</div><h3 th:text="${dashboard.tongSanPham}">0</h3></div></div>
+                    <div class="col-md-3"><div class="card stat-card customer-card text-white p-3"><div class="fw-bold">Khách hàng</div><h3 th:text="${dashboard.tongKhachHang}">0</h3></div></div>
+                    <div class="col-md-3"><div class="card stat-card order-card text-white p-3"><div class="fw-bold">Hóa đơn</div><h3 th:text="${dashboard.tongHoaDon}">0</h3></div></div>
+                    <div class="col-md-3"><div class="card stat-card revenue-card text-white p-3"><div class="fw-bold">Doanh thu</div><h4 class="revenue-text" th:text="${#numbers.formatDecimal(dashboard.tongDoanhThu, 0, 0, 'COMMA')} + ' đ'">0 đ</h4></div></div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-8"><div class="card shadow-sm border-0 rounded-4"><div class="card-header bg-white fw-bold">📈 Doanh thu 7 ngày gần nhất</div><div class="card-body"><canvas id="revenueChart" height="120"></canvas></div></div></div>
+                    <div class="col-md-4"><div class="card shadow-sm border-0 rounded-4"><div class="card-header bg-white fw-bold">🔥 Sản phẩm bán chạy</div><div class="card-body p-0"><ul class="list-group list-group-flush"><li th:each="tp : ${dashboard.topProducts}" class="list-group-item d-flex justify-content-between align-items-center"><span th:text="${tp.tenSP}">Tên SP</span><span class="badge bg-danger rounded-pill" th:text="${tp.soLuongBan}">0</span></li></ul></div></div></div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script> const labels = [[${dashboard.labels}]]; const revenues = [[${dashboard.revenues}]]; new Chart(document.getElementById('revenueChart'), { type: 'line', data: { labels: labels, datasets: [{ label: 'Doanh thu (đ)', data: revenues, borderColor: '#4e73df', backgroundColor: 'rgba(78,115,223,0.05)', fill: true }] } }); </script>
+            </div>
+        </div>
+    </section>
+</div>

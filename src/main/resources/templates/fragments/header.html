@@ -1,0 +1,151 @@
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-lg custom-navbar shadow-sm">
+        <div class="container">
+
+            <!-- LOGO -->
+            <a class="navbar-brand logo-text" th:href="@{/}">
+                <i class="fas fa-paw"></i> PetShop
+            </a>
+
+            <!-- MOBILE BUTTON -->
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- MENU -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <!-- LEFT -->
+                <ul class="navbar-nav mx-auto align-items-lg-center">
+
+                    <li class="nav-item">
+                        <a class="nav-link custom-link" th:href="@{/}">
+                            Trang chủ
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown dropdown-hover">
+                        <a class="nav-link dropdown-toggle custom-link"
+                           href="#"
+                           data-bs-toggle="dropdown">
+                            Sản phẩm
+                        </a>
+
+                        <ul class="dropdown-menu border-0 shadow">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/SanPham?loai=Cho}">
+                                    🐶 Chó
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" th:href="@{/SanPham?loai=Meo}">
+                                    🐱 Mèo
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" th:href="@{/SanPham?loai=PhuKien}">
+                                    🎀 Phụ kiện
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link custom-link" th:href="@{/DichVu}">
+                            Dịch vụ
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link custom-link" th:href="@{/About}">
+                            Giới thiệu
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link custom-link" th:href="@{/Contact}">
+                            Liên hệ
+                        </a>
+                    </li>
+
+                </ul>
+
+                <!-- RIGHT -->
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+                    <form class="search-box d-flex"
+                          th:action="@{/SanPham}"
+                          method="get">
+
+                        <input class="form-control"
+                               type="search"
+                               name="searchString"
+                               placeholder="Tìm thú cưng...">
+
+                        <button class="btn btn-search">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+
+                    <!-- CART -->
+                    <a th:href="@{/GioHang}"
+                       class="btn cart-btn position-relative">
+
+                        <i class="fas fa-shopping-cart"></i>
+
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              th:text="${session.cart != null ? #lists.size(session.cart) : 0}">
+                            0
+                        </span>
+                    </a>
+
+                    <!-- LOGIN -->
+                    <div th:if="${session.role == null}">
+                        <a th:href="@{/DangNhap}" class="btn login-btn">
+                            Đăng nhập
+                        </a>
+                    </div>
+
+                    <!-- USER -->
+                    <div th:unless="${session.role == null}" class="dropdown">
+                        <button class="btn user-btn dropdown-toggle"
+                                data-bs-toggle="dropdown">
+
+                            <i class="fas fa-user-circle"></i>
+
+                            <span th:text="${session.tenKH != null ? session.tenKH : session.tenNV}">
+                                User
+                            </span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+
+                            <li th:if="${session.role == 'Admin'}">
+                                <a class="dropdown-item"
+                                   th:href="@{/admin/index}">
+                                    <i class="fas fa-cog"></i>
+                                    Quản trị
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/DangNhap/Logout}">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

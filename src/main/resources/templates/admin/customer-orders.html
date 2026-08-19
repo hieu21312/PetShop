@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}">
+</head>
+
+<body class="bg-light">
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-primary mb-1">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Đơn hàng khách hàng
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Khách hàng:
+                    <span class="fw-semibold text-dark"
+                          th:text="${customer.tenKH}">
+                    </span>
+                </p>
+            </div>
+
+            <a th:href="@{/admin/customers}"
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>
+                Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-primary">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày lập</th>
+                        <th>Tổng tiền</th>
+                        <th>Địa chỉ giao hàng</th>
+                        <th>Thanh toán</th>
+                        <th>Tình trạng</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="o : ${orders}">
+
+                        <td>
+                            <span class="fw-bold text-primary"
+                                  th:text="${o.maHD}">
+                            </span>
+                        </td>
+
+                        <td th:text="${#temporals.format(o.ngayLap, 'dd/MM/yyyy HH:mm')}">
+                        </td>
+
+                        <td>
+                            <span class="fw-bold text-danger"
+                                  th:text="${#numbers.formatDecimal(o.tongTien,0,0,'COMMA')} + ' đ'">
+                            </span>
+                        </td>
+
+                        <td th:text="${o.diaChiGiaoHang}"></td>
+
+                        <!-- Thanh toán -->
+                        <td>
+                            <span th:if="${o.daThanhToan}"
+                                  class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Đã thanh toán
+                            </span>
+
+                            <span th:unless="${o.daThanhToan}"
+                                  class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i>
+                                Chưa thanh toán
+                            </span>
+                        </td>
+
+                        <!-- Tình trạng -->
+                        <td>
+                            <span class="badge bg-info text-dark"
+                                  th:text="${o.orderStatus != null ? o.orderStatus.tinhTrangDonHang : 'Đang xử lý'}">
+                            </span>
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(orders)}">
+                        <td colspan="6" class="text-center py-5">
+
+                            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
+                                 width="120"
+                                 class="mb-3">
+
+                            <h5 class="text-muted">
+                                Khách hàng chưa có đơn hàng nào
+                            </h5>
+
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<style>
+    body{
+        background:#f5f7fb;
+    }
+
+    .card{
+        border-radius:16px;
+    }
+
+    .table{
+        border-radius:12px;
+        overflow:hidden;
+    }
+
+    .table tbody tr{
+        transition:all .2s ease;
+    }
+
+    .table tbody tr:hover{
+        background:#f8f9ff;
+        transform:scale(1.002);
+    }
+
+    .badge{
+        font-size:0.85rem;
+        padding:8px 12px;
+        border-radius:20px;
+    }
+
+    .table-primary th{
+        background:#4f46e5 !important;
+        color:white;
+        border:none;
+    }
+</style>
+
+</body>
+</html>

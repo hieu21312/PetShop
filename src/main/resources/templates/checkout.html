@@ -1,0 +1,146 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="fw-bold mb-4"><i class="fas fa-file-invoice-dollar text-primary"></i> Thanh toán đơn hàng</h2>
+
+            <form th:action="@{/DatHang}" method="post" id="orderForm">
+                <div class="row g-4">
+                    <!-- Cột trái -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-map-marker-alt me-2"></i> Địa chỉ giao hàng</h5>
+                                <textarea name="DiaChiGiaoHang" class="form-control bg-light border-0 p-3" rows="3" required placeholder="Nhập địa chỉ nhận hàng chi tiết tại đây..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-credit-card me-2"></i> Phương thức thanh toán</h5>
+                                <div class="list-group">
+                                    <label class="list-group-item d-flex align-items-center p-3 cursor-pointer">
+                                        <input type="radio" name="HinhThucThanhToan" value="COD" checked class="me-3">
+                                        <div>
+                                            <span class="fw-bold">COD</span><br>
+                                            <small class="text-muted">Thanh toán tiền mặt khi nhận hàng</small>
+                                        </div>
+                                    </label>
+                                    <label class="list-group-item d-flex align-items-center p-3 cursor-pointer">
+                                        <input type="radio" name="HinhThucThanhToan" value="BankTransfer" id="btnOnline" class="me-3">
+                                        <div>
+                                            <span class="fw-bold">Chuyển khoản Online</span><br>
+                                            <small class="text-muted">Quét mã QR để thanh toán nhanh chóng</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div id="qrCodeContainer" style="display:none;" class="text-center mt-4 p-3 bg-white border rounded-4">
+                                    <p class="text-muted small">Quét mã để thanh toán:</p>
+                                    <img id="imgQR" src="" style="max-width: 200px; border-radius: 10px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4">Đơn hàng của bạn</h5>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tạm tính:</span>
+                                    <span class="fw-bold" id="tamTinhSpan"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" id="MaGiamGiaInput" class="form-control bg-light border-0" placeholder="Mã giảm giá">
+                                        <button class="btn btn-outline-primary" type="button" id="btnApDung">Áp dụng</button>
+                                    </div>
+                                    <input type="hidden" name="MaGiamGiaInput" id="MaGiamGiaHidden">
+                                    <input type="hidden" name="TienGiamInput" id="TienGiamHidden">
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-3 text-danger">
+                                    <span>Giảm giá:</span>
+                                    <span class="fw-bold" id="displayGiam">0 đ</span>
+                                </div>
+
+                                <hr class="my-3">
+
+                                <div class="d-flex justify-content-between mb-4">
+                                    <span class="fs-5 fw-bold">Tổng cộng:</span>
+                                    <span class="fs-4 fw-bold text-danger" id="displayTong"></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
+                                    Xác nhận đặt hàng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            // Lấy giá trị từ server và gán vào biến
+            var tongTienGoc = [[${tongTien}]];
+            // Hàm format số tiền (thêm dấu phẩy)
+            function formatMoney(amount) {
+                return amount.toLocaleString('vi-VN') + ' đ';
+            }
+            // Hiển thị giá trị ban đầu
+            $('#tamTinhSpan').text(formatMoney(tongTienGoc));
+            $('#displayTong').text(formatMoney(tongTienGoc));
+
+            $('#btnApDung').click(function() {
+                var code = $('#MaGiamGiaInput').val();
+                if (!code) return;
+                $.post('/KiemTraMaGiamGia', { maGiamGia: code }, function(res) {
+                    if (res.success) {
+                        $('#MaGiamGiaHidden').val(res.maGiamGia);
+                        $('#TienGiamHidden').val(res.soTienGiam);
+                        $('#displayGiam').text(formatMoney(res.soTienGiam));
+                        var tongMoi = tongTienGoc - res.soTienGiam;
+                        $('#displayTong').text(formatMoney(tongMoi));
+                        if ($('input[name="HinhThucThanhToan"]:checked').val() === 'BankTransfer') {
+                            capNhatQR(tongMoi, res.maGiamGia);
+                        }
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            });
+            function capNhatQR(amount, voucherCode) {
+                var bankId = "MB";
+                var accountNo = "123456789";
+                var description = "THANHTOAN";
+                if (voucherCode) description += " " + voucherCode;
+                var url = 'https://img.vietqr.io/image/' + bankId + '-' + accountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(description);
+                $('#imgQR').attr('src', url);
+            }
+            $('input[name="HinhThucThanhToan"]').change(function() {
+                if ($(this).val() === 'BankTransfer') {
+                    var tongText = $('#displayTong').text();
+                    var tong = parseFloat(tongText.replace(/[^0-9.-]+/g, '')) || 0;
+                    var voucher = $('#MaGiamGiaHidden').val();
+                    capNhatQR(tong, voucher);
+                    $('#qrCodeContainer').slideDown();
+                } else {
+                    $('#qrCodeContainer').slideUp();
+                }
+            });
+            $(function() {
+                if ($('input[name="HinhThucThanhToan"]:checked').val() === 'BankTransfer') {
+                    var tong = parseFloat($('#displayTong').text().replace(/[^0-9.-]+/g, '')) || 0;
+                    capNhatQR(tong, $('#MaGiamGiaHidden').val());
+                    $('#qrCodeContainer').show();
+                } else {
+                    $('#qrCodeContainer').hide();
+                }
+            });
+        </script>
+    </section>
+</div>

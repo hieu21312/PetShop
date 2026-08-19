@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+                <i class="fas fa-check-circle text-success fa-5x mb-3"></i>
+                <h3 class="fw-bold">Đặt hàng thành công!</h3>
+                <p class="text-muted">Mã đơn hàng: <strong th:text="${orderId}"></strong></p>
+                <p>Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.</p>
+
+                <!-- Hiển thị hướng dẫn chuyển khoản nếu là BankTransfer -->
+                <div th:if="${hinhThuc == 'BankTransfer'}" class="mt-4 p-4 bg-light rounded-4">
+                    <h5 class="fw-bold text-primary"><i class="fas fa-university"></i> Thanh toán chuyển khoản</h5>
+                    <p>Số tiền cần chuyển: <strong class="text-danger fs-4" th:text="${#numbers.formatInteger(tongTien, 'COMMA')} + ' đ'"></strong></p>
+                    <div class="row mt-3 text-start">
+                        <div class="col-md-6">
+                            <table class="table table-bordered bg-white">
+                                <tr><th>Ngân hàng</th><td>Vietcombank</td></tr>
+                                <tr><th>Số tài khoản</th><td>123456789</td></tr>
+                                <tr><th>Chủ tài khoản</th><td>PETSHOP COMPANY</td></tr>
+                                <tr><th>Nội dung</th><td>THANHTOAN <span th:text="${orderId}"></span></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <img th:src="'https://img.vietqr.io/image/VCB-123456789-compact2.png?amount=' + ${tongTien} + '&addInfo=THANHTOAN ' + ${orderId}"
+                                 class="img-fluid rounded shadow" style="max-width: 200px;">
+                            <p class="mt-2 small">Quét mã QR để chuyển khoản nhanh</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-info-circle"></i> Sau khi chuyển khoản, vui lòng chờ admin xác nhận thanh toán. Đơn hàng sẽ được xử lý ngay khi xác nhận.
+                    </div>
+                </div>
+
+                <div th:if="${hinhThuc == 'COD'}" class="mt-3">
+                    <p>Hình thức thanh toán: <strong>COD (Thanh toán khi nhận hàng)</strong></p>
+                </div>
+
+                <div class="mt-4">
+                    <a th:href="@{/}" class="btn btn-primary rounded-pill px-4">Tiếp tục mua sắm</a>
+                    <a th:href="@{/GioHang}" class="btn btn-outline-secondary rounded-pill px-4 ms-2">Xem lại giỏ hàng</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
