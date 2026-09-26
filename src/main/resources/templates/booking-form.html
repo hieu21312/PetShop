@@ -3,62 +3,96 @@
 <head th:replace="~{fragments/head :: head}"></head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-white py-3">
-                    <h4 class="mb-0 fw-bold text-primary">
-                        <i class="fas fa-calendar-check me-2"></i> Đặt lịch dịch vụ
+        <div class="col-md-9 col-lg-8">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header text-white py-3 rounded-top-4" style="background: linear-gradient(45deg, #ff4d6d, #ff758f);">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-alt me-2"></i> Đặt Lịch Dịch Vụ Thú Cưng
                     </h4>
                 </div>
                 <div class="card-body p-4">
-                    <!-- Thông báo lỗi/thành công -->
-                    <div th:if="${param.error}" class="alert alert-danger" th:text="${param.error}"></div>
-                    <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
+                    <!-- Thông báo lỗi/thành công từ FlashAttributes -->
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i><span th:text="${param.error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                        <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
 
-                    <!-- Thông tin dịch vụ -->
-                    <div class="bg-light p-3 rounded-3 mb-4">
-                        <h5 class="fw-bold" th:text="${service.tenDV}"></h5>
-                        <p class="text-muted" th:text="${service.moTa}"></p>
-                        <span class="badge bg-danger fs-6"
-                              th:text="${#numbers.formatDecimal(service.giaDichVu, 0, 0)} + ' đ'"></span>
+                    <!-- Thông tin dịch vụ chọn từ Bước 1 -->
+                    <div class="p-3 rounded-3 mb-4 shadow-sm" style="background: #fff0f3; border-left: 4px solid #ff4d6d;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-uppercase text-muted fw-bold">Dịch vụ đã chọn</small>
+                                <h5 class="fw-bold mb-1 text-dark" th:text="${service.tenDV}"></h5>
+                                <p class="text-muted mb-0 small" th:text="${service.moTa}"></p>
+                            </div>
+                            <span class="badge fs-6 px-3 py-2 rounded-pill text-white shadow-sm" style="background: linear-gradient(45deg, #ff4d6d, #ff758f);"
+                                  th:text="${#numbers.formatDecimal(service.giaDichVu, 0, 0)} + ' đ'"></span>
+                        </div>
                     </div>
 
                     <form th:action="@{/DatLich}" method="post">
                         <input type="hidden" name="maDV" th:value="${service.maDV}">
 
-                        <div class="row g-3">
+                        <h6 class="fw-bold mb-3" style="color: #ff4d6d;"><i class="fas fa-user me-2"></i>Thông tin Khách hàng</h6>
+                        <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Họ tên *</label>
-                                <input type="text" name="tenKhachHang" class="form-control" th:value="${tenKH}" required>
+                                <input type="text" name="tenKhachHang" class="form-control" th:value="${tenKH}" placeholder="Ví dụ: Nguyễn Văn A" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Số điện thoại *</label>
-                                <input type="tel" name="soDienThoai" class="form-control" required>
+                                <input type="tel" name="soDienThoai" class="form-control" placeholder="0901234567" required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label fw-semibold">Email *</label>
-                                <input type="email" name="email" class="form-control" th:value="${emailKH}" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Ngày đặt *</label>
-                                <input type="date" name="ngayDat" class="form-control" min="2024-01-01" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Giờ đặt *</label>
-                                <input type="time" name="gioDat" class="form-control" min="08:00" max="20:00" required>
-                                <small class="text-muted">Khung giờ: 08:00 - 20:00</small>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Ghi chú (nếu có)</label>
-                                <textarea name="ghiChu" class="form-control" rows="3" placeholder="Ví dụ: Bé cưng có nhu cầu đặc biệt..."></textarea>
+                                <input type="email" name="email" class="form-control" th:value="${emailKH}" placeholder="example@email.com" required>
                             </div>
                         </div>
 
-                        <div class="mt-4 d-flex justify-content-between">
-                            <a th:href="@{/DichVu}" class="btn btn-outline-secondary">Quay lại</a>
-                            <button type="submit" class="btn btn-primary px-4">Gửi đặt lịch</button>
+                        <h6 class="fw-bold mb-3" style="color: #ff4d6d;"><i class="fas fa-clock me-2"></i>Thời gian &amp; Chi tiết Thú Cưng</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ngày thực hiện *</label>
+                                <input type="date" id="ngayDat" name="ngayDat" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Khung giờ thực hiện *</label>
+                                <select name="gioDat" class="form-select" required>
+                                    <option value="" disabled selected>-- Chọn khung giờ --</option>
+                                    <option value="08:30:00">08:30 AM (Sáng)</option>
+                                    <option value="09:30:00">09:30 AM (Sáng)</option>
+                                    <option value="10:30:00">10:30 AM (Sáng)</option>
+                                    <option value="14:00:00">02:00 PM (Chiều)</option>
+                                    <option value="15:00:00">03:00 PM (Chiều)</option>
+                                    <option value="16:00:00">04:00 PM (Chiều)</option>
+                                    <option value="17:00:00">05:00 PM (Chiều)</option>
+                                    <option value="18:00:00">06:00 PM (Tối)</option>
+                                </select>
+                                <small class="text-muted">Tối đa 3 lượt khách/khung giờ</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Thông tin Thú cưng &amp; Ghi chú thêm</label>
+                                <textarea name="ghiChu" class="form-control" rows="3" placeholder="Tên bé, Giống loài (Poodle/Corgi/Mèo Anh...), Cân nặng, Lưu ý đặc biệt (nếu có)..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between align-items-center">
+                            <a th:href="@{/DichVu}" class="btn btn-outline-secondary rounded-pill px-4">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại chọn dịch vụ khác
+                            </a>
+                            <button type="submit" class="btn text-white rounded-pill px-5 py-2.5 fw-bold shadow-sm" style="background: linear-gradient(45deg, #ff4d6d, #ff758f); border: none;">
+                                <i class="fas fa-check-circle me-1"></i> Xác nhận Đặt lịch
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -66,6 +100,19 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Đặt min date là ngày hôm nay
+    document.addEventListener("DOMContentLoaded", function() {
+        var dateInput = document.getElementById("ngayDat");
+        if (dateInput) {
+            var today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.value = today;
+        }
+    });
+</script>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

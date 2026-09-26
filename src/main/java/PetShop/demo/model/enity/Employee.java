@@ -25,6 +25,21 @@ public class Employee {
     @Column(name = "VaiTro")
     private Integer vaiTro;
 
+    @Column(name = "DienThoai")
+    private String dienThoai;
+
+    @Column(name = "Email")
+    private String email;
+
+    @Column(name = "ChuyenMon")
+    private String chuyenMon;
+
+    @Column(name = "AnhDaiDien")
+    private String anhDaiDien;
+
+    @Column(name = "TrangThai")
+    private String trangThai; // 'Đang làm việc', 'Tạm nghỉ'
+
     @ManyToOne
     @JoinColumn(name = "VaiTro", insertable = false, updatable = false)
     private Role role;
@@ -50,6 +65,21 @@ public class Employee {
 
     public Integer getVaiTro() { return vaiTro; }
     public void setVaiTro(Integer vaiTro) { this.vaiTro = vaiTro; }
+
+    public String getDienThoai() { return dienThoai; }
+    public void setDienThoai(String dienThoai) { this.dienThoai = dienThoai; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getChuyenMon() { return chuyenMon; }
+    public void setChuyenMon(String chuyenMon) { this.chuyenMon = chuyenMon; }
+
+    public String getAnhDaiDien() { return anhDaiDien; }
+    public void setAnhDaiDien(String anhDaiDien) { this.anhDaiDien = anhDaiDien; }
+
+    public String getTrangThai() { return trangThai; }
+    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }

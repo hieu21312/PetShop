@@ -1,14 +1,31 @@
 <div th:fragment="sidebar">
     <div class="list-group mb-4 admin-sidebar">
-        <a th:href="@{/admin/index}" class="list-group-item list-group-item-action">Dashboard</a>
-        <a th:href="@{/admin/products}" class="list-group-item list-group-item-action">Quản lý sản phẩm</a>
-        <a th:href="@{/admin/categories}" class="list-group-item list-group-item-action">Quản lý danh mục</a>
-        <a th:href="@{/admin/suppliers}" class="list-group-item list-group-item-action">Quản lý nhà cung cấp</a>
-        <a th:href="@{/admin/inventory}" class="list-group-item list-group-item-action">Quản lý tồn kho</a>
-        <a th:href="@{/admin/orders}" class="list-group-item list-group-item-action">Quản lý đơn hàng</a>
-        <a th:href="@{/admin/customers}" class="list-group-item list-group-item-action">Quản lý khách hàng</a>
-        <a th:href="@{/admin/employees}" class="list-group-item list-group-item-action">Quản lý nhân viên</a>
-        <a th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action">Quản lý mã giảm giá</a>
-        <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action">Quản lý đặt lịch</a>
+        <a th:href="@{/admin/index}" class="list-group-item list-group-item-action"><i class="fas fa-chart-line me-2"></i> Dashboard</a>
+        <a th:href="@{/admin/products}" class="list-group-item list-group-item-action"><i class="fas fa-shopping-bag me-2"></i> Quản Lý sản phẩm</a>
+        <a th:href="@{/admin/categories}" class="list-group-item list-group-item-action"><i class="fas fa-tag me-2"></i> Quản Lý danh mục</a>
+        <a th:href="@{/admin/suppliers}" class="list-group-item list-group-item-action"><i class="fas fa-truck me-2"></i> Quản Lý nhà cung cấp</a>
+        <a th:href="@{/admin/inventory}" class="list-group-item list-group-item-action"><i class="fas fa-boxes me-2"></i> Quản Lý tồn kho</a>
+        <a th:href="@{/admin/orders}" class="list-group-item list-group-item-action"><i class="fas fa-file-alt me-2"></i> Quản Lý đơn hàng</a>
+        <a th:href="@{/admin/customers}" class="list-group-item list-group-item-action"><i class="fas fa-user-friends me-2"></i> Quản Lý khách hàng</a>
+
+        <!-- MENU 2 CẤP: QUẢN LÝ NHÂN SỰ -->
+        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center fw-bold" data-bs-toggle="collapse" href="#staffSubmenu" role="button" aria-expanded="true">
+            <span><i class="fas fa-user-tie me-2"></i> Quản Lý Nhân sự</span>
+            <i class="fas fa-chevron-down small text-muted"></i>
+        </a>
+        <div class="collapse show ps-3 my-1" id="staffSubmenu">
+            <a th:href="@{/admin/staff?roleFilter=vet}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-stethoscope me-2 text-primary"></i> Bác sĩ thú y
+            </a>
+            <a th:href="@{/admin/staff?roleFilter=care}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-cut me-2 text-danger"></i> Nhân viên Spa / Care
+            </a>
+            <a th:href="@{/admin/staff}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-users me-2 text-secondary"></i> Tất cả nhân sự
+            </a>
+        </div>
+
+        <a th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action"><i class="fas fa-ticket-alt me-2"></i> Quản Lý mã giảm giá</a>
+        <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2"></i> Quản Lý đặt lịch</a>
     </div>
 </div>

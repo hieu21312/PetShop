@@ -29,7 +29,7 @@ public class Booking {
     @Column(name = "NgayDat")
     private LocalDate ngayDat;
 
-    @Column(name = "GioDat")
+    @Column(name = "GioDat", columnDefinition = "TIME")
     private LocalTime gioDat;
 
     @Column(name = "GhiChu")
@@ -43,6 +43,13 @@ public class Booking {
 
     @Column(name = "MaKH")  // nếu khách hàng đã đăng nhập, lưu mã KH
     private Integer maKH;
+
+    @Column(name = "MaNV")  // Bác sĩ / Nhân viên chăm sóc phụ trách
+    private Integer maNV;
+
+    @ManyToOne
+    @JoinColumn(name = "MaNV", insertable = false, updatable = false)
+    private Employee employee;
 
     // Constructors
     public Booking() {}
@@ -70,4 +77,8 @@ public class Booking {
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
     public Integer getMaKH() { return maKH; }
     public void setMaKH(Integer maKH) { this.maKH = maKH; }
+    public Integer getMaNV() { return maNV; }
+    public void setMaNV(Integer maNV) { this.maNV = maNV; }
+    public Employee getEmployee() { return employee; }
+    public void setEmployee(Employee employee) { this.employee = employee; }
 }

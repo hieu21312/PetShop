@@ -1,0 +1,93 @@
+{
+  "required_fields": [
+    "active_role",
+    "task_classification",
+    "artifact_decision",
+    "workflow_path",
+    "validation_plan"
+  ],
+  "non_trivial_requires_rules_read": true,
+  "non_trivial_keywords": [
+    "non-trivial",
+    "multi-file",
+    "payment",
+    "search",
+    "auth",
+    "distributed",
+    "workflow",
+    "governance",
+    "policy",
+    "callback",
+    "stateful",
+    "spec",
+    "approval-ready"
+  ],
+  "artifact_values": [
+    "Internal only",
+    "Repo task spec required",
+    "Repo task spec + approval-ready plan"
+  ],
+  "forbidden_patterns": [
+    {
+      "name": "ide_plan_artifact",
+      "pattern": "(?i)(\\.gemini|\\.codex|brain\\\\|brain/).*implementation_plan\\.md"
+    },
+    {
+      "name": "repo_external_spec_artifact",
+      "pattern": "(?i)(\\.gemini|\\.codex|brain\\\\|brain/).*(task|plan|spec|walkthrough)\\.md"
+    },
+    {
+      "name": "forbidden_git_checkout",
+      "pattern": "(?i)git checkout\\b"
+    },
+    {
+      "name": "forbidden_git_restore",
+      "pattern": "(?i)git restore\\b"
+    },
+    {
+      "name": "forbidden_git_reset_hard",
+      "pattern": "(?i)git reset\\s+--hard\\b"
+    }
+  ],
+  "overclaim_blacklist": [
+    "hoàn hảo",
+    "không có rủi ro",
+    "đã fix triệt để",
+    "hoàn toàn chuẩn xác",
+    "rất bảo mật",
+    "không phát hiện rủi ro",
+    "an toàn tuyệt đối",
+    "chạy đúng 100%",
+    "perfect",
+    "no risk",
+    "fully secure",
+    "completely safe",
+    "no issues found",
+    "flawless",
+    "zero risk",
+    "bulletproof"
+  ],
+  "role_destructive_blocks": {
+    "reviewer": "Destructive Thinking",
+    "implementer": "Blast Radius",
+    "planner": "Critical Flaw Analysis",
+    "debugger": "False Positive Check"
+  },
+  "role_required_headings": {
+    "reviewer": ["Findings", "Open Questions", "Summary"],
+    "implementer": ["Scope Implemented", "What Changed", "Validation Run", "Remaining Risk"],
+    "planner": ["Problem Statement", "Goals", "Proposed Changes", "Verification Plan"],
+    "debugger": ["Reproduction Status", "Evidence Collected", "Hypotheses", "Root Cause"]
+  },
+  "role_context_traps": {
+    "reviewer": "VERDICT_EVALUATION",
+    "implementer": "IMPLEMENTATION_REPORT",
+    "planner": "PLAN_PROPOSAL",
+    "debugger": "DEBUG_DIAGNOSTIC"
+  },
+  "role_nontrivial_required_fields": {
+    "reviewer": ["Review Verdict", "Evidence Basis", "Confidence Boundary", "Remaining Unverified", "Blocking Gap"],
+    "implementer": ["Change Label", "Why This Change", "Commands Run", "Behavior Verified", "Still Unverified", "Strongest Missing Proof"],
+    "debugger": ["Confidence Boundary", "Strongest Missing Proof"]
+  }
+}

@@ -1,0 +1,121 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-user-md me-2"></i> Quản lý Nhân sự</h2>
+                    <a th:href="@{/admin/staff/add}" class="btn btn-success shadow-sm">
+                        <i class="fas fa-plus me-1"></i> Thêm nhân sự
+                    </a>
+                </div>
+
+                <!-- Notification Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- FILTER TABS -->
+                <ul class="nav nav-pills mb-3 gap-2">
+                    <li class="nav-item">
+                        <a th:href="@{/admin/staff}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
+                           th:classappend="${currentFilter == 'all' or currentFilter == null ? 'active bg-primary text-white' : 'bg-light text-dark'}">
+                            👥 Tất cả nhân sự
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/admin/staff(roleFilter='vet')}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
+                           th:classappend="${currentFilter == 'vet' ? 'active bg-success text-white' : 'bg-light text-dark'}">
+                            🩺 Bác sĩ thú y
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a th:href="@{/admin/staff(roleFilter='care')}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
+                           th:classappend="${currentFilter == 'care' ? 'active bg-danger text-white' : 'bg-light text-dark'}">
+                            ✂️ Staff Spa / Care
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink text-nowrap">
+                                <tr>
+                                    <th class="ps-3 text-nowrap">Mã NV</th>
+                                    <th class="text-nowrap">Nhân viên</th>
+                                    <th class="text-nowrap">Vai trò</th>
+                                    <th class="text-nowrap">SĐT / Email</th>
+                                    <th class="text-nowrap">Chuyên môn</th>
+                                    <th class="text-nowrap text-center">Trạng thái</th>
+                                    <th class="pe-3 text-end text-nowrap">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="emp : ${staffList}">
+                                    <td class="ps-3 fw-semibold text-nowrap" th:text="${emp.maNV}"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="employee-avatar me-2">
+                                                <i class="fas fa-user-md" th:if="${emp.role != null && emp.role.tenVaiTro == 'Bác sĩ thú y'}"></i>
+                                                <i class="fas fa-user" th:if="${emp.role == null || emp.role.tenVaiTro != 'Bác sĩ thú y'}"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="d-block text-dark text-nowrap" th:text="${emp.tenNV}"></strong>
+                                                <small class="text-muted text-nowrap" th:text="${(emp.gioiTinh != null ? emp.gioiTinh : '') + (emp.namSinh != null ? ', ' + emp.namSinh : '')}"></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <span th:if="${emp.role != null && emp.role.tenVaiTro == 'Bác sĩ thú y'}" class="badge bg-success px-3 py-2 rounded-pill">
+                                            👨‍⚕️ Bác sĩ thú y
+                                        </span>
+                                        <span th:if="${emp.role != null && emp.role.tenVaiTro == 'Admin'}" class="badge bg-danger px-3 py-2 rounded-pill">
+                                            👑 Admin
+                                        </span>
+                                        <span th:if="${emp.role == null || (emp.role.tenVaiTro != 'Bác sĩ thú y' && emp.role.tenVaiTro != 'Admin')}" class="badge role-badge rounded-pill">
+                                            ✂️ Nhân viên chăm sóc
+                                        </span>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <small class="d-block text-dark"><i class="fas fa-phone me-1 text-muted"></i><span th:text="${emp.dienThoai != null ? emp.dienThoai : 'N/A'}"></span></small>
+                                        <small class="text-muted"><i class="fas fa-envelope me-1"></i><span th:text="${emp.email != null ? emp.email : 'N/A'}"></span></small>
+                                    </td>
+                                    <td>
+                                        <span class="small text-secondary fw-semibold" th:text="${emp.chuyenMon != null && !emp.chuyenMon.isBlank() ? emp.chuyenMon : 'Chăm sóc chung'}"></span>
+                                    </td>
+                                    <td class="text-center text-nowrap">
+                                        <form th:action="@{'/admin/staff/toggleStatus/' + ${emp.maNV}}" method="post" class="d-inline">
+                                            <button type="submit" th:class="${emp.trangThai == 'Đang làm việc' || emp.trangThai == null ? 'btn btn-sm btn-outline-success rounded-pill px-3 text-nowrap' : 'btn btn-sm btn-outline-secondary rounded-pill px-3 text-nowrap'}">
+                                                <i class="fas fa-circle me-1" style="font-size: 8px;"></i>
+                                                <span th:text="${emp.trangThai != null ? emp.trangThai : 'Đang làm việc'}"></span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="pe-3 text-end text-nowrap">
+                                        <div class="d-inline-flex gap-1">
+                                            <a th:href="@{'/admin/staff/edit/' + ${emp.maNV}}" class="btn btn-sm btn-warning" title="Sửa hồ sơ">Sửa</a>
+                                            <a th:href="@{'/admin/staff/delete/' + ${emp.maNV}}" class="btn btn-sm btn-danger" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">Xóa</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(staffList)}">
+                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có hồ sơ nhân sự nào</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

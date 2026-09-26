@@ -1,70 +1,110 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head}"></head>
-<body>
-<header th:replace="~{fragments/header :: header}"></header>
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
-        </div>
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold text-gradient">📅 Quản lý lịch đặt dịch vụ</h2>
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
             </div>
-            <div th:if="${param.success}" class="alert alert-success" th:text="${param.success}"></div>
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-pink">
-                            <tr>
-                                <th>Mã</th>
-                                <th>Dịch vụ</th>
-                                <th>Khách hàng</th>
-                                <th>Ngày đặt</th>
-                                <th>Giờ</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="b : ${bookings}">
-                                <td th:text="${b.maDatLich}"></td>
-                                <td th:text="${b.maDV}"></td>
-                                <td>
-                                    <strong th:text="${b.tenKhachHang}"></strong><br>
-                                    <small class="text-muted" th:text="${b.soDienThoai}"></small>
-                                </td>
-                                <td th:text="${#temporals.format(b.ngayDat, 'dd/MM/yyyy')}"></td>
-                                <td th:text="${b.gioDat}"></td>
-                                <td>
-                                    <span class="badge" th:classappend="${b.trangThai == 'Chờ xác nhận' ? 'bg-warning' : (b.trangThai == 'Đã xác nhận' ? 'bg-primary' : (b.trangThai == 'Hoàn thành' ? 'bg-success' : 'bg-secondary'))}" th:text="${b.trangThai}"></span>
-                                </td>
-                                <td>
-                                    <form th:action="@{/admin/bookings/updateStatus}" method="post" class="d-inline">
-                                        <input type="hidden" name="id" th:value="${b.maDatLich}">
-                                        <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
-                                            <option value="Chờ xác nhận" th:selected="${b.trangThai == 'Chờ xác nhận'}">Chờ xác nhận</option>
-                                            <option value="Đã xác nhận" th:selected="${b.trangThai == 'Đã xác nhận'}">Đã xác nhận</option>
-                                            <option value="Hoàn thành" th:selected="${b.trangThai == 'Hoàn thành'}">Hoàn thành</option>
-                                            <option value="Hủy" th:selected="${b.trangThai == 'Hủy'}">Hủy</option>
-                                        </select>
-                                    </form>
-                                    <a th:href="@{/admin/bookings/delete/{id}(id=${b.maDatLich})}" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Xóa lịch đặt này?')">Xóa</a>
-                                </td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(bookings)}">
-                                <td colspan="7" class="text-center py-4">Chưa có lịch đặt nào</td>
-                            </tr>
-                            </tbody>
-                        </table>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-calendar-alt me-2"></i> Quản lý lịch đặt dịch vụ</h2>
+                </div>
+
+                <!-- Notification Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink text-nowrap">
+                                <tr>
+                                    <th class="ps-3 text-nowrap">Mã Đặt</th>
+                                    <th class="text-nowrap">Dịch Vụ</th>
+                                    <th class="text-nowrap">Khách Hàng</th>
+                                    <th class="text-nowrap">Ngày &amp; Giờ</th>
+                                    <th class="text-nowrap">Nhân Sự Phụ Trách</th>
+                                    <th class="text-nowrap text-center">Trạng Thái</th>
+                                    <th class="pe-3 text-end text-nowrap">Thao Tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="b : ${bookings}">
+                                    <td class="ps-3 text-nowrap">
+                                        <span class="badge bg-light text-danger border fw-bold px-3 py-2 rounded-pill" th:text="'#BK' + ${b.maDatLich}"></span>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <span class="badge role-badge px-3 py-2 rounded-pill" th:text="'🐾 Service #' + ${b.maDV}"></span>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <strong class="d-block text-dark" th:text="${b.tenKhachHang}"></strong>
+                                        <small class="text-muted"><i class="fas fa-phone me-1 text-muted"></i><span th:text="${b.soDienThoai}"></span></small>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <small class="d-block text-dark fw-semibold"><i class="far fa-calendar-alt me-1 text-muted"></i><span th:text="${#temporals.format(b.ngayDat, 'dd/MM/yyyy')}"></span></small>
+                                        <small class="text-muted"><i class="far fa-clock me-1"></i><span th:text="${b.gioDat}"></span></small>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <form th:action="@{/admin/bookings/assignStaff}" method="post" class="d-inline">
+                                            <input type="hidden" name="id" th:value="${b.maDatLich}">
+                                            <select name="maNV" class="form-select form-select-sm rounded-pill shadow-sm d-inline-block w-auto px-3 py-1 border-1" onchange="this.form.submit()">
+                                                <option value="">-- Chưa phân công --</option>
+                                                <optgroup label="👨‍⚕️ Bác sĩ thú y">
+                                                    <option th:each="e : ${employees}"
+                                                            th:if="${e.role != null and e.role.tenVaiTro == 'Bác sĩ thú y'}"
+                                                            th:value="${e.maNV}"
+                                                            th:selected="${b.maNV == e.maNV}"
+                                                            th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : '')">
+                                                    </option>
+                                                </optgroup>
+                                                <optgroup label="✂️ Staff Spa / Chăm sóc">
+                                                    <option th:each="e : ${employees}"
+                                                            th:if="${e.role == null or e.role.tenVaiTro != 'Bác sĩ thú y'}"
+                                                            th:value="${e.maNV}"
+                                                            th:selected="${b.maNV == e.maNV}"
+                                                            th:text="${e.tenNV} + (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')">
+                                                    </option>
+                                                </optgroup>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td class="text-center text-nowrap">
+                                        <span class="badge px-3 py-2 rounded-pill text-nowrap"
+                                              th:classappend="${b.trangThai == 'Chờ xác nhận' ? 'bg-warning text-dark' : (b.trangThai == 'Đã xác nhận' ? 'bg-primary text-white' : (b.trangThai == 'Hoàn thành' ? 'bg-success text-white' : 'bg-secondary text-white'))}">
+                                            <i class="fas fa-circle me-1" style="font-size: 7px;"></i>
+                                            <span th:text="${b.trangThai}"></span>
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end text-nowrap">
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <form th:action="@{/admin/bookings/updateStatus}" method="post" class="d-inline">
+                                                <input type="hidden" name="id" th:value="${b.maDatLich}">
+                                                <select name="status" class="form-select form-select-sm rounded-pill shadow-sm d-inline-block w-auto px-3 py-1" onchange="this.form.submit()">
+                                                    <option value="Chờ xác nhận" th:selected="${b.trangThai == 'Chờ xác nhận'}">Chờ xác nhận</option>
+                                                    <option value="Đã xác nhận" th:selected="${b.trangThai == 'Đã xác nhận'}">Đã xác nhận</option>
+                                                    <option value="Hoàn thành" th:selected="${b.trangThai == 'Hoàn thành'}">Hoàn thành</option>
+                                                    <option value="Đã hủy" th:selected="${b.trangThai == 'Đã hủy'}">Đã hủy</option>
+                                                </select>
+                                            </form>
+                                            <a th:href="@{/admin/bookings/delete/{id}(id=${b.maDatLich})}" class="btn btn-sm btn-danger" title="Xóa lịch đặt" onclick="return confirm('Bạn có chắc chắn muốn xóa lịch đặt này?')">Xóa</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(bookings)}">
+                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có lịch đặt dịch vụ nào</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-</body>
-</html>

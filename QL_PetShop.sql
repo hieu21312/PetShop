@@ -1,4 +1,5 @@
-﻿USE [QL_PetShop]
+
+USE [QL_PetShop]
 GO
 
 /****** Object:  Table [dbo].[tblDanhMuc] ******/
@@ -80,6 +81,11 @@ CREATE TABLE [dbo].[tblNhanVien](
     [GioiTinh] [nvarchar](10) NULL,
     [NamSinh] [int] NULL,
     [VaiTro] [int] NULL,
+    [DienThoai] [nvarchar](20) NULL,
+    [Email] [nvarchar](100) NULL,
+    [ChuyenMon] [nvarchar](255) NULL, -- 'Bác sĩ sản khoa/phẫu thuật', 'Cắt tỉa & Spa chuyên nghiệp'
+    [AnhDaiDien] [nvarchar](255) NULL,
+    [TrangThai] [nvarchar](50) NULL DEFAULT N'Đang làm việc', -- 'Đang làm việc', 'Tạm nghỉ'
     CONSTRAINT [FK_tblNhanVien_tblVaiTro] FOREIGN KEY([VaiTro]) REFERENCES [dbo].[tblVaiTro] ([IDVaiTro])
 )
 GO
@@ -665,6 +671,26 @@ INSERT INTO [dbo].[tblChiTietHoaDonDichVu] ([MaHDDV], [MaDV], [SoLuong], [GiaDic
 (28, 8, 1, 120000),  
 (29, 9, 1, 80000),   
 (30, 10, 1, 200000); 
+GO
+
+/****** Object:  Table [dbo].[tblDatLich] ******/
+CREATE TABLE [dbo].[tblDatLich](
+    [MaDatLich] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [MaDV] [int] NULL,
+    [MaKH] [int] NULL,
+    [MaNV] [int] NULL, -- Bác sĩ / Nhân viên chăm sóc phụ trách
+    [TenKhachHang] [nvarchar](100) NULL,
+    [SoDienThoai] [nvarchar](20) NULL,
+    [Email] [nvarchar](100) NULL,
+    [NgayDat] [date] NULL,
+    [GioDat] [time](7) NULL,
+    [GhiChu] [nvarchar](500) NULL,
+    [TrangThai] [nvarchar](50) NULL, -- 'Chờ xác nhận', 'Đã xác nhận', 'Hoàn thành', 'Đã hủy'
+    [NgayTao] [datetime] NULL,
+    CONSTRAINT [FK_tblDatLich_tblDichVu] FOREIGN KEY([MaDV]) REFERENCES [dbo].[tblDichVu] ([MaDV]),
+    CONSTRAINT [FK_tblDatLich_tblKhachHang] FOREIGN KEY([MaKH]) REFERENCES [dbo].[tblKhachHang] ([MaKH]),
+    CONSTRAINT [FK_tblDatLich_tblNhanVien] FOREIGN KEY([MaNV]) REFERENCES [dbo].[tblNhanVien] ([MaNV])
+)
 GO
 
 INSERT INTO [dbo].[tblBinhLuan] ([MaSP], [HoTen], [NoiDung], [SoSao], [Ngay]) VALUES

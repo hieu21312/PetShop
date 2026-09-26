@@ -1,0 +1,86 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row justify-content-center">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header text-white py-3 rounded-top-4" style="background: linear-gradient(45deg, #ff4d6d, #ff758f);">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="fas fa-user-edit me-2"></i>
+                            <span th:text="${employee.maNV != null ? 'Cập nhật hồ sơ nhân sự' : 'Thêm nhân sự mới'}"></span>
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/admin/staff/save}" method="post" th:object="${employee}">
+                            <input type="hidden" th:field="*{maNV}">
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Họ và Tên *</label>
+                                    <input type="text" th:field="*{tenNV}" class="form-control" placeholder="Ví dụ: ThS. BS Nguyễn Văn A" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Vai trò / Chức danh *</label>
+                                    <select th:field="*{vaiTro}" class="form-select" required>
+                                        <option value="" disabled selected>-- Chọn vai trò --</option>
+                                        <option th:each="r : ${roles}" th:value="${r.idVaiTro}" th:text="${r.tenVaiTro}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Số điện thoại</label>
+                                    <input type="tel" th:field="*{dienThoai}" class="form-control" placeholder="0901234567">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Email</label>
+                                    <input type="email" th:field="*{email}" class="form-control" placeholder="doctor@petshop.com">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Giới tính</label>
+                                    <select th:field="*{gioiTinh}" class="form-select">
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nữ">Nữ</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Năm sinh</label>
+                                    <input type="number" th:field="*{namSinh}" class="form-control" placeholder="1992">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Trạng thái làm việc</label>
+                                    <select th:field="*{trangThai}" class="form-select">
+                                        <option value="Đang làm việc">Đang làm việc</option>
+                                        <option value="Tạm nghỉ">Tạm nghỉ</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Chuyên môn / Kỹ năng chuyên sâu</label>
+                                    <input type="text" th:field="*{chuyenMon}" class="form-control" placeholder="Ví dụ: Phẫu thuật ngoại khoa, Tiêm phòng & Tiêu hóa, Cắt tỉa Poodle Spa...">
+                                    <small class="text-muted">Mô tả ngắn gọn bằng cấp hoặc kỹ năng nổi bật của Bác sĩ / Nhân viên</small>
+                                </div>
+
+                                <div class="col-md-12" th:if="${employee.maNV == null}">
+                                    <label class="form-label fw-semibold">Mật khẩu đăng nhập ban đầu</label>
+                                    <input type="password" th:field="*{matKhau}" class="form-control" placeholder="Mặc định là 123456 nếu bỏ trống">
+                                </div>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-between">
+                                <a th:href="@{/admin/staff}" class="btn btn-outline-secondary rounded-pill px-4">
+                                    <i class="fas fa-arrow-left me-1"></i> Hủy
+                                </a>
+                                <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-1"></i> Lưu thông tin
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
