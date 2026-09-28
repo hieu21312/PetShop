@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0 text-gradient">
+                            <i class="fas fa-clipboard-list text-danger me-2"></i> Lập phiếu tiếp nhận chăm sóc thú cưng
+                        </h4>
+                        <a th:href="@{/admin/care-tickets}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/care-tickets/create}" method="post" th:object="${ticket}">
+
+                        <div class="alert alert-info py-2 rounded-3 mb-4">
+                            <i class="fas fa-info-circle me-1"></i> Mã số phiếu tự động: <strong th:text="*{soPhieu}"></strong>
+                            <input type="hidden" th:field="*{soPhieu}">
+                        </div>
+
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-paw me-2"></i>1. Đối tượng tiếp nhận & Nhân sự phụ trách</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Chọn thú cưng <span class="text-danger">*</span></label>
+                                <select th:field="*{maThuCung}" class="form-select rounded-3" required id="petSelect">
+                                    <option value="" disabled selected>-- Chọn thú cưng tiếp nhận --</option>
+                                    <option th:each="p : ${pets}" 
+                                            th:value="${p.maThuCung}" 
+                                            th:text="${p.tenThuCung} + ' (' + ${p.loaiThuCung} + ' - ' + ${p.giongLoai} + ') - Chủ: ' + (${p.chuNuoi != null ? p.chuNuoi.hoTenChuNuoi : 'N/A'})">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gói dịch vụ chăm sóc thực hiện</label>
+                                <select name="selectedServiceId" class="form-select rounded-3">
+                                    <option value="" selected>-- Chọn dịch vụ chăm sóc --</option>
+                                    <option th:each="s : ${services}" 
+                                            th:value="${s.maDVCS}" 
+                                            th:text="${s.tenDichVu} + ' (' + ${#numbers.formatDecimal(s.giaDichVu, 0, 0, 'COMMA')} + ' đ)'">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Kỹ thuật viên / Bác sĩ trực tiếp thực hiện</label>
+                                <select th:field="*{maNVThucHien}" class="form-select rounded-3">
+                                    <option value="" selected>-- Chưa phân công --</option>
+                                    <option th:each="e : ${employees}" 
+                                            th:value="${e.maNV}" 
+                                            th:text="${e.tenNV} + (${e.chuyenMon != null ? ' - ' + e.chuyenMon : ''})">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Cân nặng khi nhận (kg)</label>
+                                <input type="number" step="0.1" th:field="*{canNangTiepNhan}" class="form-control rounded-3" placeholder="Ví dụ: 4.2">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Ngày hẹn trả</label>
+                                <input type="datetime-local" th:field="*{ngayHenTra}" class="form-control rounded-3">
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-danger mb-3"><i class="fas fa-stethoscope me-2"></i>2. Ghi nhận tình trạng ban đầu & Yêu cầu</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Tình trạng ban đầu khi tiếp nhận thú cưng</label>
+                                <textarea th:field="*{tinhTrangBanDau}" class="form-control rounded-3" rows="3" placeholder="Lông rối, da mẩn đỏ, rỉ mắt, móng dài..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Yêu cầu cụ thể từ chủ nuôi</label>
+                                <textarea th:field="*{yeuCauCuaChuNuoi}" class="form-control rounded-3" rows="3" placeholder="Cắt tỉa mặt tròn gấu bông, tắm thơm lâu, không cạo sát..."></textarea>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-success mb-3"><i class="fas fa-money-bill-wave me-2"></i>3. Chi phí & Trạng thái phiếu</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label">Tổng tiền (VNĐ)</label>
+                                <input type="number" th:field="*{tongTien}" class="form-control rounded-3" placeholder="Ví dụ: 250000">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Giảm giá (VNĐ)</label>
+                                <input type="number" th:field="*{tienGiamGia}" class="form-control rounded-3" placeholder="Ví dụ: 20000">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Trạng thái dịch vụ ban đầu</label>
+                                <select th:field="*{trangThaiDichVu}" class="form-select rounded-3">
+                                    <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
+                                    <option value="Đang thực hiện">Đang thực hiện</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/admin/care-tickets}" class="btn btn-light px-4 rounded-pill">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm">
+                                <i class="fas fa-check-circle me-1"></i> Lưu & Khởi tạo phiếu tiếp nhận
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

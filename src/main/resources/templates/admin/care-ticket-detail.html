@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="badge bg-danger mb-2 px-3 py-1 fs-6" th:text="${ticket.soPhieu}"></span>
+                            <h3 class="fw-bold mb-0 text-dark">Chi tiết phiếu dịch vụ chăm sóc</h3>
+                            <small class="text-muted">Tiếp nhận lúc: <span th:text="${#temporals.format(ticket.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></span></small>
+                        </div>
+                        <div>
+                            <a th:href="@{/admin/care-tickets}" class="btn btn-outline-secondary rounded-pill px-4">
+                                <i class="fas fa-arrow-left me-1"></i> Danh sách phiếu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Cột trái: Thông tin Thú cưng & Chủ nuôi -->
+                <div class="col-md-5">
+                    <!-- Thông tin Thú cưng -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-dog me-2"></i>Thú cưng tiếp nhận</h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <div th:if="${ticket.thuCung != null}">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar-lg bg-light text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-paw fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-dark" th:text="${ticket.thuCung.tenThuCung}"></h5>
+                                        <span class="badge bg-light text-dark border" th:text="${ticket.thuCung.giongLoai}"></span>
+                                        <span class="badge bg-light text-dark border" th:text="${ticket.thuCung.gioiTinh}"></span>
+                                    </div>
+                                </div>
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item px-0 d-flex justify-content-between">
+                                        <span class="text-muted">Cân nặng lúc nhận:</span>
+                                        <strong th:text="${ticket.canNangTiepNhan != null ? ticket.canNangTiepNhan + ' kg' : 'Chưa cân'}"></strong>
+                                    </li>
+                                    <li class="list-group-item px-0 d-flex justify-content-between">
+                                        <span class="text-muted">Màu lông:</span>
+                                        <strong th:text="${ticket.thuCung.mauSac ?: 'N/A'}"></strong>
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        <span class="text-muted d-block mb-1">Tình trạng ban đầu:</span>
+                                        <div class="alert alert-light border py-2 mb-0" th:text="${ticket.tinhTrangBanDau ?: 'Không có ghi nhận bất thường'}"></div>
+                                    </li>
+                                    <li class="list-group-item px-0">
+                                        <span class="text-muted d-block mb-1">Yêu cầu của chủ:</span>
+                                        <div class="alert alert-warning border py-2 mb-0 fw-semibold" th:text="${ticket.yeuCauCuaChuNuoi ?: 'Thực hiện theo quy trình tiêu chuẩn'}"></div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin Chủ nuôi -->
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-success"><i class="fas fa-id-card me-2"></i>Hồ sơ chủ nuôi</h5>
+                        </div>
+                        <div class="card-body p-4 pt-0" th:if="${ticket.chuNuoi != null}">
+                            <div class="fw-bold fs-6 text-dark" th:text="${ticket.chuNuoi.hoTenChuNuoi}"></div>
+                            <div class="text-muted small mb-2"><i class="fas fa-phone text-success me-1"></i><span th:text="${ticket.chuNuoi.soDienThoai}"></span></div>
+                            <div class="small text-secondary mb-2" th:if="${ticket.chuNuoi.diaChi != null}">
+                                <i class="fas fa-map-marker-alt text-danger me-1"></i><span th:text="${ticket.chuNuoi.diaChi}"></span>
+                            </div>
+                            <div th:if="${ticket.chuNuoi.soDienThoaiKhanCap != null}" class="alert alert-danger py-2 small mb-0">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Số khẩn cấp: <strong th:text="${ticket.chuNuoi.soDienThoaiKhanCap}"></strong>
+                                (<span th:text="${ticket.chuNuoi.nguoiLienHeKhanCap}"></span>)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Tiến độ, Kết quả & Thanh toán -->
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-tasks text-danger me-2"></i>Cập nhật tiến độ & Thanh toán</h5>
+                        </div>
+                        <div class="card-body p-4 pt-0">
+                            <!-- Bảng tóm tắt tiền -->
+                            <div class="bg-light p-3 rounded-4 mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Tổng tiền dịch vụ:</span>
+                                    <strong th:text="${#numbers.formatDecimal(ticket.tongTien, 0, 0, 'COMMA')} + ' đ'"></strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Giảm giá:</span>
+                                    <span class="text-danger" th:text="'-' + ${#numbers.formatDecimal(ticket.tienGiamGia, 0, 0, 'COMMA')} + ' đ'"></span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold fs-5 text-dark">Thành tiền cần thu:</span>
+                                    <span class="fw-bold fs-4 text-danger" th:text="${#numbers.formatDecimal(ticket.thanhToan, 0, 0, 'COMMA')} + ' đ'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Form cập nhật trạng thái -->
+                            <form th:action="@{/admin/care-tickets/update-status/{id}(id=${ticket.maPhieuDV})}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">1. Trạng thái thực hiện dịch vụ</label>
+                                    <select name="trangThaiDichVu" class="form-select rounded-3">
+                                        <option value="Chờ tiếp nhận" th:selected="${ticket.trangThaiDichVu == 'Chờ tiếp nhận'}">⏳ Chờ tiếp nhận</option>
+                                        <option value="Đang thực hiện" th:selected="${ticket.trangThaiDichVu == 'Đang thực hiện'}">🔄 Đang thực hiện chăm sóc</option>
+                                        <option value="Hoàn thành chăm sóc" th:selected="${ticket.trangThaiDichVu == 'Hoàn thành chăm sóc'}">✅ Hoàn thành chăm sóc (Chờ chủ đón)</option>
+                                        <option value="Đã bàn giao thú cưng" th:selected="${ticket.trangThaiDichVu == 'Đã bàn giao thú cưng'}">🤝 Đã bàn giao thú cưng cho chủ</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">2. Kết quả chăm sóc / Lời dặn dò bác sĩ & Spa</label>
+                                    <textarea name="ketQuaChamSoc" class="form-control rounded-3" rows="3" 
+                                              placeholder="Ví dụ: Đã tắm sạch sấy bồng, cắt mài móng gọn gàng, thú cưng ngoan và khỏe mạnh..."
+                                              th:text="${ticket.ketQuaChamSoc}"></textarea>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">3. Trạng thái thanh toán</label>
+                                        <select name="trangThaiThanhToan" class="form-select rounded-3">
+                                            <option value="Chưa thanh toán" th:selected="${ticket.trangThaiThanhToan == 'Chưa thanh toán'}">❌ Chưa thanh toán</option>
+                                            <option value="Đã đặt cọc" th:selected="${ticket.trangThaiThanhToan == 'Đã đặt cọc'}">💳 Đã đặt cọc</option>
+                                            <option value="Đã thanh toán" th:selected="${ticket.trangThaiThanhToan == 'Đã thanh toán'}">💰 Đã thanh toán đầy đủ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">4. Hình thức thanh toán</label>
+                                        <select name="hinhThucThanhToan" class="form-select rounded-3">
+                                            <option value="Tiền mặt" th:selected="${ticket.hinhThucThanhToan == 'Tiền mặt'}">💵 Tiền mặt</option>
+                                            <option value="Chuyển khoản" th:selected="${ticket.hinhThucThanhToan == 'Chuyển khoản'}">📱 Chuyển khoản ngân hàng</option>
+                                            <option value="Quẹt thẻ" th:selected="${ticket.hinhThucThanhToan == 'Quẹt thẻ'}">💳 Quẹt thẻ POS</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-danger py-2 rounded-pill fw-bold shadow-sm">
+                                        <i class="fas fa-save me-1"></i> Cập nhật trạng thái phiếu & Hoàn tất
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
