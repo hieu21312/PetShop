@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold mb-0 text-gradient">
+                            <i class="fas fa-spa text-success me-2"></i>
+                            <span th:text="${service.maDVCS == null ? 'Thêm dịch vụ chăm sóc mới' : 'Cập nhật dịch vụ chăm sóc'}"></span>
+                        </h4>
+                        <a th:href="@{/admin/care-services}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="${service.maDVCS == null ? '/admin/care-services/create' : '/admin/care-services/edit/' + service.maDVCS}"
+                          method="post" th:object="${service}">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Tên dịch vụ chăm sóc <span class="text-danger">*</span></label>
+                                <input type="text" th:field="*{tenDichVu}" class="form-control rounded-3" placeholder="Ví dụ: Tắm sấy khử mùi, Cắt tỉa lông Teddy..." required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Nhóm dịch vụ <span class="text-danger">*</span></label>
+                                <select th:field="*{nhomDichVu}" class="form-select rounded-3" required>
+                                    <option value="Spa - Grooming">✂️ Spa - Grooming</option>
+                                    <option value="Khách sạn thú cưng">🏨 Khách sạn thú cưng</option>
+                                    <option value="Thú y & Khám chữa">🩺 Thú y & Khám chữa</option>
+                                    <option value="Chăm sóc cao cấp">💎 Chăm sóc cao cấp</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Đơn giá (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{giaDichVu}" class="form-control rounded-3" placeholder="Ví dụ: 150000" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Thời gian thực hiện (Phút)</label>
+                                <input type="number" th:field="*{thoiGianThucHien}" class="form-control rounded-3" placeholder="Ví dụ: 45">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Đối tượng áp dụng</label>
+                                <input type="text" th:field="*{doiTuongApDung}" class="form-control rounded-3" placeholder="Chó < 5kg, Mèo mọi cỡ...">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mô tả quy trình chi tiết</label>
+                                <textarea th:field="*{moTaChiTiet}" class="form-control rounded-3" rows="4" placeholder="Mô tả các bước thực hiện, loại dầu gội hoặc lợi ích của dịch vụ..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Trạng thái cung cấp</label>
+                                <select th:field="*{trangThai}" class="form-select rounded-3">
+                                    <option value="Đang cung cấp">Đang cung cấp</option>
+                                    <option value="Tạm ngưng">Tạm ngưng</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/admin/care-services}" class="btn btn-light px-4 rounded-pill">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-success px-5 rounded-pill shadow-sm">
+                                <i class="fas fa-save me-1"></i> Lưu dịch vụ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
