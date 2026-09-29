@@ -1,0 +1,126 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-gradient mb-1">
+                            <i class="fas fa-dog text-warning me-2"></i> Quản lý hồ sơ thú cưng
+                        </h2>
+                        <p class="text-muted small mb-0" th:if="${owner == null}">Quản lý lý lịch thú cưng, giống loài, cân nặng, tiền sử bệnh và chủ nuôi</p>
+                        <p class="text-primary small mb-0" th:if="${owner != null}">
+                            Đang xem danh sách thú cưng của chủ nuôi: <strong th:text="${owner.hoTenChuNuoi}"></strong> (<span th:text="${owner.soDienThoai}"></span>)
+                        </p>
+                    </div>
+                    <a th:href="@{/admin/pets/create}" class="btn btn-warning text-dark fw-bold px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-plus-circle me-1"></i> Đăng ký thú cưng mới
+                    </a>
+                </div>
+
+                <!-- Bộ lọc & Tìm kiếm -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-3">
+                        <form th:action="@{/admin/pets}" method="get" class="row g-2 align-items-center">
+                            <div class="col-md-7">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" name="keyword" th:value="${keyword}" class="form-control border-start-0" placeholder="Tìm theo tên thú cưng, giống loài (Poodle, Corgi, Sphynx...)...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="loai" class="form-select" onchange="this.form.submit()">
+                                    <option value="All" th:selected="${currentLoai == null or currentLoai == 'All'}">Tất cả giống loài</option>
+                                    <option value="Chó" th:selected="${currentLoai == 'Chó'}">🐶 Chó</option>
+                                    <option value="Mèo" th:selected="${currentLoai == 'Mèo'}">🐱 Mèo</option>
+                                    <option value="Khác" th:selected="${currentLoai == 'Khác'}">🐾 Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-dark w-100 rounded-3">Tìm kiếm</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Danh sách thú cưng -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink">
+                                    <tr>
+                                        <th width="70">Mã</th>
+                                        <th>Thú cưng</th>
+                                        <th>Loài & Giống</th>
+                                        <th>Cân nặng</th>
+                                        <th>Chủ sở hữu</th>
+                                        <th>Tình trạng sức khỏe</th>
+                                        <th class="text-center" width="160">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${pets}">
+                                        <td><span class="fw-bold text-muted" th:text="'#' + ${p.maThuCung}"></span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 42px; height: 42px;">
+                                                    <i th:class="${p.loaiThuCung == 'Mèo' ? 'fas fa-cat text-info fs-5' : 'fas fa-dog text-warning fs-5'}"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark" th:text="${p.tenThuCung}"></div>
+                                                    <small class="text-muted">
+                                                        <span th:text="${p.gioiTinh}"></span> | 
+                                                        <span th:text="${p.trietSan ? 'Đã triệt sản' : 'Chưa triệt sản'}"></span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-secondary" th:text="${p.giongLoai}"></div>
+                                            <small class="text-muted" th:if="${p.mauSac != null}" th:text="'Màu: ' + ${p.mauSac}"></small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border fw-semibold" th:if="${p.canNang != null}" th:text="${p.canNang} + ' kg'"></span>
+                                            <span class="text-muted small" th:unless="${p.canNang != null}">--</span>
+                                        </td>
+                                        <td>
+                                            <div th:if="${p.chuNuoi != null}">
+                                                <div class="fw-bold text-primary" th:text="${p.chuNuoi.hoTenChuNuoi}"></div>
+                                                <small class="text-muted"><i class="fas fa-phone me-1"></i><span th:text="${p.chuNuoi.soDienThoai}"></span></small>
+                                            </div>
+                                            <span th:unless="${p.chuNuoi != null}" class="text-muted">Chưa gán</span>
+                                        </td>
+                                        <td>
+                                            <div class="small text-truncate" style="max-width: 180px;" th:title="${p.tinhTrangSucKhoeHienTai}" th:text="${p.tinhTrangSucKhoeHienTai ?: 'Bình thường, khỏe mạnh'}"></div>
+                                            <span class="badge bg-success-subtle text-success small" th:text="${p.trangThai}"></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a th:href="@{/admin/pets/edit/{id}(id=${p.maThuCung})}" class="btn btn-outline-warning rounded-pill me-1" title="Chỉnh sửa">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </a>
+                                                <a th:href="@{/admin/pets/delete/{id}(id=${p.maThuCung})}" class="btn btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc chắn muốn xóa hồ sơ thú cưng này?')" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(pets)}">
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-paw fs-1 d-block mb-3 text-secondary"></i>
+                                            Chưa tìm thấy hồ sơ thú cưng nào phù hợp.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>

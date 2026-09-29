@@ -1,0 +1,129 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-gradient mb-1">
+                            <i class="fas fa-clipboard-list text-danger me-2"></i> Phiếu chăm sóc thú cưng
+                        </h2>
+                        <p class="text-muted small mb-0">Quản lý quy trình tiếp nhận, theo dõi tiến độ chăm sóc và thu ngân</p>
+                    </div>
+                    <a th:href="@{/admin/care-tickets/create}" class="btn btn-danger px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-plus-circle me-1"></i> Tiếp nhận thú cưng mới
+                    </a>
+                </div>
+
+                <!-- Bộ lọc theo trạng thái dịch vụ -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/admin/care-tickets}" class="btn btn-sm rounded-pill px-3" 
+                               th:classappend="${currentStatus == null or currentStatus == 'All' ? 'btn-dark' : 'btn-outline-secondary'}">
+                                Tất cả phiếu
+                            </a>
+                            <a th:href="@{/admin/care-tickets?status=Chờ tiếp nhận}" class="btn btn-sm rounded-pill px-3" 
+                               th:classappend="${currentStatus == 'Chờ tiếp nhận' ? 'btn-secondary text-white' : 'btn-outline-secondary'}">
+                                <i class="fas fa-clock me-1"></i> Chờ tiếp nhận
+                            </a>
+                            <a th:href="@{/admin/care-tickets?status=Đang thực hiện}" class="btn btn-sm rounded-pill px-3" 
+                               th:classappend="${currentStatus == 'Đang thực hiện' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark'}">
+                                <i class="fas fa-spinner fa-spin me-1"></i> Đang thực hiện
+                            </a>
+                            <a th:href="@{/admin/care-tickets?status=Hoàn thành chăm sóc}" class="btn btn-sm rounded-pill px-3" 
+                               th:classappend="${currentStatus == 'Hoàn thành chăm sóc' ? 'btn-info text-white' : 'btn-outline-info'}">
+                                <i class="fas fa-check-circle me-1"></i> Hoàn thành chăm sóc
+                            </a>
+                            <a th:href="@{/admin/care-tickets?status=Đã bàn giao thú cưng}" class="btn btn-sm rounded-pill px-3" 
+                               th:classappend="${currentStatus == 'Đã bàn giao thú cưng' ? 'btn-success text-white' : 'btn-outline-success'}">
+                                <i class="fas fa-handshake me-1"></i> Đã bàn giao cho chủ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách phiếu -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink">
+                                    <tr>
+                                        <th>Số phiếu</th>
+                                        <th>Thú cưng & Chủ</th>
+                                        <th>Thời gian</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái dịch vụ</th>
+                                        <th>Thanh toán</th>
+                                        <th class="text-center" width="140">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="t : ${tickets}">
+                                        <td>
+                                            <span class="fw-bold text-dark d-block" th:text="${t.soPhieu}"></span>
+                                            <small class="text-muted" th:if="${t.nvThucHien != null}">
+                                                <i class="fas fa-user-check text-primary me-1"></i><span th:text="${t.nvThucHien.tenNV}"></span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-danger">
+                                                <i class="fas fa-paw me-1"></i><span th:text="${t.thuCung != null ? t.thuCung.tenThuCung : 'Pet #' + t.maThuCung}"></span>
+                                            </div>
+                                            <small class="text-muted" th:if="${t.chuNuoi != null}">
+                                                Chủ: <span th:text="${t.chuNuoi.hoTenChuNuoi}"></span> (<span th:text="${t.chuNuoi.soDienThoai}"></span>)
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small class="text-dark d-block" th:text="${#temporals.format(t.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></small>
+                                            <small class="text-muted" th:if="${t.ngayHenTra != null}">
+                                                Hẹn trả: <span th:text="${#temporals.format(t.ngayHenTra, 'dd/MM HH:mm')}"></span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-danger fs-6" th:text="${#numbers.formatDecimal(t.thanhToan, 0, 0, 'COMMA')} + ' đ'"></span>
+                                            <div class="small text-muted" th:if="${t.tienGiamGia != null and t.tienGiamGia > 0}">
+                                                Giảm: -<span th:text="${#numbers.formatDecimal(t.tienGiamGia, 0, 0, 'COMMA')}"></span> đ
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${t.trangThaiDichVu == 'Đã bàn giao thú cưng' ? 'bg-success' : (t.trangThaiDichVu == 'Hoàn thành chăm sóc' ? 'bg-info text-dark' : (t.trangThaiDichVu == 'Đang thực hiện' ? 'bg-warning text-dark' : 'bg-secondary'))}"
+                                                  th:text="${t.trangThaiDichVu}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${t.trangThaiThanhToan == 'Đã thanh toán' ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}"
+                                                  th:text="${t.trangThaiThanhToan}"></span>
+                                            <small class="text-muted d-block mt-1" th:if="${t.hinhThucThanhToan != null}" th:text="${t.hinhThucThanhToan}"></small>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a th:href="@{/admin/care-tickets/detail/{id}(id=${t.maPhieuDV})}" class="btn btn-outline-primary rounded-pill me-1" title="Chi tiết & Cập nhật">
+                                                    <i class="fas fa-eye"></i> Xem
+                                                </a>
+                                                <a th:href="@{/admin/care-tickets/delete/{id}(id=${t.maPhieuDV})}" class="btn btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc muốn xóa phiếu này?')" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(tickets)}">
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-clipboard-check fs-1 d-block mb-3 text-secondary"></i>
+                                            Chưa có phiếu chăm sóc nào.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
