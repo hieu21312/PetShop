@@ -15,8 +15,8 @@
                             Đang xem danh sách thú cưng của chủ nuôi: <strong th:text="${owner.hoTenChuNuoi}"></strong> (<span th:text="${owner.soDienThoai}"></span>)
                         </p>
                     </div>
-                    <a th:href="@{/admin/pets/create}" class="btn btn-warning text-dark fw-bold px-4 rounded-pill shadow-sm">
-                        <i class="fas fa-plus-circle me-1"></i> Đăng ký thú cưng mới
+                    <a th:href="@{/admin/pets/create}" class="btn btn-success px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-plus me-1"></i> Thêm mới
                     </a>
                 </div>
 
@@ -49,24 +49,24 @@
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-pink">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+                                <thead class="table-pink text-nowrap">
                                     <tr>
-                                        <th width="70">Mã</th>
-                                        <th>Thú cưng</th>
-                                        <th>Loài & Giống</th>
-                                        <th>Cân nặng</th>
-                                        <th>Chủ sở hữu</th>
-                                        <th>Tình trạng sức khỏe</th>
-                                        <th class="text-center" width="160">Thao tác</th>
+                                        <th style="min-width: 60px;">Mã</th>
+                                        <th style="min-width: 180px;">Thú cưng</th>
+                                        <th style="min-width: 160px;">Loài & Giống</th>
+                                        <th style="min-width: 100px;">Cân nặng</th>
+                                        <th style="min-width: 180px;">Chủ sở hữu</th>
+                                        <th style="min-width: 180px;">Tình trạng sức khỏe</th>
+                                        <th class="text-center" style="min-width: 140px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="p : ${pets}">
-                                        <td><span class="fw-bold text-muted" th:text="'#' + ${p.maThuCung}"></span></td>
-                                        <td>
+                                        <td class="text-nowrap"><span class="fw-bold text-muted" th:text="'#' + ${p.maThuCung}"></span></td>
+                                        <td class="text-nowrap">
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 42px; height: 42px;">
+                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; min-width: 40px;">
                                                     <i th:class="${p.loaiThuCung == 'Mèo' ? 'fas fa-cat text-info fs-5' : 'fas fa-dog text-warning fs-5'}"></i>
                                                 </div>
                                                 <div>
@@ -78,15 +78,15 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <div class="fw-semibold text-secondary" th:text="${p.giongLoai}"></div>
                                             <small class="text-muted" th:if="${p.mauSac != null}" th:text="'Màu: ' + ${p.mauSac}"></small>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <span class="badge bg-light text-dark border fw-semibold" th:if="${p.canNang != null}" th:text="${p.canNang} + ' kg'"></span>
                                             <span class="text-muted small" th:unless="${p.canNang != null}">--</span>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <div th:if="${p.chuNuoi != null}">
                                                 <div class="fw-bold text-primary" th:text="${p.chuNuoi.hoTenChuNuoi}"></div>
                                                 <small class="text-muted"><i class="fas fa-phone me-1"></i><span th:text="${p.chuNuoi.soDienThoai}"></span></small>
@@ -94,18 +94,16 @@
                                             <span th:unless="${p.chuNuoi != null}" class="text-muted">Chưa gán</span>
                                         </td>
                                         <td>
-                                            <div class="small text-truncate" style="max-width: 180px;" th:title="${p.tinhTrangSucKhoeHienTai}" th:text="${p.tinhTrangSucKhoeHienTai ?: 'Bình thường, khỏe mạnh'}"></div>
-                                            <span class="badge bg-success-subtle text-success small" th:text="${p.trangThai}"></span>
+                                            <div class="small text-truncate" style="max-width: 200px;" th:title="${p.tinhTrangSucKhoeHienTai}" th:text="${p.tinhTrangSucKhoeHienTai ?: 'Bình thường, khỏe mạnh'}"></div>
+                                            <span class="badge bg-success-subtle text-success small mt-1" th:text="${p.trangThai}"></span>
                                         </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <a th:href="@{/admin/pets/edit/{id}(id=${p.maThuCung})}" class="btn btn-outline-warning rounded-pill me-1" title="Chỉnh sửa">
-                                                    <i class="fas fa-edit"></i> Sửa
-                                                </a>
-                                                <a th:href="@{/admin/pets/delete/{id}(id=${p.maThuCung})}" class="btn btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc chắn muốn xóa hồ sơ thú cưng này?')" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
+                                        <td class="text-center text-nowrap">
+                                            <a th:href="@{/admin/pets/edit/{id}(id=${p.maThuCung})}" class="btn btn-sm btn-outline-warning rounded-pill px-3 me-1" title="Chỉnh sửa">
+                                                <i class="fas fa-edit me-1"></i> Sửa
+                                            </a>
+                                            <a th:href="@{/admin/pets/delete/{id}(id=${p.maThuCung})}" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Bạn có chắc chắn muốn xóa hồ sơ thú cưng này?')" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(pets)}">

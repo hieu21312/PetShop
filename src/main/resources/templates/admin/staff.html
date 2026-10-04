@@ -6,9 +6,12 @@
             </div>
             <div class="col-md-9">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold text-gradient"><i class="fas fa-user-md me-2"></i> Quản lý Nhân sự</h2>
-                    <a th:href="@{/admin/staff/add}" class="btn btn-success shadow-sm">
-                        <i class="fas fa-plus me-1"></i> Thêm nhân sự
+                    <div>
+                        <h2 class="fw-bold text-gradient mb-1"><i class="fas fa-user-md me-2"></i> Quản lý Nhân sự</h2>
+                        <p class="text-muted small mb-0">Quản lý danh sách bác sĩ thú y, nhân viên chăm sóc và theo dõi trạng thái làm việc</p>
+                    </div>
+                    <a th:href="@{/admin/staff/add}" class="btn btn-success px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-plus me-1"></i> Thêm mới
                     </a>
                 </div>
 
@@ -22,41 +25,97 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
-                <!-- FILTER TABS -->
-                <ul class="nav nav-pills mb-3 gap-2">
-                    <li class="nav-item">
-                        <a th:href="@{/admin/staff}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
-                           th:classappend="${currentFilter == 'all' or currentFilter == null ? 'active bg-primary text-white' : 'bg-light text-dark'}">
-                            👥 Tất cả nhân sự
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a th:href="@{/admin/staff(roleFilter='vet')}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
-                           th:classappend="${currentFilter == 'vet' ? 'active bg-success text-white' : 'bg-light text-dark'}">
-                            🩺 Bác sĩ thú y
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a th:href="@{/admin/staff(roleFilter='care')}" class="nav-link rounded-pill px-3 shadow-sm text-nowrap"
-                           th:classappend="${currentFilter == 'care' ? 'active bg-danger text-white' : 'bg-light text-dark'}">
-                            ✂️ Staff Spa / Care
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                <div class="card border-0 shadow-sm rounded-4" style="overflow: visible;">
+                    <div class="card-body p-0" style="overflow: visible;">
+                        <div class="table-responsive" style="overflow-y: visible;">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 950px;">
                                 <thead class="table-pink text-nowrap">
                                 <tr>
-                                    <th class="ps-3 text-nowrap">Mã NV</th>
-                                    <th class="text-nowrap">Nhân viên</th>
-                                    <th class="text-nowrap">Vai trò</th>
-                                    <th class="text-nowrap">SĐT / Email</th>
-                                    <th class="text-nowrap">Chuyên môn</th>
-                                    <th class="text-nowrap text-center">Trạng thái</th>
-                                    <th class="pe-3 text-end text-nowrap">Thao tác</th>
+                                    <th class="ps-3 text-nowrap" style="min-width: 80px;">Mã NV</th>
+                                    <th class="text-nowrap" style="min-width: 200px;">Nhân viên</th>
+                                    <th class="text-nowrap" style="min-width: 170px;">
+                                        <div class="d-inline-flex align-items-center">
+                                            <span>Vai trò</span>
+                                            <div class="dropdown d-inline ms-1">
+                                                <button class="btn btn-sm p-0 border-0 shadow-none text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Lọc theo vai trò">
+                                                    <i class="fas fa-filter ms-1" th:style="${currentRoleFilter != null && currentRoleFilter != 'all' ? 'color: #ffeb3b !important; font-size: 13px;' : 'color: rgba(255,255,255,0.85); font-size: 12px; cursor: pointer;'}"></i>
+                                                </button>
+                                                <ul class="dropdown-menu shadow border-0 rounded-3 mt-1" style="min-width: 180px; font-size: 13px;">
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentRoleFilter == 'all' or currentRoleFilter == null ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter='all', statusFilter=${currentStatusFilter})}">
+                                                            <span>Tất cả</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentRoleFilter == 'all' or currentRoleFilter == null}"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentRoleFilter == 'admin' ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter='admin', statusFilter=${currentStatusFilter})}">
+                                                            <span>Admin</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentRoleFilter == 'admin'}"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentRoleFilter == 'vet' ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter='vet', statusFilter=${currentStatusFilter})}">
+                                                            <span>Bác sĩ thú y</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentRoleFilter == 'vet'}"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentRoleFilter == 'care' ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter='care', statusFilter=${currentStatusFilter})}">
+                                                            <span>Nhân viên chăm sóc</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentRoleFilter == 'care'}"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="text-nowrap" style="min-width: 180px;">SĐT / Email</th>
+                                    <th class="text-nowrap" style="min-width: 180px;">Chuyên môn</th>
+                                    <th class="text-nowrap text-center" style="min-width: 170px;">
+                                        <div class="d-inline-flex align-items-center justify-content-center">
+                                            <span>Trạng thái</span>
+                                            <div class="dropdown d-inline ms-1">
+                                                <button class="btn btn-sm p-0 border-0 shadow-none text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Lọc theo trạng thái làm việc">
+                                                    <i class="fas fa-filter ms-1" th:style="${currentStatusFilter != null && currentStatusFilter != 'all' ? 'color: #ffeb3b !important; font-size: 13px;' : 'color: rgba(255,255,255,0.85); font-size: 12px; cursor: pointer;'}"></i>
+                                                </button>
+                                                <ul class="dropdown-menu shadow border-0 rounded-3 mt-1 text-start" style="min-width: 160px; font-size: 13px;">
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentStatusFilter == 'all' or currentStatusFilter == null ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter=${currentRoleFilter}, statusFilter='all')}">
+                                                            <span>Tất cả</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentStatusFilter == 'all' or currentStatusFilter == null}"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentStatusFilter == 'active' ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter=${currentRoleFilter}, statusFilter='active')}">
+                                                            <span>Đang làm việc</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentStatusFilter == 'active'}"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item py-2 d-flex justify-content-between align-items-center" 
+                                                           th:classappend="${currentStatusFilter == 'leave' ? 'active bg-light text-dark fw-bold' : ''}" 
+                                                           th:href="@{/admin/staff(roleFilter=${currentRoleFilter}, statusFilter='leave')}">
+                                                            <span>Tạm nghỉ</span>
+                                                            <i class="fas fa-check text-primary" th:if="${currentStatusFilter == 'leave'}"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th class="pe-3 text-end text-nowrap" style="min-width: 120px;">Thao tác</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -93,9 +152,11 @@
                                         <span class="small text-secondary fw-semibold" th:text="${emp.chuyenMon != null && !emp.chuyenMon.isBlank() ? emp.chuyenMon : 'Chăm sóc chung'}"></span>
                                     </td>
                                     <td class="text-center text-nowrap">
-                                        <form th:action="@{'/admin/staff/toggleStatus/' + ${emp.maNV}}" method="post" class="d-inline">
-                                            <button type="submit" th:class="${emp.trangThai == 'Đang làm việc' || emp.trangThai == null ? 'btn btn-sm btn-outline-success rounded-pill px-3 text-nowrap' : 'btn btn-sm btn-outline-secondary rounded-pill px-3 text-nowrap'}">
-                                                <i class="fas fa-circle me-1" style="font-size: 8px;"></i>
+                                        <form th:action="@{'/admin/staff/toggleStatus/' + ${emp.maNV}(roleFilter=${currentRoleFilter}, statusFilter=${currentStatusFilter})}" method="post" class="d-inline">
+                                            <button type="submit" 
+                                                    th:title="${emp.trangThai == 'Đang làm việc' || emp.trangThai == null ? 'Nhấp để đổi sang Tạm nghỉ' : 'Nhấp để đổi sang Đang làm việc'}"
+                                                    th:class="${emp.trangThai == 'Đang làm việc' || emp.trangThai == null ? 'btn btn-sm btn-outline-success rounded-pill px-3 text-nowrap' : 'btn btn-sm btn-outline-warning text-dark rounded-pill px-3 text-nowrap'}">
+                                                <i class="fas fa-circle me-1" th:style="${emp.trangThai == 'Đang làm việc' || emp.trangThai == null ? 'font-size: 8px; color: #198754;' : 'font-size: 8px; color: #ffc107;'}"></i>
                                                 <span th:text="${emp.trangThai != null ? emp.trangThai : 'Đang làm việc'}"></span>
                                             </button>
                                         </form>
@@ -108,7 +169,7 @@
                                     </td>
                                 </tr>
                                 <tr th:if="${#lists.isEmpty(staffList)}">
-                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có hồ sơ nhân sự nào</td>
+                                    <td colspan="7" class="text-center py-4 text-muted">Không tìm thấy hồ sơ nhân sự nào phù hợp với bộ lọc</td>
                                 </tr>
                                 </tbody>
                             </table>
