@@ -12,8 +12,8 @@
                         </h2>
                         <p class="text-muted small mb-0">Quản lý quy trình tiếp nhận, theo dõi tiến độ chăm sóc và thu ngân</p>
                     </div>
-                    <a th:href="@{/admin/care-tickets/create}" class="btn btn-danger px-4 rounded-pill shadow-sm">
-                        <i class="fas fa-plus-circle me-1"></i> Tiếp nhận thú cưng mới
+                    <a th:href="@{/admin/care-tickets/create}" class="btn btn-success px-4 rounded-pill shadow-sm">
+                        <i class="fas fa-plus me-1"></i> Thêm mới
                     </a>
                 </div>
 
@@ -49,27 +49,27 @@
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-pink">
+                            <table class="table table-hover align-middle mb-0" style="min-width: 950px;">
+                                <thead class="table-pink text-nowrap">
                                     <tr>
-                                        <th>Số phiếu</th>
-                                        <th>Thú cưng & Chủ</th>
-                                        <th>Thời gian</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Trạng thái dịch vụ</th>
-                                        <th>Thanh toán</th>
-                                        <th class="text-center" width="140">Thao tác</th>
+                                        <th style="min-width: 140px;">Số phiếu</th>
+                                        <th style="min-width: 200px;">Thú cưng & Chủ</th>
+                                        <th style="min-width: 160px;">Thời gian</th>
+                                        <th style="min-width: 130px;">Tổng tiền</th>
+                                        <th style="min-width: 160px;">Trạng thái dịch vụ</th>
+                                        <th style="min-width: 160px;">Thanh toán</th>
+                                        <th class="text-center" style="min-width: 140px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="t : ${tickets}">
-                                        <td>
-                                            <span class="fw-bold text-dark d-block" th:text="${t.soPhieu}"></span>
+                                        <td class="text-nowrap">
+                                            <span class="fw-bold text-dark font-monospace d-block" th:text="${t.soPhieu}"></span>
                                             <small class="text-muted" th:if="${t.nvThucHien != null}">
                                                 <i class="fas fa-user-check text-primary me-1"></i><span th:text="${t.nvThucHien.tenNV}"></span>
                                             </small>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <div class="fw-bold text-danger">
                                                 <i class="fas fa-paw me-1"></i><span th:text="${t.thuCung != null ? t.thuCung.tenThuCung : 'Pet #' + t.maThuCung}"></span>
                                             </div>
@@ -77,38 +77,36 @@
                                                 Chủ: <span th:text="${t.chuNuoi.hoTenChuNuoi}"></span> (<span th:text="${t.chuNuoi.soDienThoai}"></span>)
                                             </small>
                                         </td>
-                                        <td>
-                                            <small class="text-dark d-block" th:text="${#temporals.format(t.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></small>
+                                        <td class="text-nowrap">
+                                            <div class="text-dark"><i class="far fa-clock text-muted me-1"></i><span th:text="${#temporals.format(t.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></span></div>
                                             <small class="text-muted" th:if="${t.ngayHenTra != null}">
                                                 Hẹn trả: <span th:text="${#temporals.format(t.ngayHenTra, 'dd/MM HH:mm')}"></span>
                                             </small>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <span class="fw-bold text-danger fs-6" th:text="${#numbers.formatDecimal(t.thanhToan, 0, 0, 'COMMA')} + ' đ'"></span>
                                             <div class="small text-muted" th:if="${t.tienGiamGia != null and t.tienGiamGia > 0}">
                                                 Giảm: -<span th:text="${#numbers.formatDecimal(t.tienGiamGia, 0, 0, 'COMMA')}"></span> đ
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge" 
+                                        <td class="text-nowrap">
+                                            <span class="badge px-3 py-2 rounded-pill" 
                                                   th:classappend="${t.trangThaiDichVu == 'Đã bàn giao thú cưng' ? 'bg-success' : (t.trangThaiDichVu == 'Hoàn thành chăm sóc' ? 'bg-info text-dark' : (t.trangThaiDichVu == 'Đang thực hiện' ? 'bg-warning text-dark' : 'bg-secondary'))}"
                                                   th:text="${t.trangThaiDichVu}"></span>
                                         </td>
-                                        <td>
-                                            <span class="badge" 
+                                        <td class="text-nowrap">
+                                            <span class="badge px-3 py-2 rounded-pill" 
                                                   th:classappend="${t.trangThaiThanhToan == 'Đã thanh toán' ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}"
                                                   th:text="${t.trangThaiThanhToan}"></span>
                                             <small class="text-muted d-block mt-1" th:if="${t.hinhThucThanhToan != null}" th:text="${t.hinhThucThanhToan}"></small>
                                         </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <a th:href="@{/admin/care-tickets/detail/{id}(id=${t.maPhieuDV})}" class="btn btn-outline-primary rounded-pill me-1" title="Chi tiết & Cập nhật">
-                                                    <i class="fas fa-eye"></i> Xem
-                                                </a>
-                                                <a th:href="@{/admin/care-tickets/delete/{id}(id=${t.maPhieuDV})}" class="btn btn-outline-danger rounded-pill" onclick="return confirm('Bạn có chắc muốn xóa phiếu này?')" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
+                                        <td class="text-center text-nowrap">
+                                            <a th:href="@{/admin/care-tickets/detail/{id}(id=${t.maPhieuDV})}" class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" title="Chi tiết & Cập nhật">
+                                                <i class="fas fa-eye me-1"></i> Xem
+                                            </a>
+                                            <a th:href="@{/admin/care-tickets/delete/{id}(id=${t.maPhieuDV})}" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Bạn có chắc muốn xóa phiếu này?')" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(tickets)}">

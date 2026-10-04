@@ -28,28 +28,74 @@ public class AdminStaffController {
     @Autowired
     private AuthService authService;
 
-    // Hiển thị danh sách Bác sĩ thú y & Nhân viên chăm sóc (Hỗ trợ lọc roleFilter)
+    // Hiển thị danh sách Bác sĩ thú y & Nhân viên chăm sóc (Hỗ trợ lọc roleFilter và statusFilter)
     @GetMapping
-    public String listStaff(@RequestParam(required = false) String roleFilter, Model model, HttpSession session) {
+    public String listStaff(
+            @RequestParam(required = false) String roleFilter,
+            @RequestParam(required = false) String statusFilter,
+            Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
 
-        List<Employee> staffList = employeeService.getAllEmployees();
+        List<Employee> allStaff = employeeService.getAllEmployees();
 
-        if ("vet".equalsIgnoreCase(roleFilter)) {
-            staffList = staffList.stream()
+        // Thống kê tổng số lượng nhân sự
+        long totalCount = allStaff.size();
+        long workingCount = allStaff.stream()
+                .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))
+                .count();
+        long leaveCount = allStaff.stream()
+                .filter(e -> "Tạm nghỉ".equalsIgnoreCase(e.getTrangThai()))
+                .count();
+
+        List<Employee> filteredList = allStaff;
+
+        // 1. Lọc theo vai trò (roleFilter)
+        if ("admin".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() != null && "Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()))
+                    .toList();
+            roleFilter = "admin";
+        } else if ("vet".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
                     .filter(e -> e.getRole() != null && "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
                     .toList();
+            roleFilter = "vet";
         } else if ("care".equalsIgnoreCase(roleFilter)) {
-            staffList = staffList.stream()
-                    .filter(e -> e.getRole() == null || !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() == null || (!"Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()) && !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro())))
                     .toList();
+            roleFilter = "care";
+        } else {
+            roleFilter = "all";
+        }
+
+        // 2. Lọc theo trạng thái làm việc (statusFilter)
+        if ("active".equalsIgnoreCase(statusFilter) || "working".equalsIgnoreCase(statusFilter) || "Đang làm việc".equalsIgnoreCase(statusFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))
+                    .toList();
+            statusFilter = "active";
+        } else if ("leave".equalsIgnoreCase(statusFilter) || "inactive".equalsIgnoreCase(statusFilter) || "Tạm nghỉ".equalsIgnoreCase(statusFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> "Tạm nghỉ".equalsIgnoreCase(e.getTrangThai()))
+                    .toList();
+            statusFilter = "leave";
+        } else {
+            statusFilter = "all";
         }
 
         List<Role> roles = roleRepository.findAll();
 
-        model.addAttribute("staffList", staffList);
+        model.addAttribute("staffList", filteredList);
         model.addAttribute("roles", roles);
-        model.addAttribute("currentFilter", roleFilter != null ? roleFilter : "all");
+        model.addAttribute("currentRoleFilter", (roleFilter != null && !roleFilter.isBlank()) ? roleFilter : "all");
+        model.addAttribute("currentStatusFilter", statusFilter);
+        model.addAttribute("currentFilter", (roleFilter != null && !roleFilter.isBlank()) ? roleFilter : "all");
+
+        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("workingCount", workingCount);
+        model.addAttribute("leaveCount", leaveCount);
+
         return "admin/staff";
     }
 
@@ -96,12 +142,28 @@ public class AdminStaffController {
 
     // Bật / Tắt trạng thái làm việc (Đang làm việc <-> Tạm nghỉ)
     @PostMapping("/toggleStatus/{id}")
-    public String toggleStatus(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
+    public String toggleStatus(
+            @PathVariable Integer id,
+            @RequestParam(required = false) String roleFilter,
+            @RequestParam(required = false) String statusFilter,
+            RedirectAttributes ra, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
 
         employeeService.toggleStatus(id);
         ra.addFlashAttribute("success", "Cập nhật trạng thái làm việc thành công!");
-        return "redirect:/admin/staff";
+
+        StringBuilder redirectUrl = new StringBuilder("redirect:/admin/staff?");
+        if (roleFilter != null && !roleFilter.isBlank() && !"all".equalsIgnoreCase(roleFilter)) {
+            redirectUrl.append("roleFilter=").append(roleFilter).append("&");
+        }
+        if (statusFilter != null && !statusFilter.isBlank() && !"all".equalsIgnoreCase(statusFilter)) {
+            redirectUrl.append("statusFilter=").append(statusFilter).append("&");
+        }
+        String res = redirectUrl.toString();
+        if (res.endsWith("?") || res.endsWith("&")) {
+            res = res.substring(0, res.length() - 1);
+        }
+        return res;
     }
 
     // Reset mật khẩu nhân sự về mặc định 123456
