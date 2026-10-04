@@ -39,6 +39,15 @@ public class AdminStaffController {
             staffList = staffList.stream()
                     .filter(e -> e.getRole() != null && "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
                     .toList();
+        } else if ("consultant".equalsIgnoreCase(roleFilter)) {
+            staffList = staffList.stream()
+                    .filter(e -> e.getRole() != null && (
+                            "Tư vấn viên".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Nhân viên tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn viên".contains(e.getRole().getTenVaiTro())
+                    ))
+                    .toList();
         } else if ("care".equalsIgnoreCase(roleFilter)) {
             staffList = staffList.stream()
                     .filter(e -> e.getRole() == null || !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))

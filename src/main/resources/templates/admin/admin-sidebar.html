@@ -26,6 +26,9 @@
             <a th:href="@{/admin/care-tickets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
                 <i class="fas fa-clipboard-list me-2 text-danger"></i> Phiếu chăm sóc
             </a>
+            <a th:href="@{/admin/doctor/treatment}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-user-md me-2 text-info"></i> Nhật ký điều trị (Bác sĩ)
+            </a>
         </div>
 
         <!-- MENU 2 CẤP: QUẢN LÝ NHÂN SỰ -->
@@ -36,6 +39,9 @@
         <div class="collapse ps-3 my-1" id="staffSubmenu">
             <a th:href="@{/admin/staff?roleFilter=vet}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
                 <i class="fas fa-stethoscope me-2 text-primary"></i> Bác sĩ thú y
+            </a>
+            <a th:href="@{/admin/staff?roleFilter=consultant}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-headset me-2 text-warning"></i> Nhân viên tư vấn
             </a>
             <a th:href="@{/admin/staff?roleFilter=care}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
                 <i class="fas fa-cut me-2 text-danger"></i> Nhân viên Spa / Care

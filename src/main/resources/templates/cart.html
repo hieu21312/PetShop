@@ -2,13 +2,62 @@
     <section class="py-4">
 
         <style>
-            .cart-table th {
-                font-weight: 600;
-                color: #6c757d;
-                text-uppercase: uppercase;
-                font-size: 0.85rem;
-                letter-spacing: 0.5px;
+            /* MODERN SEGMENTED TAB SYSTEM */
+            .custom-tab-wrapper {
+                background: #f8f9fa;
+                padding: 5px;
+                border-radius: 50px;
+                display: inline-flex;
+                border: 1px solid #e9ecef;
             }
+            .custom-tab-btn {
+                border-radius: 50px !important;
+                padding: 10px 24px;
+                font-weight: 600;
+                font-size: 0.92rem;
+                color: #6c757d;
+                border: none !important;
+                background: transparent;
+                transition: all 0.2s ease-in-out;
+            }
+            .custom-tab-btn:hover {
+                color: #212529;
+            }
+            .custom-tab-btn.active {
+                background: #ffffff !important;
+                color: #e91e63 !important;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+            }
+
+            /* PREMIUM TABLE STYLING - ANTI SLOP */
+            .cart-table {
+                border-collapse: separate;
+                border-spacing: 0;
+            }
+            .cart-table thead th {
+                background: #fff0f3 !important;
+                color: #c2185b !important;
+                font-weight: 700 !important;
+                font-size: 0.8rem !important;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                border-bottom: 2px solid #ffccd5 !important;
+                border-top: none !important;
+                padding: 14px 18px !important;
+                box-shadow: none !important;
+            }
+            .cart-table tbody tr {
+                transition: background-color 0.15s ease-in-out;
+            }
+            .cart-table tbody tr:hover {
+                background-color: #fff9fa !important;
+            }
+            .cart-table tbody td {
+                padding: 16px 18px !important;
+                vertical-align: middle;
+                border-bottom: 1px solid #f1f3f5;
+            }
+
             .product-cart-img {
                 width: 70px;
                 height: 70px;
@@ -51,147 +100,197 @@
                 border: 2px dashed #dee2e6;
                 border-radius: 24px;
                 background-color: #f8f9fa;
-                /* ================= ĐỔI MÀU NỀN KHUNG TIÊU ĐỀ BẢNG ================= */
-            .cart-table thead th {
-                background-color: #fff0f3 !important; /* Đổi màu nền thành hồng phấn nhạt */
-                color: #e91e63 !important; /* Đổi màu chữ thành hồng đậm */
-                box-shadow: none !important; /* QUAN TRỌNG: Tắt lớp phủ màu xanh/xám của Bootstrap */
-                border: none !important;
-            }
-
-            /* Tùy chọn thêm: Bo góc 2 đầu cho khung tiêu đề mượt mà hơn */
-            .cart-table thead th:first-child {
-                border-top-left-radius: 12px;
-                border-bottom-left-radius: 12px;
-            }
-            .cart-table thead th:last-child {
-                border-top-right-radius: 12px;
-                border-bottom-right-radius: 12px;
-
             }
         </style>
 
         <div class="container">
-            <div th:if="${#lists.isEmpty(cart)}" class="text-center p-5 empty-cart-box my-5">
-                <div class="mb-4">
-                    <i class="fas fa-shopping-basket fa-4x text-muted opacity-50"></i>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1" style="color: #2c3e50 !important;">
+                        <i class="fas fa-shopping-cart me-2" style="color: #e91e63;"></i> Giỏ Hàng & Dịch Vụ Đã Đặt
+                    </h3>
+                    <p class="text-muted mb-0">Quản lý giỏ hàng mua sắm và theo dõi tiến độ các dịch vụ chăm sóc đã đặt thành công</p>
                 </div>
-                <h4 class="fw-bold text-secondary mb-3">Giỏ hàng của bạn đang trống</h4>
-                <p class="text-muted mb-4">Hãy nhanh tay chọn cho bé cưng của mình những sản phẩm tuyệt vời nhất nhé!</p>
-                <a th:href="@{/}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
-                    <i class="fas fa-arrow-left me-2"></i> Quay lại cửa hàng
-                </a>
             </div>
 
-            <div th:unless="${#lists.isEmpty(cart)}" class="row g-4 mt-2">
-
-                <div class="col-12">
-                    <h3 class="fw-bold text-dark mb-2" style="color: #2c3e50 !important;">
-                        <i class="fas fa-shopping-cart me-2" style="color: #e91e63;"></i> Giỏ Hàng Của Bạn
-                    </h3>
-                    <p class="text-muted mb-0">Quản lý và kiểm tra lại danh sách thú cưng hoặc phụ kiện trước khi thanh toán.</p>
+            <!-- SEGMENTED TAB NAVIGATION -->
+            <div class="mb-4">
+                <div class="custom-tab-wrapper shadow-sm">
+                    <button class="custom-tab-btn" th:classappend="${activeTab == 'products' or activeTab == null ? 'active' : ''}" 
+                            id="products-tab" data-bs-toggle="tab" data-bs-target="#products-pane" type="button" role="tab">
+                        <i class="fas fa-shopping-bag me-2"></i> Mua sắm (Sản phẩm & Pet)
+                        <span class="badge rounded-pill bg-danger ms-1" th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
+                    </button>
+                    <button class="custom-tab-btn" th:classappend="${activeTab == 'services' ? 'active' : ''}" 
+                            id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane" type="button" role="tab">
+                        <i class="fas fa-spa me-2"></i> Dịch vụ đã đặt thành công
+                    </button>
                 </div>
+            </div>
 
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0 cart-table">
-                                <thead style="border: none;">
-                                <tr>
-                                    <th class="ps-4 py-3 text-uppercase" style="background-color: #fff0f3 !important; color: #e91e63 !important; box-shadow: inset 0 0 0 9999px #fff0f3 !important; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; border-bottom: none;">Sản phẩm</th>
-
-                                    <th class="py-3 text-center text-uppercase" style="background-color: #fff0f3 !important; color: #e91e63 !important; box-shadow: inset 0 0 0 9999px #fff0f3 !important; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; border-bottom: none;">Đơn giá</th>
-
-                                    <th class="py-3 text-center text-uppercase" style="width: 140px; background-color: #fff0f3 !important; color: #e91e63 !important; box-shadow: inset 0 0 0 9999px #fff0f3 !important; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; border-bottom: none;">Số lượng</th>
-
-                                    <th class="py-3 text-end text-uppercase" style="background-color: #fff0f3 !important; color: #e91e63 !important; box-shadow: inset 0 0 0 9999px #fff0f3 !important; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; border-bottom: none;">Thành tiền</th>
-
-                                    <th class="py-3 text-center pe-4" style="background-color: #fff0f3 !important; box-shadow: inset 0 0 0 9999px #fff0f3 !important; border-bottom: none;"></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="item : ${cart}" class="border-bottom">
-                                    <td class="ps-4 py-3">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <img th:src="@{'/Content/HinhAnh/' + ${item.anhDaiDien}}" class="product-cart-img shadow-sm">
-                                            <div>
-                                                <span class="fw-bold text-dark d-block mb-1" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.tenSP}">Tên sản phẩm</span>
-
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center py-3 fw-semibold text-secondary"
-                                        th:text="${#numbers.formatDecimal(item.giaBan, 1, 'POINT', 0, 'COMMA')} + ' đ'">
-                                    </td>
-
-                                    <td class="py-3">
-                                        <div class="d-flex justify-content-center">
-                                            <div class="input-group input-group-sm bg-light rounded-3 p-1 align-items-center border" style="width: fit-content;">
-                                                <a th:href="@{/GiamSoLuong(iMaSP=${item.maSP})}" class="btn btn-sm btn-white bg-white border shadow-sm text-dark quantity-btn">
-                                                    <i class="fas fa-minus small"></i>
-                                                </a>
-                                                <input type="text" class="form-control text-center quantity-input px-1" th:value="${item.soLuong}" readonly>
-                                                <a th:href="@{/TangSoLuong(iMaSP=${item.maSP})}" class="btn btn-sm btn-white bg-white border shadow-sm text-dark quantity-btn">
-                                                    <i class="fas fa-plus small"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-end py-3 fw-bold text-dark"
-                                        th:text="${#numbers.formatDecimal(item.thanhTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">
-                                    </td>
-
-                                    <td class="text-center py-3 pe-4">
-                                        <a th:href="@{/XoaGioHang(iMaSP=${item.maSP})}" class="text-muted btn-delete transition-all" style="font-size: 1.1rem;" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')">
-                                            <i class="hover-danger fas fa-trash-alt" style="transition: color 0.2s;" onmouseover="this.style.color='#dc3545'" onmouseout="this.style.color='#6c757d'"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+            <div class="tab-content" id="cartTabsContent">
+                <!-- TAB 1: MUA SẮM SẢN PHẨM -->
+                <div class="tab-pane fade" th:classappend="${activeTab == 'products' or activeTab == null ? 'show active' : ''}" id="products-pane" role="tabpanel">
+                    <div th:if="${#lists.isEmpty(cart)}" class="text-center p-5 empty-cart-box my-4">
+                        <div class="mb-4">
+                            <i class="fas fa-shopping-basket fa-4x text-muted opacity-50"></i>
                         </div>
-                    </div>
-
-                    <a th:href="@{/}" class="btn btn-link text-decoration-none p-0 fw-semibold" style="color: #e91e63;">
-                        <i class="fas fa-arrow-left me-2"></i> Tiếp tục chọn thêm sản phẩm
-                    </a>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card border-0 summary-card p-4 sticky-top shadow-sm" style="top: 20px; z-index: 1;">
-                        <h5 class="fw-bold text-dark mb-4pb-2 border-bottom pb-3" style="color: #2c3e50 !important;">Tóm tắt đơn hàng</h5>
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="text-muted">Tổng số lượng sản phẩm:</span>
-                            <span class="fw-bold text-dark fs-5" th:text="${tongSoLuong}">0</span>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="text-muted">Phí vận chuyển:</span>
-                            <span class="text-success fw-semibold">Miễn phí 🐾</span>
-                        </div>
-
-                        <div class="border-top pt-3 mb-4">
-                            <div class="d-flex justify-content-between align-items-baseline">
-                                <span class="fw-bold text-dark fs-5">Tổng thanh toán:</span>
-                                <div class="text-end">
-                                    <span class="fs-3 fw-bolder text-danger d-block"
-                                          th:text="${#numbers.formatDecimal(tongTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">
-                                    </span>
-                                    <small class="text-muted text-end d-block small">(Đã bao gồm thuế VAT nếu có)</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <a th:href="@{/DatHang}" class="btn btn-checkout btn-lg w-100 rounded-pill text-white fw-bold py-3 shadow-sm mb-2">
-                            Tiến Hành Đặt Hàng <i class="fas fa-arrow-right ms-2"></i>
+                        <h4 class="fw-bold text-secondary mb-3">Giỏ hàng mua sắm của bạn đang trống</h4>
+                        <p class="text-muted mb-4">Hãy nhanh tay chọn cho bé cưng của mình những sản phẩm tuyệt vời nhất nhé!</p>
+                        <a th:href="@{/}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-arrow-left me-2"></i> Quay lại cửa hàng
                         </a>
                     </div>
+
+                    <div th:unless="${#lists.isEmpty(cart)}" class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0 cart-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">Sản phẩm</th>
+                                                <th class="text-center">Đơn giá</th>
+                                                <th class="text-center" style="width: 140px;">Số lượng</th>
+                                                <th class="text-end">Thành tiền</th>
+                                                <th class="text-center pe-4"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="item : ${cart}">
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <img th:src="@{'/Content/HinhAnh/' + ${item.anhDaiDien}}" class="product-cart-img shadow-sm">
+                                                        <div>
+                                                            <span class="fw-bold text-dark d-block mb-1" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${item.tenSP}">Tên sản phẩm</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center fw-semibold text-secondary"
+                                                    th:text="${#numbers.formatDecimal(item.giaBan, 1, 'POINT', 0, 'COMMA')} + ' đ'">
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex justify-content-center">
+                                                        <div class="input-group input-group-sm bg-light rounded-3 p-1 align-items-center border" style="width: fit-content;">
+                                                            <a th:href="@{/GiamSoLuong(iMaSP=${item.maSP})}" class="btn btn-sm btn-white bg-white border shadow-sm text-dark quantity-btn">
+                                                                <i class="fas fa-minus small"></i>
+                                                            </a>
+                                                            <input type="text" class="form-control text-center quantity-input px-1" th:value="${item.soLuong}" readonly>
+                                                            <a th:href="@{/TangSoLuong(iMaSP=${item.maSP})}" class="btn btn-sm btn-white bg-white border shadow-sm text-dark quantity-btn">
+                                                                <i class="fas fa-plus small"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end fw-bold text-dark"
+                                                    th:text="${#numbers.formatDecimal(item.thanhTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">
+                                                </td>
+                                                <td class="text-center pe-4">
+                                                    <a th:href="@{/XoaGioHang(iMaSP=${item.maSP})}" class="text-muted btn-delete transition-all" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <a th:href="@{/}" class="btn btn-link text-decoration-none p-0 fw-semibold" style="color: #e91e63;">
+                                <i class="fas fa-arrow-left me-2"></i> Tiếp tục chọn thêm sản phẩm
+                            </a>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card border-0 summary-card p-4 sticky-top shadow-sm" style="top: 20px;">
+                                <h5 class="fw-bold text-dark mb-3 border-bottom pb-3">Tóm tắt đơn hàng</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-muted">Tổng số lượng:</span>
+                                    <span class="fw-bold text-dark fs-5" th:text="${tongSoLuong}">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="text-muted">Phí vận chuyển:</span>
+                                    <span class="text-success fw-semibold">Miễn phí 🐾</span>
+                                </div>
+                                <div class="border-top pt-3 mb-4">
+                                    <div class="d-flex justify-content-between align-items-baseline">
+                                        <span class="fw-bold text-dark fs-5">Tổng thanh toán:</span>
+                                        <div class="text-end">
+                                            <span class="fs-3 fw-bolder text-danger d-block" th:text="${#numbers.formatDecimal(tongTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a th:href="@{/DatHang}" class="btn btn-checkout text-white w-100 py-3 rounded-pill fw-bold text-uppercase fs-6 shadow-sm text-center">
+                                    Tiến hành đặt hàng <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- TAB 2: DỊCH VỤ ĐÃ ĐẶT THÀNH CÔNG -->
+                <div class="tab-pane fade" th:classappend="${activeTab == 'services' ? 'show active' : ''}" id="services-pane" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header py-3 px-4 border-0" style="background-color: #fff0f3; border-bottom: 1px solid #ffccd5 !important;">
+                            <h5 class="fw-bold mb-0" style="font-size: 1rem; color: #d81b60;">
+                                <i class="fas fa-calendar-check me-2" style="color: #e91e63;"></i> Danh sách dịch vụ & lịch hẹn đã đặt thành công
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0 cart-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Mã Đặt Lịch</th>
+                                            <th>Dịch Vụ / Ghi Chú</th>
+                                            <th class="text-center">Ngày & Giờ Hẹn</th>
+                                            <th class="text-center">Trạng Thái Lịch Hẹn</th>
+                                            <th class="text-center pe-4">Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="b : ${userBookings}">
+                                            <td class="ps-4 fw-bold text-dark" th:text="'#DAT' + ${b.maDatLich}">#DAT1</td>
+                                            <td>
+                                                <strong class="d-block text-dark" style="font-size: 0.93rem;" th:text="${b.ghiChu != null and !b.ghiChu.isBlank() ? b.ghiChu : 'Dịch vụ chăm sóc & Khám bệnh'}"></strong>
+                                                <small class="text-muted" th:text="${b.tenKhachHang != null ? 'Khách hàng: ' + b.tenKhachHang : ''}"></small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-inline-flex align-items-center px-3 py-1 rounded-pill bg-light border">
+                                                    <i class="far fa-calendar-alt text-danger me-2"></i>
+                                                    <span th:text="${b.ngayDat != null ? b.ngayDat : ''}" class="fw-medium text-dark me-1"></span>
+                                                    <span th:text="${b.gioDat != null ? b.gioDat : ''}" class="fw-bold text-danger"></span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge rounded-pill px-3 py-2 fw-semibold" 
+                                                      th:style="${b.trangThai == 'Đã xác nhận' ? 'background-color: #e6f4ea; color: #137333; border: 1px solid #ceebd6;' : (b.trangThai == 'Đã hủy' ? 'background-color: #f1f3f4; color: #5f6368; border: 1px solid #dadce0;' : 'background-color: #fef7e0; color: #b06000; border: 1px solid #fce8b2;')}"
+                                                      th:text="${b.trangThai}">Chờ xác nhận</span>
+                                            </td>
+                                            <td class="text-center pe-4">
+                                                <a th:href="@{/Contact}" class="btn btn-sm rounded-pill px-3 fw-semibold" style="color: #e91e63; background-color: #fff0f3; border: 1px solid #ffccd5;">
+                                                    <i class="fas fa-headset me-1"></i> Hỗ trợ
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(userBookings) and #lists.isEmpty(userCareTickets)}">
+                                            <td colspan="5" class="text-center py-5 text-muted">
+                                                <div class="py-3">
+                                                    <i class="fas fa-calendar-times fa-3x mb-3 d-block text-muted opacity-25"></i>
+                                                    <p class="mb-2 fw-medium text-secondary">Bạn chưa có dịch vụ hay lịch hẹn chăm sóc nào được đăng ký.</p>
+                                                    <a th:href="@{/Booking}" class="btn btn-sm text-white rounded-pill px-4 py-2 mt-2 fw-semibold shadow-sm" style="background-color: #e91e63; border: none;">
+                                                        <i class="fas fa-calendar-plus me-1"></i> Đặt lịch ngay
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </section>
 </div>

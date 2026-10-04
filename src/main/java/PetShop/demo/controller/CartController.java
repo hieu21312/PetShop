@@ -32,6 +32,15 @@ public class CartController {
     @Autowired
     private VoucherRepository voucherRepository;
 
+    @Autowired
+    private PetShop.demo.service.BookingService bookingService;
+
+    @Autowired
+    private PetShop.demo.repository.PhieuDichVuChamSocRepository phieuDichVuChamSocRepository;
+
+    @Autowired
+    private PetShop.demo.service.ThongBaoService thongBaoService;
+
     // Thêm vào giỏ hàng
     @GetMapping("/ThemGioHang")
     public String addToCart(@RequestParam int iMaSP,
@@ -48,10 +57,24 @@ public class CartController {
 
     // Xem giỏ hàng
     @GetMapping("/GioHang")
-    public String viewCart(Model model, HttpSession session) {
+    public String viewCart(@RequestParam(value = "tab", required = false, defaultValue = "products") String activeTab,
+                           Model model, HttpSession session) {
         model.addAttribute("cart", cartService.getCart(session));
         model.addAttribute("tongSoLuong", cartService.getTotalQuantity(session));
         model.addAttribute("tongTien", cartService.getTotalPrice(session));
+        model.addAttribute("activeTab", activeTab);
+
+        Integer customerId = (Integer) session.getAttribute("maKH");
+        if (customerId != null) {
+            // Load danh sách lịch đặt & phiếu dịch vụ của khách hàng
+            model.addAttribute("userBookings", bookingService.getBookingsByCustomer(customerId));
+            model.addAttribute("userCareTickets", phieuDichVuChamSocRepository.findByMaChuNuoi(customerId));
+
+            // Populate thông báo vào Session để header.html hiển thị
+            session.setAttribute("unreadNotifications", thongBaoService.demThongBaoChuaDoc(customerId));
+            session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(customerId));
+        }
+
         return "cart";
     }
 
