@@ -23,6 +23,9 @@ public class AdminOrderController {
     private OrderStatusRepository orderStatusRepository;
 
     @Autowired
+    private PetShop.demo.service.ThongBaoService thongBaoService;
+
+    @Autowired
     private AuthService authService;
 
     // Danh sách đơn hàng
@@ -53,10 +56,26 @@ public class AdminOrderController {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
         Order order = orderRepository.findById(maHD).orElse(null);
         if (order == null) return "redirect:/admin/orders";
+        
+        Integer oldStatus = order.getTinhTrang();
         order.setTinhTrang(updatedOrder.getTinhTrang());
         order.setDiaChiGiaoHang(updatedOrder.getDiaChiGiaoHang());
         order.setDaThanhToan(updatedOrder.getDaThanhToan());
         orderRepository.save(order);
+
+        // Phát thông báo tự động cho khách hàng khi thay đổi tình trạng đơn hàng
+        if (order.getMaKH() != null && !oldStatus.equals(updatedOrder.getTinhTrang())) {
+            String statusText = "đã được cập nhật";
+            if (updatedOrder.getTinhTrang() == 2) statusText = "đã được XÁC NHẬN";
+            else if (updatedOrder.getTinhTrang() == 3) statusText = "đang được GIAO HÀNG";
+            else if (updatedOrder.getTinhTrang() == 4) statusText = "đã HOÀN THÀNH";
+            else if (updatedOrder.getTinhTrang() == 5) statusText = "đã bị HỦY";
+
+            String tieuDe = "Cập nhật đơn hàng #" + order.getMaHD();
+            String noiDung = "Đơn hàng #" + order.getMaHD() + " của bạn " + statusText + ". Cảm ơn bạn đã mua sắm tại PetShop!";
+            thongBaoService.taoThongBaoNhacLich(order.getMaKH(), null, tieuDe, noiDung, null);
+        }
+
         return "redirect:/admin/orders/detail/" + maHD;
     }
 }

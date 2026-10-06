@@ -60,6 +60,16 @@ public class AdminStaffController {
                     .filter(e -> e.getRole() != null && "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
                     .toList();
             roleFilter = "vet";
+        } else if ("consultant".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() != null && (
+                            "Tư vấn viên".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Nhân viên tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn viên".contains(e.getRole().getTenVaiTro())
+                    ))
+                    .toList();
+            roleFilter = "consultant";
         } else if ("care".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getRole() == null || (!"Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()) && !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro())))

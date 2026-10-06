@@ -1,0 +1,81 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-gradient mb-1">
+                            <i class="fas fa-stethoscope text-primary me-2"></i> Danh sách thú cưng theo dõi & điều trị
+                        </h2>
+                        <p class="text-muted small mb-0">Hồ sơ khám chữa bệnh, lịch sử điều trị và lên lịch tái khám cho bác sĩ thú y</p>
+                    </div>
+                </div>
+
+                <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4 rounded-4 shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${successMsg}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Danh sách thú cưng -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink">
+                                    <tr>
+                                        <th width="70">Mã</th>
+                                        <th>Thú cưng</th>
+                                        <th>Loài & Giống</th>
+                                        <th>Giới tính</th>
+                                        <th>Cân nặng</th>
+                                        <th>Tình trạng sức khỏe</th>
+                                        <th width="180" class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="pet : ${pets}">
+                                        <td><span class="fw-bold text-muted" th:text="'#' + ${pet.maThuCung}">#1</span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 42px; height: 42px;">
+                                                    <i th:class="${pet.loaiThuCung == 'Mèo' ? 'fas fa-cat text-info fs-5' : 'fas fa-dog text-warning fs-5'}"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fw-bold text-dark d-block" th:text="${pet.tenThuCung}">Miu</span>
+                                                    <small class="text-muted" th:text="${pet.chuNuoi != null ? 'Chủ: ' + pet.chuNuoi.hoTenChuNuoi : ''}"></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info text-dark me-1" th:text="${pet.loaiThuCung}">Mèo</span>
+                                            <span class="text-muted small" th:text="${pet.giongLoai}">Anh Lông Ngắn</span>
+                                        </td>
+                                        <td th:text="${pet.gioiTinh}">Cái</td>
+                                        <td th:text="${pet.canNang != null ? pet.canNang + ' kg' : 'N/A'}">3.5 kg</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2" th:text="${pet.tinhTrangSucKhoeHienTai != null ? pet.tinhTrangSucKhoeHienTai : 'Đang điều trị'}">Đang điều trị</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{/admin/doctor/treatment/{id}(id=${pet.maThuCung})}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-stethoscope me-1"></i> Hồ sơ & Nhật ký
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(pets)}">
+                                        <td colspan="7" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle me-1"></i> Chưa có hồ sơ thú cưng nào trong danh sách.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>

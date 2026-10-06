@@ -8,9 +8,7 @@
             </a>
 
             <!-- MOBILE BUTTON -->
-            <button class="navbar-toggler" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -27,9 +25,7 @@
                     </li>
 
                     <li class="nav-item dropdown dropdown-hover">
-                        <a class="nav-link dropdown-toggle custom-link"
-                           href="#"
-                           data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle custom-link" href="#" data-bs-toggle="dropdown">
                             Sản phẩm
                         </a>
 
@@ -78,14 +74,9 @@
                 <div class="d-flex align-items-center gap-2">
 
                     <!-- SEARCH -->
-                    <form class="search-box d-flex"
-                          th:action="@{/SanPham}"
-                          method="get">
+                    <form class="search-box d-flex" th:action="@{/SanPham}" method="get">
 
-                        <input class="form-control"
-                               type="search"
-                               name="searchString"
-                               placeholder="Tìm thú cưng...">
+                        <input class="form-control" type="search" name="searchString" placeholder="Tìm thú cưng...">
 
                         <button class="btn btn-search">
                             <i class="fas fa-search"></i>
@@ -93,16 +84,84 @@
                     </form>
 
                     <!-- CART -->
-                    <a th:href="@{/GioHang}"
-                       class="btn cart-btn position-relative">
+                    <a th:href="@{/GioHang}" class="btn cart-btn position-relative me-1" title="Giỏ hàng">
 
                         <i class="fas fa-shopping-cart"></i>
 
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                              th:text="${session.cart != null ? #lists.size(session.cart) : 0}">
+                            th:text="${session.cart != null ? #lists.size(session.cart) : 0}">
                             0
                         </span>
                     </a>
+
+                    <!-- NOTIFICATION BELL -->
+                    <div class="dropdown me-1">
+                        <button
+                            class="btn position-relative dropdown-toggle d-flex align-items-center justify-content-center"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo của bạn"
+                            style="width: 40px; height: 40px; background-color: #fff0f3; color: #e91e63; border: 1px solid #ffccd5; border-radius: 50%; transition: all 0.2s ease-in-out;">
+                            <i class="fas fa-bell fs-6"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style="font-size: 0.7rem; padding: 0.35em 0.55em;"
+                                th:text="${session.unreadNotifications != null ? session.unreadNotifications : 0}">
+                                0
+                            </span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end border-0 p-0 overflow-hidden shadow-lg"
+                            style="min-width: 340px; max-width: 380px; border-radius: 18px;">
+                            <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                        style="width: 28px; height: 28px; background-color: #fff0f3; color: #e91e63;">
+                                        <i class="fas fa-bell small"></i>
+                                    </div>
+                                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">Thông báo</span>
+                                </div>
+                                <a th:href="@{/GioHang?tab=services}" class="small text-decoration-none fw-semibold"
+                                    style="color: #e91e63; font-size: 0.8rem;">
+                                    Lịch hẹn <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                </a>
+                            </div>
+
+                            <div th:if="${session.role == null}" class="text-center py-4 px-3 bg-white">
+                                <i class="fas fa-user-lock text-muted opacity-50 fa-2x mb-2 d-block"></i>
+                                <p class="small text-muted mb-3">Vui lòng đăng nhập để xem các nhắc lịch tái khám & chăm
+                                    sóc</p>
+                                <a th:href="@{/DangNhap}" class="btn btn-sm text-white rounded-pill px-4 fw-semibold"
+                                    style="background-color: #e91e63; font-size: 0.85rem;">Đăng nhập</a>
+                            </div>
+
+                            <div th:if="${session.role != null}" class="bg-white">
+                                <div th:if="${session.notificationList == null or #lists.isEmpty(session.notificationList)}"
+                                    class="text-center py-4 px-3 text-muted small">
+                                    <i class="fas fa-bell-slash text-secondary opacity-50 fa-2x mb-2 d-block"></i>
+                                    Bạn chưa có thông báo nhắc lịch mới nào.
+                                </div>
+                                <div th:unless="${session.notificationList == null or #lists.isEmpty(session.notificationList)}"
+                                    class="p-2" style="max-height: 320px; overflow-y: auto;">
+                                    <div th:each="tb : ${session.notificationList}"
+                                        class="p-3 mb-2 rounded-3 transition-all"
+                                        style="background-color: #fafafa;  transition: background-color 0.15s ease;">
+                                        <div class="fw-bold text-dark mb-1"
+                                            style="font-size: 0.88rem; line-height: 1.3;" th:text="${tb.tieuDe}">Lịch
+                                            hẹn tái khám</div>
+                                        <div class="text-secondary mb-2"
+                                            style="font-size: 0.82rem; line-height: 1.45; color: #495057 !important;"
+                                            th:text="${tb.noiDung}">Nội dung thông báo nhắc lịch...</div>
+                                        <div class="d-flex align-items-center justify-content-between pt-1 border-top">
+                                            <span class="badge bg-light text-muted fw-normal" style="font-size: 0.7rem;"
+                                                th:text="${tb.loaiThongBao != null ? tb.loaiThongBao : 'Nhắc lịch'}">Nhắc
+                                                lịch</span>
+                                            <span class="text-muted" style="font-size: 0.72rem;"
+                                                th:text="${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')}">04/10/2026
+                                                08:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- LOGIN -->
                     <div th:if="${session.role == null}">
@@ -113,8 +172,7 @@
 
                     <!-- USER -->
                     <div th:unless="${session.role == null}" class="dropdown">
-                        <button class="btn user-btn dropdown-toggle"
-                                data-bs-toggle="dropdown">
+                        <button class="btn user-btn dropdown-toggle" data-bs-toggle="dropdown">
 
                             <i class="fas fa-user-circle"></i>
 
@@ -126,16 +184,14 @@
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
 
                             <li th:if="${session.role == 'Admin'}">
-                                <a class="dropdown-item"
-                                   th:href="@{/admin/index}">
+                                <a class="dropdown-item" th:href="@{/admin/index}">
                                     <i class="fas fa-cog"></i>
                                     Quản trị
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item"
-                                   th:href="@{/DangNhap/Logout}">
+                                <a class="dropdown-item" th:href="@{/DangNhap/Logout}">
                                     <i class="fas fa-sign-out-alt"></i>
                                     Đăng xuất
                                 </a>

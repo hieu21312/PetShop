@@ -24,6 +24,9 @@ public class AdminChuNuoiController {
     private HoSoThuCungRepository hoSoThuCungRepository;
 
     @Autowired
+    private PetShop.demo.repository.CustomerRepository customerRepository;
+
+    @Autowired
     private AuthService authService;
 
     // 1. Danh sách chủ nuôi
@@ -51,10 +54,16 @@ public class AdminChuNuoiController {
         return "admin/owner-form";
     }
 
-    // 3. Xử lý thêm mới
+    // 3. Xử lý thêm mới (Tự động liên kết tài khoản Khách hàng nếu khớp SĐT hoặc Email)
     @PostMapping("/create")
     public String createOwner(@ModelAttribute("owner") ChuNuoi owner, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+
+        if (owner.getMaKH() == null) {
+            customerRepository.findFirstByDienThoaiOrEmail(owner.getSoDienThoai(), owner.getEmail())
+                    .ifPresent(c -> owner.setMaKH(c.getMaKH()));
+        }
+
         chuNuoiRepository.save(owner);
         return "redirect:/admin/owners";
     }
@@ -69,7 +78,7 @@ public class AdminChuNuoiController {
         return "admin/owner-form";
     }
 
-    // 5. Xử lý cập nhật
+    // 5. Xử lý cập nhật (Tự động cập nhật liên kết MaKH)
     @PostMapping("/edit/{id}")
     public String updateOwner(@PathVariable("id") Integer id, @ModelAttribute("owner") ChuNuoi ownerForm, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
@@ -87,6 +96,12 @@ public class AdminChuNuoiController {
             owner.setLoaiChuNuoi(ownerForm.getLoaiChuNuoi());
             owner.setGhiChu(ownerForm.getGhiChu());
             owner.setTrangThai(ownerForm.getTrangThai());
+
+            if (owner.getMaKH() == null) {
+                customerRepository.findFirstByDienThoaiOrEmail(owner.getSoDienThoai(), owner.getEmail())
+                        .ifPresent(c -> owner.setMaKH(c.getMaKH()));
+            }
+
             chuNuoiRepository.save(owner);
         }
         return "redirect:/admin/owners";

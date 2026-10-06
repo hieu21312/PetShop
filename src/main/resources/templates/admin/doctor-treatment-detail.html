@@ -1,0 +1,186 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold text-gradient mb-1">
+                            <a th:href="@{/admin/doctor/treatment}" class="text-decoration-none text-secondary me-2"><i class="fas fa-arrow-left"></i></a>
+                            <i class="fas fa-notes-medical text-primary me-2"></i> Hồ sơ y tế: <span th:text="${pet.tenThuCung}" class="text-primary">Miu</span>
+                        </h2>
+                        <p class="text-muted small mb-0">Theo dõi diễn biến sức khỏe, kê đơn thuốc và cài đặt thông báo lịch hẹn tái khám</p>
+                    </div>
+                </div>
+
+                <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4 rounded-4 shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${successMsg}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Profile Summary & Treatment Update Form -->
+                <div class="row g-4 mb-4">
+                    <!-- Thông tin thú cưng -->
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-header py-3 px-4 rounded-top-4 border-0 fw-bold" style="background-color: #fff0f3; color: #e91e63;">
+                                <i class="fas fa-paw me-2" style="color: #e91e63;"></i>Thông tin thú cưng
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2"><strong>Mã thú cưng:</strong> <span th:text="'#' + ${pet.maThuCung}"></span></p>
+                                <p class="mb-2"><strong>Tên thú cưng:</strong> <span th:text="${pet.tenThuCung}" class="fw-bold text-primary"></span></p>
+                                <p class="mb-2"><strong>Loại / Giống:</strong> <span th:text="${pet.loaiThuCung} + ' / ' + ${pet.giongLoai}"></span></p>
+                                <p class="mb-2"><strong>Giới tính:</strong> <span th:text="${pet.gioiTinh}"></span></p>
+                                <p class="mb-2"><strong>Cân nặng:</strong> <span th:text="${pet.canNang != null ? pet.canNang + ' kg' : 'N/A'}"></span></p>
+                                <p class="mb-2"><strong>Tình trạng sức khỏe:</strong> <span class="badge bg-warning text-dark rounded-pill" th:text="${pet.tinhTrangSucKhoeHienTai}"></span></p>
+                                <p class="mb-0"><strong>Tiền sử bệnh lý:</strong> <span th:text="${pet.tienSuBenhLy != null ? pet.tienSuBenhLy : 'Chưa ghi nhận'}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Cập Nhật Điều Trị Mới (Bác sĩ) -->
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header text-white fw-bold py-3 px-4 rounded-top-4" style="background-color: #e91e63;">
+                                <i class="fas fa-stethoscope me-2"></i>Cập nhật nhật ký điều trị mới
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/admin/doctor/treatment/{id}/add-log(id=${pet.maThuCung})}" method="post">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Chẩn đoán bệnh / Diễn biến *</label>
+                                            <input type="text" name="chuanDoan" class="form-control rounded-3" placeholder="Ví dụ: Viêm hô hấp trên nhẹ, hạ sốt" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Nhiệt độ (°C)</label>
+                                            <input type="number" step="0.1" name="nhietDo" class="form-control rounded-3" placeholder="38.5">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Cân nặng (kg)</label>
+                                            <input type="number" step="0.1" name="canNang" class="form-control rounded-3" th:value="${pet.canNang}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Phương pháp điều trị</label>
+                                            <textarea name="phuongPhapDieuTri" class="form-control rounded-3" rows="2" placeholder="Tiêm kháng sinh, truyền dịch..."></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Thuốc sử dụng / Đơn thuốc</label>
+                                            <textarea name="thuocSuDung" class="form-control rounded-3" rows="2" placeholder="Tên thuốc, liều dùng..."></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Trạng thái sức khỏe mới</label>
+                                            <select name="trangThaiSucKhoe" class="form-select rounded-3">
+                                                <option value="Đang điều trị">Đang điều trị</option>
+                                                <option value="Theo dõi thêm">Theo dõi thêm</option>
+                                                <option value="Đã bình phục">Đã bình phục</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Decision Node: Cần tái khám? -->
+                                        <div class="col-md-6 bg-light p-3 rounded-4 border">
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="canTaiKhamCheck" name="canTaiKham" value="true" onchange="toggleReExamDate()">
+                                                <label class="form-check-label fw-bold text-danger" for="canTaiKhamCheck">
+                                                    <i class="fas fa-bell me-1"></i> Cần tái khám? (Tự động gửi thông báo)
+                                                </label>
+                                            </div>
+                                            <div id="reExamDateGroup" style="display: none;">
+                                                <label class="form-label small fw-bold">Chọn ngày & giờ tái khám:</label>
+                                                <input type="datetime-local" id="ngayTaiKhamInput" name="ngayTaiKham" class="form-control form-control-sm rounded-3">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold">Ghi chú của bác sĩ</label>
+                                            <input type="text" name="ghiChu" class="form-control rounded-3" placeholder="Dặn dò chủ nuôi chăm sóc tại nhà...">
+                                        </div>
+                                        <div class="col-12 text-end pt-2">
+                                            <button type="submit" class="btn text-white px-4 rounded-pill shadow-sm" style="background-color: #e91e63; border: none;">
+                                                <i class="fas fa-save me-1"></i> Lưu nhật ký điều trị
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lịch sử nhật ký điều trị -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header py-3 px-4 rounded-top-4 border-0 fw-bold" style="background-color: #fff0f3; color: #e91e63;">
+                        <i class="fas fa-history me-2" style="color: #e91e63;"></i>Lịch sử nhật ký điều trị
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-pink">
+                                    <tr>
+                                        <th>Thời gian khám</th>
+                                        <th>Chẩn đoán</th>
+                                        <th>Điều trị & Thuốc</th>
+                                        <th>Nhiệt độ / Cân nặng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tái khám?</th>
+                                        <th>Bác sĩ trực</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="log : ${treatmentLogs}">
+                                        <td class="fw-bold" th:text="${#temporals.format(log.ngayKham, 'dd/MM/yyyy HH:mm')}">03/10/2026 14:00</td>
+                                        <td class="fw-bold text-primary" th:text="${log.chuanDoan}">Viêm phổi nhẹ</td>
+                                        <td>
+                                            <small>
+                                                <strong>Điều trị:</strong> <span th:text="${log.phuongPhapDieuTri != null ? log.phuongPhapDieuTri : '-'}"></span><br>
+                                                <strong>Thuốc:</strong> <span th:text="${log.thuocSuDung != null ? log.thuocSuDung : '-'}"></span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span th:text="${log.nhietDo != null ? log.nhietDo + ' °C' : 'N/A'}"></span> / 
+                                            <span th:text="${log.canNang != null ? log.canNang + ' kg' : 'N/A'}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark rounded-pill" th:text="${log.trangThaiSucKhoe}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${log.canTaiKham}" class="badge bg-danger rounded-pill px-3">
+                                                <i class="fas fa-calendar-alt me-1"></i> Có (<span th:text="${#temporals.format(log.ngayTaiKham, 'dd/MM/yyyy HH:mm')}"></span>)
+                                            </span>
+                                            <span th:unless="${log.canTaiKham}" class="badge bg-secondary rounded-pill px-3">Không</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${log.bacSi != null ? log.bacSi.tenNV : 'Bác sĩ thú y'}"></span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(treatmentLogs)}">
+                                        <td colspan="7" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle me-1"></i> Chưa có nhật ký điều trị nào được ghi nhận cho thú cưng này.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    function toggleReExamDate() {
+        const checkBox = document.getElementById('canTaiKhamCheck');
+        const dateGroup = document.getElementById('reExamDateGroup');
+        const dateInput = document.getElementById('ngayTaiKhamInput');
+        if (checkBox.checked) {
+            dateGroup.style.display = 'block';
+            dateInput.required = true;
+        } else {
+            dateGroup.style.display = 'none';
+            dateInput.required = false;
+        }
+    }
+</script>

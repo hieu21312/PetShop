@@ -43,6 +43,9 @@ public class AdminPhieuDichVuController {
     private EmployeeRepository employeeRepository;
 
     @Autowired
+    private PetShop.demo.service.ThongBaoService thongBaoService;
+
+    @Autowired
     private AuthService authService;
 
     // 1. Danh sách phiếu chăm sóc
@@ -136,6 +139,7 @@ public class AdminPhieuDichVuController {
 
         PhieuDichVuChamSoc ticket = phieuRepository.findById(id).orElse(null);
         if (ticket != null) {
+            String oldStatus = ticket.getTrangThaiDichVu();
             ticket.setTrangThaiDichVu(trangThaiDichVu);
             ticket.setTrangThaiThanhToan(trangThaiThanhToan);
             if (hinhThucThanhToan != null) ticket.setHinhThucThanhToan(hinhThucThanhToan);
@@ -147,6 +151,14 @@ public class AdminPhieuDichVuController {
                 }
             }
             phieuRepository.save(ticket);
+
+            // Gửi thông báo tự động cho chủ nuôi khi trạng thái dịch vụ được cập nhật
+            if (ticket.getMaChuNuoi() != null && (oldStatus == null || !oldStatus.equals(trangThaiDichVu))) {
+                String tieuDe = "Cập nhật dịch vụ chăm sóc #" + ticket.getSoPhieu();
+                String noiDung = "Phiếu dịch vụ chăm sóc cho thú cưng của bạn đã được cập nhật trạng thái: '" 
+                        + trangThaiDichVu + "'. Vui lòng kiểm tra trên hệ thống!";
+                thongBaoService.taoThongBaoNhacLich(ticket.getMaChuNuoi(), ticket.getMaThuCung(), tieuDe, noiDung, null);
+            }
         }
         return "redirect:/admin/care-tickets/detail/" + id;
     }
