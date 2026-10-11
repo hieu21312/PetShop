@@ -115,14 +115,16 @@
 
             <!-- SEGMENTED TAB NAVIGATION -->
             <div class="mb-4">
-                <div class="custom-tab-wrapper shadow-sm">
+                <div class="nav custom-tab-wrapper shadow-sm" id="cartTabList" role="tablist">
                     <button class="custom-tab-btn" th:classappend="${activeTab == 'products' or activeTab == null ? 'active' : ''}" 
-                            id="products-tab" data-bs-toggle="tab" data-bs-target="#products-pane" type="button" role="tab">
+                            id="products-tab" data-bs-toggle="tab" data-bs-target="#products-pane" type="button" role="tab"
+                            aria-controls="products-pane" th:aria-selected="${activeTab == 'products' or activeTab == null ? 'true' : 'false'}">
                         <i class="fas fa-shopping-bag me-2"></i> Mua sắm (Sản phẩm & Pet)
                         <span class="badge rounded-pill bg-danger ms-1" th:text="${session.cart != null ? #lists.size(session.cart) : 0}">0</span>
                     </button>
                     <button class="custom-tab-btn" th:classappend="${activeTab == 'services' ? 'active' : ''}" 
-                            id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane" type="button" role="tab">
+                            id="services-tab" data-bs-toggle="tab" data-bs-target="#services-pane" type="button" role="tab"
+                            aria-controls="services-pane" th:aria-selected="${activeTab == 'services' ? 'true' : 'false'}">
                         <i class="fas fa-spa me-2"></i> Dịch vụ đã đặt thành công
                     </button>
                 </div>
@@ -130,7 +132,7 @@
 
             <div class="tab-content" id="cartTabsContent">
                 <!-- TAB 1: MUA SẮM SẢN PHẨM -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'products' or activeTab == null ? 'show active' : ''}" id="products-pane" role="tabpanel">
+                <div class="tab-pane fade" th:classappend="${activeTab == 'products' or activeTab == null ? 'show active' : ''}" id="products-pane" role="tabpanel" aria-labelledby="products-tab">
                     <div th:if="${#lists.isEmpty(cart)}" class="text-center p-5 empty-cart-box my-4">
                         <div class="mb-4">
                             <i class="fas fa-shopping-basket fa-4x text-muted opacity-50"></i>
@@ -228,7 +230,7 @@
                 </div>
 
                 <!-- TAB 2: DỊCH VỤ ĐÃ ĐẶT THÀNH CÔNG -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'services' ? 'show active' : ''}" id="services-pane" role="tabpanel">
+                <div class="tab-pane fade" th:classappend="${activeTab == 'services' ? 'show active' : ''}" id="services-pane" role="tabpanel" aria-labelledby="services-tab">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                         <div class="card-header py-3 px-4 border-0" style="background-color: #fff0f3; border-bottom: 1px solid #ffccd5 !important;">
                             <h5 class="fw-bold mb-0" style="font-size: 1rem; color: #d81b60;">
@@ -292,5 +294,24 @@
             </div>
 
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var tabButtons = document.querySelectorAll('#cartTabList button[data-bs-toggle="tab"]');
+                tabButtons.forEach(function (btn) {
+                    btn.addEventListener('shown.bs.tab', function (e) {
+                        var targetId = e.target.getAttribute('id');
+                        var tabKey = targetId === 'services-tab' ? 'services' : 'products';
+                        var currentUrl = new URL(window.location);
+                        if (tabKey === 'products') {
+                            currentUrl.searchParams.delete('tab');
+                        } else {
+                            currentUrl.searchParams.set('tab', tabKey);
+                        }
+                        window.history.replaceState({}, '', currentUrl);
+                    });
+                });
+            });
+        </script>
     </section>
 </div>

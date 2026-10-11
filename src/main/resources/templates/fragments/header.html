@@ -140,15 +140,18 @@
                                 </div>
                                 <div th:unless="${session.notificationList == null or #lists.isEmpty(session.notificationList)}"
                                     class="p-2" style="max-height: 320px; overflow-y: auto;">
-                                    <div th:each="tb : ${session.notificationList}"
-                                        class="p-3 mb-2 rounded-3 transition-all"
-                                        style="background-color: #fafafa;  transition: background-color 0.15s ease;">
-                                        <div class="fw-bold text-dark mb-1"
-                                            style="font-size: 0.88rem; line-height: 1.3;" th:text="${tb.tieuDe}">Lịch
-                                            hẹn tái khám</div>
+                                    <a th:each="tb : ${session.notificationList}"
+                                       th:href="@{/GioHang?tab=services}"
+                                       class="d-block text-decoration-none p-3 mb-2 rounded-3 transition-all border"
+                                       style="background-color: #fafafa; transition: background-color 0.15s ease;">
+                                        <div class="fw-bold text-dark mb-1 d-flex justify-content-between align-items-start"
+                                             style="font-size: 0.88rem; line-height: 1.3;">
+                                            <span th:text="${tb.tieuDe}">Lịch hẹn</span>
+                                            <i class="fas fa-chevron-right text-muted small ms-2 mt-1" style="font-size: 0.7rem;"></i>
+                                        </div>
                                         <div class="text-secondary mb-2"
-                                            style="font-size: 0.82rem; line-height: 1.45; color: #495057 !important;"
-                                            th:text="${tb.noiDung}">Nội dung thông báo nhắc lịch...</div>
+                                             style="font-size: 0.82rem; line-height: 1.45; color: #495057 !important;"
+                                             th:text="${tb.noiDung}">Nội dung thông báo nhắc lịch...</div>
                                         <div class="d-flex align-items-center justify-content-between pt-1 border-top">
                                             <span class="badge bg-light text-muted fw-normal" style="font-size: 0.7rem;"
                                                 th:text="${tb.loaiThongBao != null ? tb.loaiThongBao : 'Nhắc lịch'}">Nhắc
@@ -157,7 +160,7 @@
                                                 th:text="${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')}">04/10/2026
                                                 08:00</span>
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
                             </div>
                         </div>

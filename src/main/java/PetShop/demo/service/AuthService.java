@@ -64,6 +64,31 @@ public class AuthService {
         return role != null && role.toString().equals("Admin");
     }
 
+    public boolean isDoctor(HttpSession session) {
+        Object role = session.getAttribute("role");
+        if (role == null) return false;
+        String roleStr = role.toString().trim();
+        return "Bác sĩ thú y".equalsIgnoreCase(roleStr) || "Bác sĩ".equalsIgnoreCase(roleStr) || "Doctor".equalsIgnoreCase(roleStr);
+    }
+
+    public boolean isCashier(HttpSession session) {
+        Object role = session.getAttribute("role");
+        if (role == null) return false;
+        String roleStr = role.toString().trim();
+        return "Thu ngân".equalsIgnoreCase(roleStr) || 
+               "Nhân viên thu ngân".equalsIgnoreCase(roleStr) || 
+               "Nhân viên bán hàng".equalsIgnoreCase(roleStr) || 
+               "Cashier".equalsIgnoreCase(roleStr);
+    }
+
+    public boolean canManageCareTickets(HttpSession session) {
+        return isAdmin(session) || isCashier(session);
+    }
+
+    public boolean canViewTreatment(HttpSession session) {
+        return isAdmin(session) || isDoctor(session);
+    }
+
     public boolean isLoggedIn(HttpSession session) {
         return session.getAttribute("role") != null;
     }

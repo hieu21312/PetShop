@@ -27,6 +27,19 @@ public class ThongBaoService {
         return thongBaoRepository.save(tb);
     }
 
+    public ThongBao taoThongBaoDatLich(Integer maKH, String tieuDe, String noiDung, LocalDateTime ngayHen, String loaiThongBao) {
+        if (maKH == null) return null;
+        ThongBao tb = new ThongBao();
+        tb.setMaKH(maKH);
+        tb.setTieuDe(tieuDe);
+        tb.setNoiDung(noiDung);
+        tb.setLoaiThongBao(loaiThongBao != null ? loaiThongBao : "XacNhanDatLich");
+        tb.setNgayTao(LocalDateTime.now());
+        tb.setNgayHen(ngayHen);
+        tb.setTrangThai("Chưa đọc");
+        return thongBaoRepository.save(tb);
+    }
+
     public List<ThongBao> getThongBaoByCustomer(Integer maKH) {
         return thongBaoRepository.findByMaKHOrderByNgayTaoDesc(maKH);
     }

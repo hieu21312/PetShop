@@ -27,20 +27,18 @@ public class AdminDoctorTreatmentController {
     @Autowired
     private AuthService authService;
 
-    // 1. Xem danh sách thú cưng đang điều trị
     @GetMapping
     public String listPetsInTreatment(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canViewTreatment(session)) return "redirect:/DangNhap";
 
         List<HoSoThuCung> pets = nhatKyDieuTriService.getDanhSachThuCungDangDieuTri();
         model.addAttribute("pets", pets);
         return "admin/doctor-treatment-list";
     }
 
-    // 2. Chọn thú cưng -> Lấy hồ sơ & Xem Nhật ký điều trị
     @GetMapping("/{maThuCung}")
     public String viewTreatmentRecord(@PathVariable("maThuCung") Integer maThuCung, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canViewTreatment(session)) return "redirect:/DangNhap";
 
         HoSoThuCung pet = nhatKyDieuTriService.getHoSoThuCung(maThuCung)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hồ sơ thú cưng #" + maThuCung));
@@ -52,7 +50,6 @@ public class AdminDoctorTreatmentController {
         return "admin/doctor-treatment-detail";
     }
 
-    // 3. Cập nhật điều trị mới + Lên lịch tái khám nếu cần
     @PostMapping("/{maThuCung}/add-log")
     public String addTreatmentLog(@PathVariable("maThuCung") Integer maThuCung,
                                   @RequestParam("chuanDoan") String chuanDoan,
@@ -67,10 +64,20 @@ public class AdminDoctorTreatmentController {
                                   @RequestParam(value = "ghiChu", required = false) String ghiChu,
                                   HttpSession session,
                                   RedirectAttributes redirectAttributes) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isDoctor(session)) {
+            redirectAttributes.addFlashAttribute("errorMsg", "Chỉ có Bác sĩ thú y mới có quyền thực hiện thao tác cập nhật nhật ký điều trị!");
+            return "redirect:/admin/doctor/treatment/" + maThuCung;
+        }
 
-        Employee loggedInStaff = (Employee) session.getAttribute("employeeSession");
-        Integer maBacSi = (loggedInStaff != null) ? loggedInStaff.getMaNV() : 1; // Fallback bác sĩ ID 1
+        Integer maBacSi = (Integer) session.getAttribute("maNV");
+        if (maBacSi == null) {
+            Employee loggedInStaff = (Employee) session.getAttribute("employeeSession");
+            if (loggedInStaff != null) {
+                maBacSi = loggedInStaff.getMaNV();
+            } else {
+                maBacSi = 1;
+            }
+        }
 
         NhatKyDieuTri log = new NhatKyDieuTri();
         log.setMaThuCung(maThuCung);
