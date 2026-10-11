@@ -22,4 +22,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     long countByNgayDatAndGioDatAndTrangThaiNot(LocalDate ngayDat, LocalTime gioDat, String trangThai);
     long countByMaNVAndNgayDatAndGioDatAndTrangThaiNot(Integer maNV, LocalDate ngayDat, LocalTime gioDat, String trangThai);
     long countByMaNVAndNgayDatAndGioDatAndTrangThaiNotAndMaDatLichNot(Integer maNV, LocalDate ngayDat, LocalTime gioDat, String trangThai, Integer maDatLich);
+    long countByTrangThai(String trangThai);
+    List<Booking> findByTrangThaiOrderByNgayTaoDesc(String trangThai);
 }

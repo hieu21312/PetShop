@@ -20,6 +20,9 @@ public class AuthController {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private PetShop.demo.repository.ChuNuoiRepository chuNuoiRepository;
+
     // Hiển thị trang đăng nhập
     @GetMapping("/DangNhap")
     public String loginPage(@RequestParam(required = false) String returnUrl, Model model) {
@@ -39,7 +42,6 @@ public class AuthController {
             return "redirect:" + (url != null && !url.isEmpty() ? url : "/");
         }
 
-        // 2. Thử đăng nhập với tư cách nhân viên (mã nhân viên là số)
         try {
             int maNV = Integer.parseInt(email);
             var employee = authService.loginEmployee(maNV, password, session);
@@ -47,13 +49,17 @@ public class AuthController {
                 if (authService.isAdmin(session)) {
                     return "redirect:/admin/index";
                 }
-                return "redirect:/";
+                if (authService.isDoctor(session)) {
+                    return "redirect:/admin/doctor/treatment";
+                }
+                if (authService.isCashier(session)) {
+                    return "redirect:/admin/care-tickets";
+                }
+                return "redirect:/staff/my-tasks";
             }
         } catch (NumberFormatException ignored) {
-            // Không phải số thì bỏ qua
         }
 
-        // 3. Sai cả hai
         session.setAttribute("error", "Tài khoản hoặc mật khẩu không đúng!");
         return "redirect:/DangNhap?url=" + (url != null ? url : "/");
     }
@@ -86,6 +92,22 @@ public class AuthController {
         customer.setHangThanhVien("Tiêu chuẩn");
         customer.setDiemTichLuy(0);
         customerRepository.save(customer);
+
+        // Tự động liên kết hoặc khởi tạo Hồ sơ chủ nuôi cho Khách hàng mới
+        var existingChuNuoiOpt = chuNuoiRepository.findFirstBySoDienThoaiOrEmail(customer.getDienThoai(), customer.getEmail());
+        if (existingChuNuoiOpt.isPresent()) {
+            PetShop.demo.model.enity.ChuNuoi chuNuoi = existingChuNuoiOpt.get();
+            chuNuoi.setMaKH(customer.getMaKH());
+            chuNuoiRepository.save(chuNuoi);
+        } else {
+            PetShop.demo.model.enity.ChuNuoi newChuNuoi = new PetShop.demo.model.enity.ChuNuoi();
+            newChuNuoi.setMaKH(customer.getMaKH());
+            newChuNuoi.setHoTenChuNuoi(customer.getTenKH());
+            newChuNuoi.setSoDienThoai(customer.getDienThoai() != null ? customer.getDienThoai() : "");
+            newChuNuoi.setEmail(customer.getEmail());
+            newChuNuoi.setGioiTinh(customer.getGioiTinh());
+            chuNuoiRepository.save(newChuNuoi);
+        }
 
         // Tự động đăng nhập sau khi đăng ký
         session.setAttribute("maKH", customer.getMaKH());

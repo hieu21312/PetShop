@@ -1590,7 +1590,43 @@ BEGIN
 END;
 GO
 
--- ==================================================================================
--- HOÀN TẤT TẠO CƠ SỞ DỮ LIỆU & BỔ SUNG ĐẦY ĐỦ 3 CHỨC NĂNG
--- File được xuất thành công: QL_pet_chủ_dv.sql
--- ==================================================================================
+IF OBJECT_ID(N'[dbo].[tblNhatKyDieuTri]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[tblNhatKyDieuTri](
+        [MaNhatKy] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [MaThuCung] [int] NOT NULL,
+        [MaBacSi] [int] NOT NULL,
+        [NgayKham] [datetime] NULL DEFAULT GETDATE(),
+        [ChuanDoan] [nvarchar](500) NULL,
+        [PhuongPhapDieuTri] [nvarchar](max) NULL,
+        [ThuocSuDung] [nvarchar](max) NULL,
+        [CanNang] [decimal](5, 2) NULL,
+        [NhietDo] [decimal](4, 1) NULL,
+        [TrangThaiSucKhoe] [nvarchar](100) NULL DEFAULT N'Đang điều trị',
+        [CanTaiKham] [bit] NULL DEFAULT 0,
+        [NgayTaiKham] [datetime] NULL,
+        [GhiChu] [nvarchar](max) NULL,
+        CONSTRAINT [FK_tblNhatKyDieuTri_tblHoSoThuCung] FOREIGN KEY([MaThuCung]) REFERENCES [dbo].[tblHoSoThuCung] ([MaThuCung]),
+        CONSTRAINT [FK_tblNhatKyDieuTri_tblNhanVien] FOREIGN KEY([MaBacSi]) REFERENCES [dbo].[tblNhanVien] ([MaNV])
+    );
+END
+GO
+
+/****** Object:  Table [dbo].[tblThongBao] ******/
+IF OBJECT_ID(N'[dbo].[tblThongBao]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[tblThongBao](
+        [MaThongBao] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [MaKH] [int] NOT NULL,
+        [MaThuCung] [int] NULL,
+        [TieuDe] [nvarchar](200) NOT NULL,
+        [NoiDung] [nvarchar](max) NULL,
+        [LoaiThongBao] [nvarchar](50) NULL DEFAULT N'NhacLichTaiKham',
+        [NgayTao] [datetime] NULL DEFAULT GETDATE(),
+        [NgayHen] [datetime] NULL,
+        [TrangThai] [nvarchar](50) NULL DEFAULT N'Chưa đọc',
+        CONSTRAINT [FK_tblThongBao_tblKhachHang] FOREIGN KEY([MaKH]) REFERENCES [dbo].[tblKhachHang] ([MaKH]),
+        CONSTRAINT [FK_tblThongBao_tblHoSoThuCung] FOREIGN KEY([MaThuCung]) REFERENCES [dbo].[tblHoSoThuCung] ([MaThuCung])
+    );
+END
+GO

@@ -5,8 +5,41 @@
                 <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
             </div>
             <div class="col-md-9">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold text-gradient"><i class="fas fa-calendar-alt me-2"></i> Quản lý lịch đặt dịch vụ</h2>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="fw-bold text-gradient mb-0"><i class="fas fa-calendar-alt me-2"></i> Quản lý lịch đặt dịch vụ</h2>
+                </div>
+
+                <!-- QUICK FILTER PILLS -->
+                <div class="mb-4">
+                    <div class="btn-group shadow-sm p-1 bg-white rounded-pill border" role="group">
+                        <a th:href="@{/admin/bookings(status='all')}" 
+                           class="btn btn-sm rounded-pill px-3 fw-semibold transition-all"
+                           th:classappend="${currentStatus == 'all' or currentStatus == null ? 'btn-primary text-white shadow-sm' : 'btn-light text-secondary'}">
+                            Tất cả
+                        </a>
+                        <a th:href="@{/admin/bookings(status='Chờ xác nhận')}" 
+                           class="btn btn-sm rounded-pill px-3 fw-semibold transition-all position-relative"
+                           th:classappend="${currentStatus == 'Chờ xác nhận' ? 'btn-warning text-dark shadow-sm fw-bold' : 'btn-light text-secondary'}">
+                            <i class="fas fa-clock me-1 text-warning"></i> Chờ xác nhận
+                            <span th:if="${pendingBookingCount != null and pendingBookingCount > 0}" 
+                                  class="badge bg-danger rounded-pill ms-1" th:text="${pendingBookingCount}">1</span>
+                        </a>
+                        <a th:href="@{/admin/bookings(status='Đã xác nhận')}" 
+                           class="btn btn-sm rounded-pill px-3 fw-semibold transition-all"
+                           th:classappend="${currentStatus == 'Đã xác nhận' ? 'btn-info text-white shadow-sm' : 'btn-light text-secondary'}">
+                            <i class="fas fa-check-circle me-1 text-info"></i> Đã xác nhận
+                        </a>
+                        <a th:href="@{/admin/bookings(status='Hoàn thành')}" 
+                           class="btn btn-sm rounded-pill px-3 fw-semibold transition-all"
+                           th:classappend="${currentStatus == 'Hoàn thành' ? 'btn-success text-white shadow-sm' : 'btn-light text-secondary'}">
+                            <i class="fas fa-flag-checkered me-1 text-success"></i> Hoàn thành
+                        </a>
+                        <a th:href="@{/admin/bookings(status='Đã hủy')}" 
+                           class="btn btn-sm rounded-pill px-3 fw-semibold transition-all"
+                           th:classappend="${currentStatus == 'Đã hủy' ? 'btn-secondary text-white shadow-sm' : 'btn-light text-secondary'}">
+                            <i class="fas fa-times-circle me-1 text-muted"></i> Đã hủy
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Notification Messages -->

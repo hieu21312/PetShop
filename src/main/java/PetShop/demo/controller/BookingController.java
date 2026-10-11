@@ -148,13 +148,18 @@ public class BookingController {
     @Autowired
     private EmployeeService employeeService;
 
-    // ADMIN: Xem danh sách lịch đặt
+    // ADMIN: Xem danh sách lịch đặt (Hỗ trợ lọc trạng thái)
     @GetMapping("/admin/bookings")
-    public String listBookings(Model model, HttpSession session) {
+    public String listBookings(@RequestParam(value = "status", required = false, defaultValue = "all") String status,
+                               Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
-        List<Booking> bookings = bookingService.getAllBookings();
+        List<Booking> bookings = bookingService.getBookingsByStatus(status);
+        long pendingCount = bookingService.countPendingBookings();
+
         model.addAttribute("bookings", bookings);
         model.addAttribute("employees", employeeService.getActiveEmployees());
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("pendingBookingCount", pendingCount);
         return "admin/bookings";
     }
 
