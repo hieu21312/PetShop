@@ -42,7 +42,6 @@ public class AuthController {
             return "redirect:" + (url != null && !url.isEmpty() ? url : "/");
         }
 
-        // 2. Thử đăng nhập với tư cách nhân viên (mã nhân viên là số)
         try {
             int maNV = Integer.parseInt(email);
             var employee = authService.loginEmployee(maNV, password, session);
@@ -50,13 +49,17 @@ public class AuthController {
                 if (authService.isAdmin(session)) {
                     return "redirect:/admin/index";
                 }
-                return "redirect:/";
+                if (authService.isDoctor(session)) {
+                    return "redirect:/admin/doctor/treatment";
+                }
+                if (authService.isCashier(session)) {
+                    return "redirect:/admin/care-tickets";
+                }
+                return "redirect:/staff/my-tasks";
             }
         } catch (NumberFormatException ignored) {
-            // Không phải số thì bỏ qua
         }
 
-        // 3. Sai cả hai
         session.setAttribute("error", "Tài khoản hoặc mật khẩu không đúng!");
         return "redirect:/DangNhap?url=" + (url != null ? url : "/");
     }

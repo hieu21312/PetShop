@@ -48,11 +48,10 @@ public class AdminPhieuDichVuController {
     @Autowired
     private AuthService authService;
 
-    // 1. Danh sách phiếu chăm sóc
     @GetMapping
     public String listTickets(@RequestParam(value = "status", required = false) String status,
                               Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
 
         List<PhieuDichVuChamSoc> tickets;
         if (status != null && !status.trim().isEmpty() && !status.equals("All")) {
@@ -66,10 +65,9 @@ public class AdminPhieuDichVuController {
         return "admin/care-tickets";
     }
 
-    // 2. Form lập phiếu tiếp nhận chăm sóc thú cưng
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
 
         PhieuDichVuChamSoc ticket = new PhieuDichVuChamSoc();
         String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -84,12 +82,11 @@ public class AdminPhieuDichVuController {
         return "admin/care-ticket-form";
     }
 
-    // 3. Xử lý lưu phiếu tiếp nhận mới
     @PostMapping("/create")
     public String createTicket(@ModelAttribute("ticket") PhieuDichVuChamSoc ticket,
                                @RequestParam(value = "selectedServiceId", required = false) Integer selectedServiceId,
                                HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
 
         if (ticket.getMaThuCung() != null && ticket.getMaChuNuoi() == null) {
             HoSoThuCung pet = hoSoThuCungRepository.findById(ticket.getMaThuCung()).orElse(null);
@@ -115,10 +112,9 @@ public class AdminPhieuDichVuController {
         return "redirect:/admin/care-tickets";
     }
 
-    // 4. Xem chi tiết phiếu & cập nhật trạng thái
     @GetMapping("/detail/{id}")
     public String viewDetail(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
         PhieuDichVuChamSoc ticket = phieuRepository.findById(id).orElse(null);
         if (ticket == null) return "redirect:/admin/care-tickets";
 
@@ -127,7 +123,6 @@ public class AdminPhieuDichVuController {
         return "admin/care-ticket-detail";
     }
 
-    // 5. Cập nhật tiến độ / hoàn tất thanh toán
     @PostMapping("/update-status/{id}")
     public String updateStatus(@PathVariable("id") Integer id,
                                @RequestParam("trangThaiDichVu") String trangThaiDichVu,
@@ -135,7 +130,7 @@ public class AdminPhieuDichVuController {
                                @RequestParam(value = "hinhThucThanhToan", required = false) String hinhThucThanhToan,
                                @RequestParam(value = "ketQuaChamSoc", required = false) String ketQuaChamSoc,
                                HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
 
         PhieuDichVuChamSoc ticket = phieuRepository.findById(id).orElse(null);
         if (ticket != null) {
@@ -152,7 +147,6 @@ public class AdminPhieuDichVuController {
             }
             phieuRepository.save(ticket);
 
-            // Gửi thông báo tự động cho chủ nuôi khi trạng thái dịch vụ được cập nhật
             if (ticket.getMaChuNuoi() != null && (oldStatus == null || !oldStatus.equals(trangThaiDichVu))) {
                 String tieuDe = "Cập nhật dịch vụ chăm sóc #" + ticket.getSoPhieu();
                 String noiDung = "Phiếu dịch vụ chăm sóc cho thú cưng của bạn đã được cập nhật trạng thái: '" 
@@ -163,10 +157,9 @@ public class AdminPhieuDichVuController {
         return "redirect:/admin/care-tickets/detail/" + id;
     }
 
-    // 6. Xóa phiếu
     @GetMapping("/delete/{id}")
     public String deleteTicket(@PathVariable("id") Integer id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
         phieuRepository.deleteById(id);
         return "redirect:/admin/care-tickets";
     }
