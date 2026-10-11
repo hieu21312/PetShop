@@ -52,6 +52,11 @@
         </div>
 
         <a th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action"><i class="fas fa-ticket-alt me-2"></i> Quản Lý mã giảm giá</a>
-        <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2"></i> Quản Lý đặt lịch</a>
+        <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-calendar-alt me-2"></i> Quản Lý đặt lịch</span>
+            <span th:if="${pendingBookingCount != null and pendingBookingCount > 0}" 
+                  class="badge bg-danger rounded-pill px-2 py-1 shadow-sm" 
+                  th:text="${pendingBookingCount} + ' mới'" title="Lịch hẹn đang chờ xác nhận">1 mới</span>
+        </a>
     </div>
 </div>
