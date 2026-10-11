@@ -1,6 +1,7 @@
 package PetShop.demo.controller;
 
 import PetShop.demo.model.enity.Voucher;
+import PetShop.demo.model.enity.Customer;
 import PetShop.demo.repository.VoucherRepository;
 import PetShop.demo.service.AuthService;
 import PetShop.demo.service.CartService;
@@ -31,6 +32,12 @@ public class CartController {
 
     @Autowired
     private VoucherRepository voucherRepository;
+
+    @Autowired
+    private PetShop.demo.repository.CustomerRepository customerRepository;
+
+    @Autowired
+    private PetShop.demo.service.MembershipService membershipService;
 
     // Thêm vào giỏ hàng
     @GetMapping("/ThemGioHang")
@@ -93,9 +100,32 @@ public class CartController {
         if (cart.isEmpty()) {
             return "redirect:/";
         }
+
+        Integer maKH = (Integer) session.getAttribute("maKH");
+        Customer customer = (maKH != null) ? customerRepository.findById(maKH).orElse(null) : null;
+        BigDecimal tongTien = cartService.getTotalPrice(session);
+        String hangThanhVien = (customer != null) ? customer.getHangThanhVien() : "Tiêu chuẩn";
+        int diemTichLuy = (customer != null) ? customer.getDiemTichLuy() : 0;
+        BigDecimal phanTramGiamHang = membershipService.getDiscountPercentage(hangThanhVien);
+        BigDecimal tienGiamHang = membershipService.calculateTierDiscount(tongTien, hangThanhVien);
+        BigDecimal tongSauGiamHang = tongTien.subtract(tienGiamHang);
+        int diemTichDuKien = membershipService.calculatePoints(tongSauGiamHang);
+
+        // Cập nhật session nếu có thay đổi
+        if (customer != null) {
+            membershipService.updateSessionMembership(session, customer);
+        }
+
         model.addAttribute("cart", cart);
         model.addAttribute("tongSoLuong", cartService.getTotalQuantity(session));
-        model.addAttribute("tongTien", cartService.getTotalPrice(session));
+        model.addAttribute("tongTien", tongTien);
+        model.addAttribute("customer", customer);
+        model.addAttribute("hangThanhVien", hangThanhVien);
+        model.addAttribute("diemTichLuy", diemTichLuy);
+        model.addAttribute("phanTramGiamHang", phanTramGiamHang);
+        model.addAttribute("tienGiamHang", tienGiamHang);
+        model.addAttribute("tongSauGiamHang", tongSauGiamHang);
+        model.addAttribute("diemTichDuKien", diemTichDuKien);
         return "checkout";
     }
 

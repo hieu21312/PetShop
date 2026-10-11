@@ -113,7 +113,7 @@
 
                     <!-- USER -->
                     <div th:unless="${session.role == null}" class="dropdown">
-                        <button class="btn user-btn dropdown-toggle"
+                        <button class="btn user-btn dropdown-toggle d-flex align-items-center gap-1"
                                 data-bs-toggle="dropdown">
 
                             <i class="fas fa-user-circle"></i>
@@ -121,22 +121,53 @@
                             <span th:text="${session.tenKH != null ? session.tenKH : session.tenNV}">
                                 User
                             </span>
+
+                            <span th:if="${session.role == 'KhachHang' and session.hangThanhVien != null}"
+                                  class="badge ms-1 small"
+                                  th:classappend="${session.hangThanhVien == 'VVIP' ? 'bg-danger' : (session.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (session.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                  th:text="${session.hangThanhVien}">
+                            </span>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3" style="min-width: 240px;">
+
+                            <li th:if="${session.role == 'KhachHang'}" class="px-3 py-2 bg-light border-bottom rounded-top-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small text-muted">Hạng thành viên:</span>
+                                    <span class="badge fw-bold"
+                                          th:classappend="${session.hangThanhVien == 'VVIP' ? 'bg-danger' : (session.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (session.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                          th:text="${session.hangThanhVien ?: 'Tiêu chuẩn'}">
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small">
+                                    <span class="text-muted"><i class="fas fa-star text-warning me-1"></i>Điểm tích lũy:</span>
+                                    <strong class="text-primary" th:text="${(session.diemTichLuy ?: 0) + ' điểm'}"></strong>
+                                </div>
+                                <div class="small text-danger fw-semibold mt-1" th:if="${session.phanTramGiamHang != null and session.phanTramGiamHang > 0}">
+                                    <i class="fas fa-tag me-1"></i>Ưu đãi giảm: <span th:text="${session.phanTramGiamHang}"></span>%
+                                </div>
+                            </li>
 
                             <li th:if="${session.role == 'Admin'}">
-                                <a class="dropdown-item"
+                                <a class="dropdown-item py-2"
                                    th:href="@{/admin/index}">
-                                    <i class="fas fa-cog"></i>
+                                    <i class="fas fa-cog me-2"></i>
                                     Quản trị
                                 </a>
                             </li>
 
+                            <li th:if="${session.role == 'KhachHang'}">
+                                <a class="dropdown-item py-2" th:href="@{/MyBookings}">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i> Lịch hẹn dịch vụ
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider my-1"></li>
+
                             <li>
-                                <a class="dropdown-item"
+                                <a class="dropdown-item py-2 text-danger"
                                    th:href="@{/DangNhap/Logout}">
-                                    <i class="fas fa-sign-out-alt"></i>
+                                    <i class="fas fa-sign-out-alt me-2"></i>
                                     Đăng xuất
                                 </a>
                             </li>

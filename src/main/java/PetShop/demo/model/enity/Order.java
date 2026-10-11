@@ -18,6 +18,7 @@ public class Order {
     @Column(name = "MaGiamGia") private String maGiamGia;
     @Column(name = "TienGiam") private BigDecimal tienGiam;
     @Column(name = "HinhThucThanhToan") private String hinhThucThanhToan;
+    @Column(name = "DaCongDiem") private Boolean daCongDiem = false;
     @ManyToOne @JoinColumn(name = "MaKH", insertable = false, updatable = false)
     private Customer customer;
     @ManyToOne @JoinColumn(name = "TinhTrang", insertable = false, updatable = false)
@@ -70,4 +71,6 @@ public class Order {
     }
     public String getHinhThucThanhToan() { return hinhThucThanhToan; }
     public void setHinhThucThanhToan(String hinhThucThanhToan) { this.hinhThucThanhToan = hinhThucThanhToan; }
+    public Boolean getDaCongDiem() { return daCongDiem != null ? daCongDiem : false; }
+    public void setDaCongDiem(Boolean daCongDiem) { this.daCongDiem = daCongDiem; }
 }

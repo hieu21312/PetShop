@@ -25,6 +25,9 @@ public class AdminOrderController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private PetShop.demo.service.MembershipService membershipService;
+
     // Danh sách đơn hàng
     @GetMapping
     public String listOrders(Model model, HttpSession session) {
@@ -42,6 +45,8 @@ public class AdminOrderController {
         if (order == null) return "redirect:/admin/orders";
         model.addAttribute("order", order);
         model.addAttribute("statuses", orderStatusRepository.findAll());
+        int pointsEarned = membershipService.calculatePoints(order.getTongTien());
+        model.addAttribute("pointsEarned", pointsEarned);
         return "admin/order-detail";
     }
 
@@ -57,6 +62,12 @@ public class AdminOrderController {
         order.setDiaChiGiaoHang(updatedOrder.getDiaChiGiaoHang());
         order.setDaThanhToan(updatedOrder.getDaThanhToan());
         orderRepository.save(order);
+
+        // Tự động tích điểm và nâng hạng nếu đơn hàng đã thanh toán
+        if (Boolean.TRUE.equals(order.getDaThanhToan())) {
+            membershipService.processOrderPoints(order);
+        }
+
         return "redirect:/admin/orders/detail/" + maHD;
     }
 }

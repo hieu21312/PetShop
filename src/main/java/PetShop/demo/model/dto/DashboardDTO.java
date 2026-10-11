@@ -12,6 +12,18 @@ public class DashboardDTO {
     private List<BigDecimal> revenues;
     private List<TopProductDTO> topProducts;
 
+    // Thống kê dịch vụ
+    private int tongDichVu;
+    private int tongPhieuDichVu;
+    private int tongDatLich;
+    private BigDecimal tongDoanhThuDichVu;
+    private List<String> serviceLabels;
+    private List<BigDecimal> serviceRevenues;
+    private List<TopServiceDTO> topServices;
+
+    // Tổng doanh thu kết hợp (Sản phẩm + Dịch vụ)
+    private BigDecimal tongDoanhThuTongCong;
+
     // Constructors
     public DashboardDTO() {}
 
@@ -37,6 +49,30 @@ public class DashboardDTO {
     public List<TopProductDTO> getTopProducts() { return topProducts; }
     public void setTopProducts(List<TopProductDTO> topProducts) { this.topProducts = topProducts; }
 
+    public int getTongDichVu() { return tongDichVu; }
+    public void setTongDichVu(int tongDichVu) { this.tongDichVu = tongDichVu; }
+
+    public int getTongPhieuDichVu() { return tongPhieuDichVu; }
+    public void setTongPhieuDichVu(int tongPhieuDichVu) { this.tongPhieuDichVu = tongPhieuDichVu; }
+
+    public int getTongDatLich() { return tongDatLich; }
+    public void setTongDatLich(int tongDatLich) { this.tongDatLich = tongDatLich; }
+
+    public BigDecimal getTongDoanhThuDichVu() { return tongDoanhThuDichVu; }
+    public void setTongDoanhThuDichVu(BigDecimal tongDoanhThuDichVu) { this.tongDoanhThuDichVu = tongDoanhThuDichVu; }
+
+    public List<String> getServiceLabels() { return serviceLabels; }
+    public void setServiceLabels(List<String> serviceLabels) { this.serviceLabels = serviceLabels; }
+
+    public List<BigDecimal> getServiceRevenues() { return serviceRevenues; }
+    public void setServiceRevenues(List<BigDecimal> serviceRevenues) { this.serviceRevenues = serviceRevenues; }
+
+    public List<TopServiceDTO> getTopServices() { return topServices; }
+    public void setTopServices(List<TopServiceDTO> topServices) { this.topServices = topServices; }
+
+    public BigDecimal getTongDoanhThuTongCong() { return tongDoanhThuTongCong; }
+    public void setTongDoanhThuTongCong(BigDecimal tongDoanhThuTongCong) { this.tongDoanhThuTongCong = tongDoanhThuTongCong; }
+
     public static class TopProductDTO {
         private String tenSP;
         private int soLuongBan;
@@ -46,5 +82,16 @@ public class DashboardDTO {
 
         public int getSoLuongBan() { return soLuongBan; }
         public void setSoLuongBan(int soLuongBan) { this.soLuongBan = soLuongBan; }
+    }
+
+    public static class TopServiceDTO {
+        private String tenDV;
+        private int soLuotSuDung;
+
+        public String getTenDV() { return tenDV; }
+        public void setTenDV(String tenDV) { this.tenDV = tenDV; }
+
+        public int getSoLuotSuDung() { return soLuotSuDung; }
+        public void setSoLuotSuDung(int soLuotSuDung) { this.soLuotSuDung = soLuotSuDung; }
     }
 }

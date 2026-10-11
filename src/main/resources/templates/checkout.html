@@ -45,25 +45,54 @@
                     <div class="col-lg-4">
                         <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
                             <div class="card-body p-4">
-                                <h5 class="fw-bold mb-4">Đơn hàng của bạn</h5>
+                                <h5 class="fw-bold mb-3">Đơn hàng của bạn</h5>
+
+                                <!-- THẺ ƯU ĐÃI THÀNH VIÊN -->
+                                <div class="card bg-light border-0 rounded-3 p-3 mb-3" th:if="${customer != null}">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <div>
+                                            <i class="fas fa-crown text-warning me-1"></i>
+                                            <span class="small fw-bold">Hạng:</span>
+                                            <span class="badge" 
+                                                  th:classappend="${hangThanhVien == 'VVIP' ? 'bg-danger' : (hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                                  th:text="${hangThanhVien}">
+                                            </span>
+                                        </div>
+                                        <span class="small text-muted fw-semibold">
+                                            <i class="fas fa-star text-warning"></i> <span th:text="${diemTichLuy}"></span> điểm
+                                        </span>
+                                    </div>
+                                    <div class="small text-danger fw-semibold" th:if="${phanTramGiamHang > 0}">
+                                        <i class="fas fa-tag me-1"></i> Ưu đãi hạng: Giảm <span th:text="${phanTramGiamHang}"></span>%
+                                    </div>
+                                    <div class="small text-success mt-1">
+                                        <i class="fas fa-gift me-1"></i> Điểm tích dự kiến: <strong th:text="'+' + ${diemTichDuKien} + ' điểm'"></strong>
+                                    </div>
+                                </div>
 
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Tạm tính:</span>
                                     <span class="fw-bold" id="tamTinhSpan"></span>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-2 text-danger" th:if="${tienGiamHang > 0}">
+                                    <span>Giảm giá thành viên (<span th:text="${phanTramGiamHang}"></span>%):</span>
+                                    <span class="fw-bold" id="displayGiamHang" th:text="'-' + (${#numbers.formatDecimal(tienGiamHang, 1, 'POINT', 0, 'COMMA') + 'VND'})"></span>
+                                </div>
+
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label small fw-semibold text-muted">Mã giảm giá (nếu có)</label>
                                     <div class="input-group">
-                                        <input type="text" id="MaGiamGiaInput" class="form-control bg-light border-0" placeholder="Mã giảm giá">
+                                        <input type="text" id="MaGiamGiaInput" class="form-control bg-light border-0" placeholder="Nhập mã voucher">
                                         <button class="btn btn-outline-primary" type="button" id="btnApDung">Áp dụng</button>
                                     </div>
                                     <input type="hidden" name="MaGiamGiaInput" id="MaGiamGiaHidden">
-                                    <input type="hidden" name="TienGiamInput" id="TienGiamHidden">
+                                    <input type="hidden" name="TienGiamInput" id="TienGiamHidden" th:value="${tienGiamHang}">
                                 </div>
 
                                 <div class="d-flex justify-content-between mb-3 text-danger">
-                                    <span>Giảm giá:</span>
-                                    <span class="fw-bold" id="displayGiam">0 đ</span>
+                                    <span>Tổng giảm giá:</span>
+                                    <span class="fw-bold" id="displayGiam">0VND</span>
                                 </div>
 
                                 <hr class="my-3">
@@ -87,13 +116,28 @@
         <script>
             // Lấy giá trị từ server và gán vào biến
             var tongTienGoc = [[${tongTien}]];
-            // Hàm format số tiền (thêm dấu phẩy)
+            var tienGiamHang = [[${tienGiamHang != null ? tienGiamHang : 0}]];
+            var tienGiamVoucher = 0;
+
             function formatMoney(amount) {
-                return amount.toLocaleString('vi-VN') + ' đ';
+                return (amount || 0).toLocaleString('vi-VN') + 'VND';
             }
-            // Hiển thị giá trị ban đầu
-            $('#tamTinhSpan').text(formatMoney(tongTienGoc));
-            $('#displayTong').text(formatMoney(tongTienGoc));
+
+            function capNhatHienThi() {
+                var tongGiam = tienGiamHang + tienGiamVoucher;
+                var tongMoi = Math.max(0, tongTienGoc - tongGiam);
+                $('#tamTinhSpan').text(formatMoney(tongTienGoc));
+                $('#displayGiam').text(formatMoney(tongGiam));
+                $('#displayTong').text(formatMoney(tongMoi));
+                $('#TienGiamHidden').val(tongGiam);
+
+                if ($('input[name="HinhThucThanhToan"]:checked').val() === 'BankTransfer') {
+                    capNhatQR(tongMoi, $('#MaGiamGiaHidden').val());
+                }
+            }
+
+            // Khởi tạo
+            capNhatHienThi();
 
             $('#btnApDung').click(function() {
                 var code = $('#MaGiamGiaInput').val();
@@ -101,18 +145,15 @@
                 $.post('/KiemTraMaGiamGia', { maGiamGia: code }, function(res) {
                     if (res.success) {
                         $('#MaGiamGiaHidden').val(res.maGiamGia);
-                        $('#TienGiamHidden').val(res.soTienGiam);
-                        $('#displayGiam').text(formatMoney(res.soTienGiam));
-                        var tongMoi = tongTienGoc - res.soTienGiam;
-                        $('#displayTong').text(formatMoney(tongMoi));
-                        if ($('input[name="HinhThucThanhToan"]:checked').val() === 'BankTransfer') {
-                            capNhatQR(tongMoi, res.maGiamGia);
-                        }
+                        tienGiamVoucher = parseFloat(res.soTienGiam) || 0;
+                        capNhatHienThi();
+                        alert('Áp dụng mã giảm giá thành công!');
                     } else {
                         alert(res.message);
                     }
                 });
             });
+
             function capNhatQR(amount, voucherCode) {
                 var bankId = "MB";
                 var accountNo = "123456789";
@@ -121,21 +162,22 @@
                 var url = 'https://img.vietqr.io/image/' + bankId + '-' + accountNo + '-compact2.png?amount=' + amount + '&addInfo=' + encodeURIComponent(description);
                 $('#imgQR').attr('src', url);
             }
+
             $('input[name="HinhThucThanhToan"]').change(function() {
                 if ($(this).val() === 'BankTransfer') {
-                    var tongText = $('#displayTong').text();
-                    var tong = parseFloat(tongText.replace(/[^0-9.-]+/g, '')) || 0;
+                    var tongMoi = Math.max(0, tongTienGoc - (tienGiamHang + tienGiamVoucher));
                     var voucher = $('#MaGiamGiaHidden').val();
-                    capNhatQR(tong, voucher);
+                    capNhatQR(tongMoi, voucher);
                     $('#qrCodeContainer').slideDown();
                 } else {
                     $('#qrCodeContainer').slideUp();
                 }
             });
+
             $(function() {
                 if ($('input[name="HinhThucThanhToan"]:checked').val() === 'BankTransfer') {
-                    var tong = parseFloat($('#displayTong').text().replace(/[^0-9.-]+/g, '')) || 0;
-                    capNhatQR(tong, $('#MaGiamGiaHidden').val());
+                    var tongMoi = Math.max(0, tongTienGoc - (tienGiamHang + tienGiamVoucher));
+                    capNhatQR(tongMoi, $('#MaGiamGiaHidden').val());
                     $('#qrCodeContainer').show();
                 } else {
                     $('#qrCodeContainer').hide();

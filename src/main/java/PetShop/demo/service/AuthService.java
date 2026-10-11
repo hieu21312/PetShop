@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 public class AuthService {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private EmployeeRepository employeeRepository;
+    @Autowired private MembershipService membershipService;
 
     public String hashPassword(String password) {
         try {
@@ -37,6 +38,7 @@ public class AuthService {
             session.setAttribute("tenKH", c.getTenKH());
             session.setAttribute("email", c.getEmail());
             session.setAttribute("role", "KhachHang");
+            membershipService.updateSessionMembership(session, c);
             return c;
         }
         return null;

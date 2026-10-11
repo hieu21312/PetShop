@@ -29,21 +29,13 @@ public class StatisticController {
     @GetMapping("/Index")
     public String index(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-                        Model model, HttpSession session) {
+                        HttpSession session) {
         if (!authService.isAdmin(session)) {
             return "redirect:/DangNhap";
         }
-        if (from == null) from = LocalDate.now();
-        if (to == null) to = LocalDate.now();
-        model.addAttribute("from", from);
-        model.addAttribute("to", to);
-
-        BigDecimal totalRevenue = statisticService.getTotalRevenue(from, to);
-        model.addAttribute("tongDoanhThu", totalRevenue);
-
-        List<Order> orders = statisticService.getCompletedOrdersBetween(from, to);
-        model.addAttribute("orders", orders);
-
-        return "statistic";
+        if (from != null && to != null) {
+            return "redirect:/admin/reports?type=custom&from=" + from + "&to=" + to;
+        }
+        return "redirect:/admin/reports";
     }
 }

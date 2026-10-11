@@ -122,7 +122,7 @@
                                     </td>
 
                                     <td class="text-center py-3 fw-semibold text-secondary"
-                                        th:text="${#numbers.formatDecimal(item.giaBan, 1, 'POINT', 0, 'COMMA')} + ' đ'">
+                                        th:text="${#numbers.formatDecimal(item.giaBan, 1, 'POINT', 0, 'COMMA')} + 'VND'">
                                     </td>
 
                                     <td class="py-3">
@@ -140,7 +140,7 @@
                                     </td>
 
                                     <td class="text-end py-3 fw-bold text-dark"
-                                        th:text="${#numbers.formatDecimal(item.thanhTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">
+                                        th:text="${#numbers.formatDecimal(item.thanhTien, 1, 'POINT', 0, 'COMMA')} + 'VND'">
                                     </td>
 
                                     <td class="text-center py-3 pe-4">
@@ -178,7 +178,7 @@
                                 <span class="fw-bold text-dark fs-5">Tổng thanh toán:</span>
                                 <div class="text-end">
                                     <span class="fs-3 fw-bolder text-danger d-block"
-                                          th:text="${#numbers.formatDecimal(tongTien, 1, 'POINT', 0, 'COMMA')} + ' đ'">
+                                          th:text="${#numbers.formatDecimal(tongTien, 1, 'POINT', 0, 'COMMA')} + 'VND'">
                                     </span>
                                     <small class="text-muted text-end d-block small">(Đã bao gồm thuế VAT nếu có)</small>
                                 </div>

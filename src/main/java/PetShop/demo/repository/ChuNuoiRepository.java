@@ -9,5 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ChuNuoiRepository extends JpaRepository<ChuNuoi, Integer> {
     Optional<ChuNuoi> findBySoDienThoai(String soDienThoai);
+    Optional<ChuNuoi> findFirstBySoDienThoai(String soDienThoai);
+    Optional<ChuNuoi> findFirstByMaKH(Integer maKH);
     List<ChuNuoi> findByHoTenChuNuoiContainingIgnoreCaseOrSoDienThoaiContaining(String hoTen, String sdt);
 }

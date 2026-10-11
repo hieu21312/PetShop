@@ -83,6 +83,8 @@ public class AuthController {
 
         // Mã hóa mật khẩu
         customer.setMatKhau(authService.hashPassword(customer.getMatKhau()));
+        customer.setHangThanhVien("Tiêu chuẩn");
+        customer.setDiemTichLuy(0);
         customerRepository.save(customer);
 
         // Tự động đăng nhập sau khi đăng ký
@@ -90,6 +92,9 @@ public class AuthController {
         session.setAttribute("tenKH", customer.getTenKH());
         session.setAttribute("email", customer.getEmail());
         session.setAttribute("role", "KhachHang");
+        session.setAttribute("hangThanhVien", "Tiêu chuẩn");
+        session.setAttribute("diemTichLuy", 0);
+        session.setAttribute("phanTramGiamHang", java.math.BigDecimal.ZERO);
 
         return "redirect:/";
     }
