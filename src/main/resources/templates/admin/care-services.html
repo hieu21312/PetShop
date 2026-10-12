@@ -76,7 +76,7 @@
                                             <span class="badge bg-light text-dark border px-2 py-1" th:if="${s.thoiGianThucHien != null}" th:text="${s.thoiGianThucHien} + ' phút'"></span>
                                         </td>
                                         <td class="text-nowrap">
-                                            <span class="text-danger fw-bold fs-6" th:text="${#numbers.formatDecimal(s.giaDichVu, 0, 0, 'COMMA')} + ' đ'"></span>
+                                            <span class="text-danger fw-bold fs-6" th:text="${s.giaDichVu != null ? #numbers.formatDecimal(s.giaDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></span>
                                         </td>
                                         <td class="text-center text-nowrap">
                                             <a th:href="@{/admin/care-services/edit/{id}(id=${s.maDVCS})}" class="btn btn-sm btn-outline-warning rounded-pill px-2 me-1" title="Chỉnh sửa">

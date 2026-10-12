@@ -1,0 +1,382 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section class="py-3">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header & Bộ lọc thời gian -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                            <div>
+                                <h3 class="fw-bold mb-1 text-dark">Báo cáo doanh thu</h3>
+                                <p class="text-muted mb-0">
+                                    Thời gian thống kê: <strong class="text-primary fs-6" th:text="${report.selectedTimeLabel}"></strong>
+                                </p>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/admin/reports/export-csv(type=${report.filterType}, date=${param.date}, month=${param.month}, year=${param.year}, from=${param.from}, to=${param.to})}"
+                                   class="btn btn-success rounded-pill px-3 btn-sm shadow-sm">
+                                    <i class="fas fa-file-excel me-1"></i> Xuất Excel / CSV
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" onclick="window.print()">
+                                    <i class="fas fa-print me-1"></i> In báo cáo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Thanh chọn chế độ: Theo tuần / Theo tháng / Theo năm / Tùy chỉnh -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a th:href="@{/admin/reports(type='week')}"
+                               class="btn btn-sm rounded-pill px-3 fw-bold"
+                               th:classappend="${report.filterType == 'week' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
+                                Theo tuần
+                            </a>
+                            <a th:href="@{/admin/reports(type='month')}"
+                               class="btn btn-sm rounded-pill px-3 fw-bold"
+                               th:classappend="${report.filterType == 'month' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
+                                Theo tháng
+                            </a>
+                            <a th:href="@{/admin/reports(type='year')}"
+                               class="btn btn-sm rounded-pill px-3 fw-bold"
+                               th:classappend="${report.filterType == 'year' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
+                                Theo năm
+                            </a>
+                            <a th:href="@{/admin/reports(type='custom')}"
+                               class="btn btn-sm rounded-pill px-3 fw-bold"
+                               th:classappend="${report.filterType == 'custom' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
+                                Tùy chỉnh khoảng ngày
+                            </a>
+                        </div>
+
+                        <!-- Form chọn bộ lọc tương ứng -->
+                        <div class="p-3 bg-light rounded-3">
+                            <!-- 1. Bộ lọc Theo tuần -->
+                            <form th:if="${report.filterType == 'week'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
+                                <input type="hidden" name="type" value="week">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Chọn ngày trong tuần:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="date" name="date" th:value="${report.selectedDate}" class="form-control form-control-sm rounded-3">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Xem báo cáo</button>
+                                </div>
+                                <div class="col-auto">
+                                    <a th:href="@{/admin/reports(type='week')}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Tuần này</a>
+                                </div>
+                            </form>
+
+                            <!-- 2. Bộ lọc Theo tháng -->
+                            <form th:if="${report.filterType == 'month'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
+                                <input type="hidden" name="type" value="month">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Chọn tháng / năm:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="month" name="month" th:value="${report.selectedMonth}" class="form-control form-control-sm rounded-3">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Xem báo cáo</button>
+                                </div>
+                                <div class="col-auto">
+                                    <a th:href="@{/admin/reports(type='month')}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Tháng này</a>
+                                </div>
+                            </form>
+
+                            <!-- 3. Bộ lọc Theo năm -->
+                            <form th:if="${report.filterType == 'year'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
+                                <input type="hidden" name="type" value="year">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Chọn năm:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <select name="year" class="form-select form-select-sm rounded-3">
+                                        <option value="2024" th:selected="${report.selectedYear == 2024}">Năm 2024</option>
+                                        <option value="2025" th:selected="${report.selectedYear == 2025}">Năm 2025</option>
+                                        <option value="2026" th:selected="${report.selectedYear == 2026}">Năm 2026</option>
+                                        <option value="2027" th:selected="${report.selectedYear == 2027}">Năm 2027</option>
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Xem báo cáo</button>
+                                </div>
+                                <div class="col-auto">
+                                    <a th:href="@{/admin/reports(type='year')}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Năm nay</a>
+                                </div>
+                            </form>
+
+                            <!-- 4. Bộ lọc Tùy chỉnh ngày -->
+                            <form th:if="${report.filterType == 'custom'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
+                                <input type="hidden" name="type" value="custom">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Từ ngày:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="date" name="from" th:value="${report.customFrom}" class="form-control form-control-sm rounded-3" required>
+                                </div>
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Đến ngày:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="date" name="to" th:value="${report.customTo}" class="form-control form-control-sm rounded-3" required>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Xem báo cáo</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Thẻ tổng quan số liệu -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 p-3 text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                            <div class="small fw-semibold opacity-75 mb-1">Doanh thu Sản phẩm</div>
+                            <h4 class="fw-bold mb-1" th:text="${report.tongDoanhThuSanPham != null ? #numbers.formatDecimal(report.tongDoanhThuSanPham, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                            <div class="small opacity-75" th:text="${report.soDonHangSanPham} + ' đơn hàng đã lập'">0 đơn hàng</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 p-3 text-white" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <div class="small fw-semibold opacity-75 mb-1">Doanh thu Dịch vụ</div>
+                            <h4 class="fw-bold mb-1" th:text="${report.tongDoanhThuDichVu != null ? #numbers.formatDecimal(report.tongDoanhThuDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                            <div class="small opacity-75" th:text="${report.soPhieuDichVu} + ' phiếu chăm sóc'">0 phiếu dịch vụ</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm rounded-4 p-3 text-white" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                            <div class="small fw-semibold opacity-75 mb-1">Tổng doanh thu</div>
+                            <h4 class="fw-bold mb-1" th:text="${report.tongDoanhThuHopNhat != null ? #numbers.formatDecimal(report.tongDoanhThuHopNhat, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                            <div class="small opacity-75" th:text="${report.tongGiaoDich} + ' tổng số giao dịch'">0 giao dịch</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ phân tích doanh thu -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Biểu đồ so sánh doanh thu</h5>
+                        <div class="small text-muted">
+                            <span class="badge" style="background-color: #4f46e5;">&nbsp;</span> Sản phẩm
+                            <span class="badge ms-2" style="background-color: #10b981;">&nbsp;</span> Dịch vụ
+                        </div>
+                    </div>
+                    <div class="card-body p-4 pt-0">
+                        <canvas id="revenueReportChart" height="110"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bảng số liệu chi tiết -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h5 class="fw-bold mb-0 text-dark">Bảng số liệu</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th class="text-end">Doanh thu SP</th>
+                                    <th class="text-center">Số đơn</th>
+                                    <th class="text-end">Doanh thu Dịch vụ</th>
+                                    <th class="text-center">Số phiếu</th>
+                                    <th class="text-end">Tổng cộng</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="row : ${report.breakdownList}">
+                                    <td class="fw-bold text-secondary" th:text="${row.periodLabel}"></td>
+                                    <td class="text-end text-primary fw-semibold"
+                                        th:text="${row.productRevenue != null ? #numbers.formatDecimal(row.productRevenue, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                    <td class="text-center" th:text="${row.productCount}"></td>
+                                    <td class="text-end text-success fw-semibold"
+                                        th:text="${row.serviceRevenue != null ? #numbers.formatDecimal(row.serviceRevenue, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                    <td class="text-center" th:text="${row.serviceCount}"></td>
+                                    <td class="text-end text-danger fw-bold"
+                                        th:text="${row.totalRevenue != null ? #numbers.formatDecimal(row.totalRevenue, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(report.breakdownList)}">
+                                    <td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu trong kỳ này</td>
+                                </tr>
+                                </tbody>
+                                <tfoot class="table-light fw-bold">
+                                <tr>
+                                    <td>Tổng cộng</td>
+                                    <td class="text-end text-primary"
+                                        th:text="${report.tongDoanhThuSanPham != null ? #numbers.formatDecimal(report.tongDoanhThuSanPham, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                    <td class="text-center" th:text="${report.soDonHangSanPham}"></td>
+                                    <td class="text-end text-success"
+                                        th:text="${report.tongDoanhThuDichVu != null ? #numbers.formatDecimal(report.tongDoanhThuDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                    <td class="text-center" th:text="${report.soPhieuDichVu}"></td>
+                                    <td class="text-end text-danger fs-6"
+                                        th:text="${report.tongDoanhThuHopNhat != null ? #numbers.formatDecimal(report.tongDoanhThuHopNhat, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs chi tiết các giao dịch phát sinh -->
+                <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                    <div class="card-header bg-white py-3 border-0">
+                        <ul class="nav nav-tabs card-header-tabs" id="reportTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active fw-bold text-primary" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
+                                    Đơn hàng sản phẩm (<span th:text="${#lists.size(report.orders)}">0</span>)
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link fw-bold text-success" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets-pane" type="button" role="tab">
+                                    Phiếu chăm sóc dịch vụ (<span th:text="${#lists.size(report.tickets)}">0</span>)
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="tab-content" id="reportTabsContent">
+                            <!-- Tab 1: Đơn hàng sản phẩm -->
+                            <div class="tab-pane fade show active" id="orders-pane" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Mã đơn</th>
+                                            <th>Khách hàng</th>
+                                            <th>Ngày lập</th>
+                                            <th>Hình thức</th>
+                                            <th class="text-end">Tổng tiền</th>
+                                            <th class="text-center">Thao tác</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="o : ${report.orders}">
+                                            <td class="fw-bold text-primary">#<span th:text="${o.maHD}"></span></td>
+                                            <td th:text="${o.customer != null ? o.customer.tenKH : 'Khách vãng lai'}"></td>
+                                            <td th:text="${#temporals.format(o.ngayLap, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border" th:text="${o.hinhThucThanhToan ?: 'COD'}"></span>
+                                            </td>
+                                            <td class="text-end fw-bold text-danger"
+                                                th:text="${o.tongTien != null ? #numbers.formatDecimal(o.tongTien, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                                            <td class="text-center">
+                                                <a th:href="@{/admin/orders/detail/{id}(id=${o.maHD})}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Chi tiết</a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(report.orders)}">
+                                            <td colspan="6" class="text-center py-4 text-muted">Không có đơn hàng nào trong khoảng thời gian này</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2: Phiếu chăm sóc dịch vụ -->
+                            <div class="tab-pane fade" id="tickets-pane" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Số phiếu</th>
+                                            <th>Thú cưng</th>
+                                            <th>Chủ nuôi</th>
+                                            <th>Ngày nhận</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-end">Thành tiền</th>
+                                            <th class="text-center">Thao tác</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="t : ${report.tickets}">
+                                            <td class="fw-bold text-success" th:text="${t.soPhieu}"></td>
+                                            <td th:text="${t.thuCung != null ? t.thuCung.tenThuCung : 'N/A'}"></td>
+                                            <td th:text="${t.chuNuoi != null ? t.chuNuoi.hoTenChuNuoi : 'N/A'}"></td>
+                                            <td th:text="${#temporals.format(t.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td>
+                                                <span class="badge bg-info-subtle text-info" th:text="${t.trangThaiDichVu}"></span>
+                                            </td>
+                                            <td class="text-end fw-bold text-danger"
+                                                th:text="${(t.thanhToan != null ? #numbers.formatDecimal(t.thanhToan, 1, 'POINT', 0, 'COMMA') : (t.tongTien != null ? #numbers.formatDecimal(t.tongTien, 1, 'POINT', 0, 'COMMA') : '0')) + 'VND'}"></td>
+                                            <td class="text-center">
+                                                <a th:href="@{/admin/care-tickets/detail/{id}(id=${t.maPhieuDV})}" class="btn btn-sm btn-outline-success rounded-pill px-3">Chi tiết</a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(report.tickets)}">
+                                            <td colspan="7" class="text-center py-4 text-muted">Không có phiếu chăm sóc nào trong khoảng thời gian này</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Script biểu đồ Chart.js -->
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    const labels = /*[[${report.chartLabels}]]*/ [];
+                    const productData = /*[[${report.productRevenues}]]*/ [];
+                    const serviceData = /*[[${report.serviceRevenues}]]*/ [];
+
+                    const ctx = document.getElementById('revenueReportChart');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: 'Doanh thu Sản phẩm (VND)',
+                                        data: productData,
+                                        backgroundColor: '#4f46e5',
+                                        borderRadius: 6
+                                    },
+                                    {
+                                        label: 'Doanh thu Dịch vụ (VND)',
+                                        data: serviceData,
+                                        backgroundColor: '#10b981',
+                                        borderRadius: 6
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                const val = context.parsed.y || 0;
+                                                return ' ' + context.dataset.label + ': ' + val.toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    /*]]>*/
+                </script>
+            </div>
+        </div>
+    </section>
+</div>

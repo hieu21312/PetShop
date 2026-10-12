@@ -1,0 +1,80 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-box-open me-2"></i> Đơn hàng của tôi</h2>
+                    <p class="text-muted mb-0">Theo dõi tiến trình xử lý, trạng thái giao vận và lịch sử mua sắm của bạn</p>
+                </div>
+                <a th:href="@{/}" class="btn btn-outline-pink rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-shopping-bag me-2"></i>Tiếp tục mua sắm
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5">
+                        <i class="fas fa-receipt text-muted mb-3" style="font-size: 3.5rem;"></i>
+                        <h5 class="text-secondary fw-bold">Bạn chưa có đơn đặt hàng nào</h5>
+                        <p class="text-muted">Khám phá các sản phẩm đồ chơi, thức ăn, phụ kiện chất lượng cho thú cưng ngay hôm nay.</p>
+                        <a th:href="@{/}" class="btn btn-pink rounded-pill px-4 py-2 mt-2 shadow-sm">Khám phá Cửa hàng</a>
+                    </div>
+
+                    <div th:if="${not #lists.isEmpty(orders)}" class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-pink">
+                            <tr>
+                                <th class="ps-4">Mã Đơn</th>
+                                <th>Ngày Đặt</th>
+                                <th>Địa Chỉ Giao Hàng</th>
+                                <th>Hình Thức</th>
+                                <th>Tổng Tiền</th>
+                                <th>Trạng Thái</th>
+                                <th class="pe-4 text-end">Thao Tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="o : ${orders}">
+                                <td class="ps-4">
+                                    <strong class="text-danger" th:text="'#DH' + ${o.maHD}"></strong>
+                                </td>
+                                <td>
+                                    <div><i class="far fa-calendar-alt me-1 text-secondary"></i><span th:text="${#temporals.format(o.ngayLap, 'dd/MM/yyyy')}"></span></div>
+                                    <small class="text-muted"><i class="far fa-clock me-1"></i><span th:text="${#temporals.format(o.ngayLap, 'HH:mm')}"></span></small>
+                                </td>
+                                <td>
+                                    <span class="text-dark" th:text="${o.diaChiGiaoHang}"></span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${o.hinhThucThanhToan ?: 'COD'}"></span>
+                                    <div class="small mt-1" th:classappend="${o.daThanhToan ? 'text-success' : 'text-muted'}">
+                                        <i class="fas" th:classappend="${o.daThanhToan ? 'fa-check-circle' : 'fa-hourglass-half'}"></i>
+                                        <span th:text="${o.daThanhToan ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-danger fs-6" th:text="${#numbers.formatDecimal(o.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
+                                    <div class="small text-muted" th:if="${o.tienGiam != null and o.tienGiam > 0}">
+                                        Giảm: <span th:text="'-' + ${#numbers.formatDecimal(o.tienGiam, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge px-3 py-2 rounded-pill"
+                                          th:classappend="${o.tinhTrang == 1 ? 'bg-warning text-dark' : (o.tinhTrang == 2 ? 'bg-primary' : (o.tinhTrang == 3 ? 'bg-info text-dark' : (o.tinhTrang == 4 ? 'bg-success' : 'bg-danger')))}"
+                                          th:text="${o.orderStatus != null ? o.orderStatus.tinhTrangDonHang : (o.tinhTrang == 1 ? 'Chờ xác nhận' : (o.tinhTrang == 2 ? 'Đã xác nhận' : (o.tinhTrang == 3 ? 'Đang giao hàng' : (o.tinhTrang == 4 ? 'Hoàn thành' : 'Đã hủy'))))}">
+                                    </span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <a th:href="@{'/DonHang/ChiTiet/' + ${o.maHD}}" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

@@ -27,6 +27,9 @@ public class OrderStatus {
     public String getTinhTrangDonHang() { return tinhTrangDonHang; }
     public void setTinhTrangDonHang(String tinhTrangDonHang) { this.tinhTrangDonHang = tinhTrangDonHang; }
 
+    public String getTenTinhTrang() { return tinhTrangDonHang; }
+    public void setTenTinhTrang(String tenTinhTrang) { this.tinhTrangDonHang = tenTinhTrang; }
+
     public List<Order> getOrders() { return orders; }
     public void setOrders(List<Order> orders) { this.orders = orders; }
 }

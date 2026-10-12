@@ -16,7 +16,7 @@
         </form>
         <div class="alert alert-success d-flex justify-content-between">
             <strong>Tổng doanh thu:</strong>
-            <span class="text-danger font-weight-bold" th:text="${#numbers.formatDecimal(tongDoanhThu, 0, 0, 'COMMA')} + ' đ'"></span>
+            <span class="text-danger font-weight-bold" th:text="${tongDoanhThu != null ? #numbers.formatDecimal(tongDoanhThu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></span>
         </div>
         <table class="table table-bordered">
             <thead class="table-dark">
@@ -27,7 +27,7 @@
                 <td th:text="${hd.maHD}">...</td>
                 <td th:text="${hd.customer != null ? hd.customer.tenKH : 'Khách lẻ'}">...</td>
                 <td th:text="${#temporals.format(hd.ngayLap, 'dd/MM/yyyy')}">...</td>
-                <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 0, 'COMMA')} + ' đ'">...</td>
+                <td th:text="${hd.tongTien != null ? #numbers.formatDecimal(hd.tongTien, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">...</td>
             </tr>
             <tr th:if="${#lists.isEmpty(orders)}">
                 <td colspan="4" class="text-center">Không có đơn hàng nào trong khoảng thời gian này</td>

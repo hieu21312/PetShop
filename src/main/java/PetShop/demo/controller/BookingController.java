@@ -99,7 +99,7 @@ public class BookingController {
     }
 
     // KHACH HANG: Xem lịch sử đặt lịch cá nhân (Hỗ trợ cả Đã đăng nhập & Khách vãng lai qua SĐT)
-    @GetMapping("/LichSuDatLich")
+    @GetMapping({"/LichSuDatLich", "/MyBookings"})
     public String myBookings(@RequestParam(required = false) String searchPhone, Model model, HttpSession session) {
         Integer maKH = (Integer) session.getAttribute("maKH");
         String email = (String) session.getAttribute("email");

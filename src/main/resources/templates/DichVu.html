@@ -107,7 +107,7 @@
                     <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
                         <div>
                             <small class="text-uppercase text-muted d-block" style="font-size: 0.75rem; letter-spacing: 1px;">Giá dịch vụ</small>
-                            <span class="service-price" th:text="${#numbers.formatDecimal(dv.giaDichVu, 0, 0, 'COMMA')} + ' đ'"></span>
+                            <span class="service-price" th:text="${dv.giaDichVu != null ? #numbers.formatDecimal(dv.giaDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></span>
                         </div>
 
                         <a th:href="@{/DatLich(maDV=${dv.maDV})}" class="btn btn-book-now px-4">

@@ -130,6 +130,12 @@
                 </div>
             </div>
 
+            <!-- Error alert -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
             <div class="tab-content" id="cartTabsContent">
                 <!-- TAB 1: MUA SẮM SẢN PHẨM -->
                 <div class="tab-pane fade" th:classappend="${activeTab == 'products' or activeTab == null ? 'show active' : ''}" id="products-pane" role="tabpanel" aria-labelledby="products-tab">

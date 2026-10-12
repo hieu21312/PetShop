@@ -16,7 +16,7 @@
         <h1 class="product-title"
             th:text="${product.tenSP}">
         </h1>
-        <h2 class="product-price" th:text="${#numbers.formatDecimal(product.giaBan, 1, 'POINT', 0, 'COMMA')} + ' Đ'"></h2>
+        <h2 class="product-price" th:text="${product.giaBan != null ? #numbers.formatDecimal(product.giaBan, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></h2>
 
         <p th:text="${product.moTa}"></p>
         <div class="info-box">
@@ -44,7 +44,7 @@
         </div>
         <div class="product-buttons">
           <a th:href="@{/ThemGioHang(iMaSP=${product.maSP})}" class="btn btn-success btn-lg">Thêm vào giỏ</a>
-          <a th:href="@{/DatHang}" class="btn btn-outline-danger btn-lg">Mua ngay</a>
+          <a th:href="@{/ThemGioHang(iMaSP=${product.maSP}, strURL='/DatHang')}" class="btn btn-outline-danger btn-lg">Mua ngay</a>
         </div>
       </div>
     </div>
@@ -156,7 +156,7 @@
                 </h6>
 
                 <p class="text-danger fw-bold fs-5 mt-auto"
-                   th:text="${#numbers.formatDecimal(p.giaBan, 1, 'POINT', 0, 'COMMA')} + ' Đ'">
+                   th:text="${p.giaBan != null ? #numbers.formatDecimal(p.giaBan, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">
                 </p>
 
               </div>

@@ -9,6 +9,8 @@ import java.util.Optional;
 @Repository
 public interface ChuNuoiRepository extends JpaRepository<ChuNuoi, Integer> {
     Optional<ChuNuoi> findBySoDienThoai(String soDienThoai);
+    Optional<ChuNuoi> findFirstBySoDienThoai(String soDienThoai);
+    Optional<ChuNuoi> findFirstByMaKH(Integer maKH);
     Optional<ChuNuoi> findByMaKH(Integer maKH);
     Optional<ChuNuoi> findFirstBySoDienThoaiOrEmail(String soDienThoai, String email);
     List<ChuNuoi> findByHoTenChuNuoiContainingIgnoreCaseOrSoDienThoaiContaining(String hoTen, String sdt);

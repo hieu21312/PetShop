@@ -89,6 +89,8 @@ public class AuthController {
 
         // Mã hóa mật khẩu
         customer.setMatKhau(authService.hashPassword(customer.getMatKhau()));
+        customer.setHangThanhVien("Tiêu chuẩn");
+        customer.setDiemTichLuy(0);
         customerRepository.save(customer);
 
         // Tự động liên kết hoặc khởi tạo Hồ sơ chủ nuôi cho Khách hàng mới
@@ -112,6 +114,9 @@ public class AuthController {
         session.setAttribute("tenKH", customer.getTenKH());
         session.setAttribute("email", customer.getEmail());
         session.setAttribute("role", "KhachHang");
+        session.setAttribute("hangThanhVien", "Tiêu chuẩn");
+        session.setAttribute("diemTichLuy", 0);
+        session.setAttribute("phanTramGiamHang", java.math.BigDecimal.ZERO);
 
         return "redirect:/";
     }
@@ -121,5 +126,54 @@ public class AuthController {
     public String logout(HttpSession session) {
         authService.logout(session);
         return "redirect:/";
+    }
+
+    // Hiển thị trang đổi mật khẩu
+    @GetMapping("/DoiMatKhau")
+    public String changePasswordPage(HttpSession session) {
+        if (!authService.isLoggedIn(session)) {
+            return "redirect:/DangNhap?returnUrl=/DoiMatKhau";
+        }
+        return "change-password";
+    }
+
+    // Xử lý đổi mật khẩu
+    @PostMapping("/DoiMatKhau")
+    public String processChangePassword(@RequestParam String oldPassword,
+                                        @RequestParam String newPassword,
+                                        @RequestParam String confirmPassword,
+                                        HttpSession session,
+                                        org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        if (!authService.isLoggedIn(session)) {
+            return "redirect:/DangNhap";
+        }
+
+        if (newPassword == null || newPassword.trim().length() < 4) {
+            ra.addFlashAttribute("error", "Mật khẩu mới phải có ít nhất 4 ký tự!");
+            return "redirect:/DoiMatKhau";
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            ra.addFlashAttribute("error", "Xác nhận mật khẩu mới không khớp!");
+            return "redirect:/DoiMatKhau";
+        }
+
+        Integer maKH = (Integer) session.getAttribute("maKH");
+        Integer maNV = (Integer) session.getAttribute("maNV");
+        boolean success = false;
+
+        if (maKH != null) {
+            success = authService.changeCustomerPassword(maKH, oldPassword, newPassword);
+        } else if (maNV != null) {
+            success = authService.changeEmployeePassword(maNV, oldPassword, newPassword);
+        }
+
+        if (success) {
+            ra.addFlashAttribute("success", "Đổi mật khẩu thành công! Vui lòng sử dụng mật khẩu mới cho các lần đăng nhập tiếp theo.");
+        } else {
+            ra.addFlashAttribute("error", "Mật khẩu hiện tại không chính xác!");
+        }
+
+        return "redirect:/DoiMatKhau";
     }
 }

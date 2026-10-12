@@ -12,13 +12,16 @@
             Chi tiết đơn hàng #<span th:text="${order.maHD}"></span>
         </h2>
 
-        <a th:href="@{/admin/orders}"
-           class="btn btn-secondary rounded-pill px-4">
-
-            <i class="fas fa-arrow-left me-2"></i>
-            Quay lại
-
-        </a>
+        <div class="d-flex gap-2 no-print">
+            <button type="button" onclick="window.print()" class="btn btn-outline-dark rounded-pill px-4 shadow-sm">
+                <i class="fas fa-print me-2"></i> In hóa đơn
+            </button>
+            <a th:href="@{/admin/orders}"
+               class="btn btn-secondary rounded-pill px-4">
+                <i class="fas fa-arrow-left me-2"></i>
+                Quay lại
+            </a>
+        </div>
 
     </div>
 
@@ -44,16 +47,21 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-
                         <label class="form-label fw-semibold">
                             Khách hàng
+                            <span th:if="${order.customer != null}"
+                                  class="badge ms-2"
+                                  th:classappend="${order.customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (order.customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (order.customer.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                  th:text="${order.customer.hangThanhVien ?: 'Tiêu chuẩn'}">
+                            </span>
+                            <span th:if="${order.customer != null}" class="text-muted small fw-normal ms-1">
+                                (<i class="fas fa-star text-warning"></i> <span th:text="${order.customer.diemTichLuy ?: 0}"></span> điểm)
+                            </span>
                         </label>
-
                         <input type="text"
                                class="form-control"
                                th:value="${order.customer != null ? order.customer.tenKH : 'N/A'}"
                                disabled>
-
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -90,27 +98,27 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-
                         <label class="form-label fw-semibold">
-                            Thanh toán
+                            Thanh toán & Tích điểm
                         </label>
-
-                        <div class="form-check mt-2">
-
-                            <input type="checkbox"
-                                   name="daThanhToan"
-                                   value="true"
-                                   class="form-check-input"
-                                   th:checked="${order.daThanhToan}">
-
-                            <label class="form-check-label">
-
-                                Đã thanh toán
-
-                            </label>
-
+                        <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                            <div class="form-check me-2">
+                                <input type="checkbox"
+                                       name="daThanhToan"
+                                       value="true"
+                                       class="form-check-input"
+                                       th:checked="${order.daThanhToan}">
+                                <label class="form-check-label fw-semibold">
+                                    Đã thanh toán
+                                </label>
+                            </div>
+                            <span th:if="${order.daCongDiem}" class="badge bg-success-subtle text-success border border-success-subtle py-2 px-3">
+                                <i class="fas fa-check-circle me-1"></i> Đã cộng +<span th:text="${pointsEarned}"></span> điểm
+                            </span>
+                            <span th:unless="${order.daCongDiem}" class="badge bg-light text-muted border py-2 px-3">
+                                <i class="fas fa-star text-warning me-1"></i> Tích lũy +<span th:text="${pointsEarned}"></span> điểm (khi lưu Đã thanh toán)
+                            </span>
                         </div>
-
                     </div>
 
                     <div class="col-12 mb-4">
@@ -171,8 +179,8 @@
                 <tr th:each="detail : ${order.orderDetails}">
                     <td th:text="${detail.product.tenSP}"></td>
                     <td th:text="${detail.soLuong}"></td>
-                    <td th:text="${#numbers.formatDecimal(detail.giaBan,0,0,'COMMA')} + ' đ'"></td>
-                    <td th:text="${#numbers.formatDecimal(detail.soLuong * detail.giaBan,0,0,'COMMA')} + ' đ'"></td>
+                    <td th:text="${detail.giaBan != null ? #numbers.formatDecimal(detail.giaBan, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
+                    <td th:text="${(detail.soLuong != null and detail.giaBan != null) ? #numbers.formatDecimal(detail.soLuong * detail.giaBan, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></td>
                 </tr>
 
                 </tbody>

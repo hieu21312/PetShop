@@ -23,6 +23,13 @@
                     <span class="fw-semibold text-dark"
                           th:text="${customer.tenKH}">
                     </span>
+                    <span class="badge ms-2"
+                          th:classappend="${customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (customer.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                          th:text="${customer.hangThanhVien ?: 'Tiêu chuẩn'}">
+                    </span>
+                    <span class="ms-2 small text-muted">
+                        <i class="fas fa-star text-warning"></i> <span th:text="${customer.diemTichLuy ?: 0}"></span> điểm tích lũy
+                    </span>
                 </p>
             </div>
 
@@ -68,7 +75,7 @@
 
                         <td>
                             <span class="fw-bold text-danger"
-                                  th:text="${#numbers.formatDecimal(o.tongTien,0,0,'COMMA')} + ' đ'">
+                                  th:text="${o.tongTien != null ? #numbers.formatDecimal(o.tongTien, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">
                             </span>
                         </td>
 

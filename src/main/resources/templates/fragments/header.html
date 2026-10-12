@@ -1,6 +1,95 @@
 <header th:fragment="header">
+    <style>
+        .custom-navbar {
+            padding: 10px 0;
+        }
+        .custom-navbar .navbar-nav {
+            gap: 0.25rem;
+        }
+        @media (min-width: 992px) {
+            .custom-navbar .navbar-nav {
+                gap: 0.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .custom-navbar .navbar-nav {
+                gap: 1rem;
+            }
+        }
+        @media (min-width: 1400px) {
+            .custom-navbar .navbar-nav {
+                gap: 1.5rem;
+            }
+        }
+        .custom-link {
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 6px 10px !important;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .custom-navbar .search-box {
+            width: 220px;
+            max-width: 250px;
+            height: 38px;
+            border-radius: 50px !important;
+            border: 1.5px solid #ffccd5 !important;
+            background: white !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: stretch !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+        }
+        .custom-navbar .search-box input {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            min-width: 0 !important;
+            font-size: 0.88rem !important;
+            padding: 0 10px 0 14px !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+            margin: 0 !important;
+        }
+        .custom-navbar .search-box .btn-search {
+            border: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            padding: 0 16px !important;
+            background: linear-gradient(45deg, #ff4d6d, #ff758f) !important;
+            color: white !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+            transition: all 0.2s ease !important;
+        }
+        .custom-navbar .search-box .btn-search:hover {
+            background: linear-gradient(45deg, #ff3355, #ff5777) !important;
+            color: white !important;
+        }
+        .custom-navbar .user-btn {
+            padding: 7px 12px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .custom-navbar .user-name-text {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
     <nav class="navbar navbar-expand-lg custom-navbar shadow-sm">
-        <div class="container">
+        <div class="container-fluid px-3 px-xl-4">
 
             <!-- LOGO -->
             <a class="navbar-brand logo-text" th:href="@{/}">
@@ -71,14 +160,14 @@
                 </ul>
 
                 <!-- RIGHT -->
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center flex-wrap gap-2 mt-2 mt-lg-0">
 
                     <!-- SEARCH -->
                     <form class="search-box d-flex" th:action="@{/SanPham}" method="get">
 
                         <input class="form-control" type="search" name="searchString" placeholder="Tìm thú cưng...">
 
-                        <button class="btn btn-search">
+                        <button class="btn-search" type="submit" title="Tìm kiếm">
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
@@ -175,27 +264,99 @@
 
                     <!-- USER -->
                     <div th:unless="${session.role == null}" class="dropdown">
-                        <button class="btn user-btn dropdown-toggle" data-bs-toggle="dropdown">
+                        <button class="btn user-btn dropdown-toggle d-flex align-items-center gap-1"
+                                data-bs-toggle="dropdown">
 
                             <i class="fas fa-user-circle"></i>
 
-                            <span th:text="${session.tenKH != null ? session.tenKH : session.tenNV}">
+                            <span class="user-name-text" th:text="${session.tenKH != null ? session.tenKH : session.tenNV}">
                                 User
+                            </span>
+
+                            <span th:if="${session.role == 'KhachHang' and session.hangThanhVien != null}"
+                                  class="badge ms-1 small"
+                                  th:classappend="${session.hangThanhVien == 'VVIP' ? 'bg-danger' : (session.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (session.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                  th:text="${session.hangThanhVien}">
                             </span>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3" style="min-width: 240px;">
+
+                            <li th:if="${session.role == 'KhachHang'}" class="px-3 py-2 bg-light border-bottom rounded-top-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="small text-muted">Hạng thành viên:</span>
+                                    <span class="badge fw-bold"
+                                          th:classappend="${session.hangThanhVien == 'VVIP' ? 'bg-danger' : (session.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (session.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                          th:text="${session.hangThanhVien ?: 'Tiêu chuẩn'}">
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small">
+                                    <span class="text-muted"><i class="fas fa-star text-warning me-1"></i>Điểm tích lũy:</span>
+                                    <strong class="text-primary" th:text="${(session.diemTichLuy ?: 0) + ' điểm'}"></strong>
+                                </div>
+                                <div class="small text-danger fw-semibold mt-1" th:if="${session.phanTramGiamHang != null and session.phanTramGiamHang > 0}">
+                                    <i class="fas fa-tag me-1"></i>Ưu đãi giảm: <span th:text="${session.phanTramGiamHang}"></span>%
+                                </div>
+                            </li>
+
+                            <!-- Thông tin nhân sự (Nếu là Nhân viên/Bác sĩ/Admin) -->
+                            <li th:if="${session.maNV != null}" class="px-3 py-2 bg-light border-bottom rounded-top-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted">Vai trò:</span>
+                                    <span class="badge bg-secondary fw-semibold" th:text="${session.role}">Nhân viên</span>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <i class="fas fa-id-badge me-1"></i>Mã NV: <strong th:text="${session.maNV}"></strong>
+                                </div>
+                            </li>
 
                             <li th:if="${session.role == 'Admin'}">
-                                <a class="dropdown-item" th:href="@{/admin/index}">
-                                    <i class="fas fa-cog"></i>
-                                    Quản trị
+                                <a class="dropdown-item py-2"
+                                   th:href="@{/admin/index}">
+                                    <i class="fas fa-cog me-2 text-primary"></i>
+                                    Trang Quản trị
+                                </a>
+                            </li>
+
+                            <!-- Nút Lịch làm việc cho Nhân viên -->
+                            <li th:if="${session.maNV != null}">
+                                <a class="dropdown-item py-2"
+                                   th:href="@{/staff/my-tasks}">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                    Lịch làm việc
+                                </a>
+                            </li>
+
+                            <li th:if="${session.role == 'KhachHang'}">
+                                <a class="dropdown-item py-2" th:href="@{/ThongTinCaNhan}">
+                                    <i class="fas fa-user-edit me-2 text-success"></i> Thông tin cá nhân
+                                </a>
+                            </li>
+
+                            <li th:if="${session.role == 'KhachHang'}">
+                                <a class="dropdown-item py-2" th:href="@{/DonHang/CuaToi}">
+                                    <i class="fas fa-box-open me-2 text-info"></i> Đơn hàng của tôi
+                                </a>
+                            </li>
+
+                            <li th:if="${session.role == 'KhachHang'}">
+                                <a class="dropdown-item py-2" th:href="@{/LichSuDatLich}">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i> Lịch hẹn dịch vụ
                                 </a>
                             </li>
 
                             <li>
-                                <a class="dropdown-item" th:href="@{/DangNhap/Logout}">
-                                    <i class="fas fa-sign-out-alt"></i>
+                                <a class="dropdown-item py-2" th:href="@{/DoiMatKhau}">
+                                    <i class="fas fa-key me-2 text-warning"></i> Đổi mật khẩu
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider my-1"></li>
+
+                            <li>
+                                <a class="dropdown-item py-2 text-danger"
+                                   th:href="@{/DangNhap/Logout}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
                                     Đăng xuất
                                 </a>
                             </li>
