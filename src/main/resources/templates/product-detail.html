@@ -44,7 +44,7 @@
         </div>
         <div class="product-buttons">
           <a th:href="@{/ThemGioHang(iMaSP=${product.maSP})}" class="btn btn-success btn-lg">Thêm vào giỏ</a>
-          <a th:href="@{/DatHang}" class="btn btn-outline-danger btn-lg">Mua ngay</a>
+          <a th:href="@{/ThemGioHang(iMaSP=${product.maSP}, strURL='/DatHang')}" class="btn btn-outline-danger btn-lg">Mua ngay</a>
         </div>
       </div>
     </div>

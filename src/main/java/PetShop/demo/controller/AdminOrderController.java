@@ -53,6 +53,9 @@ public class AdminOrderController {
         return "admin/order-detail";
     }
 
+    @Autowired
+    private PetShop.demo.service.OrderService orderService;
+
     // Cập nhật đơn hàng (tình trạng, địa chỉ, thanh toán)
     @PostMapping("/update")
     public String updateOrder(@ModelAttribute Order updatedOrder,
@@ -67,6 +70,11 @@ public class AdminOrderController {
         order.setDiaChiGiaoHang(updatedOrder.getDiaChiGiaoHang());
         order.setDaThanhToan(updatedOrder.getDaThanhToan());
         orderRepository.save(order);
+
+        // Hoàn lại kho và voucher nếu đơn hàng chuyển sang trạng thái Đã hủy (5)
+        if (updatedOrder.getTinhTrang() != null && updatedOrder.getTinhTrang() == 5 && (oldStatus == null || oldStatus != 5)) {
+            orderService.cancelOrderAndRestoreStock(order);
+        }
 
         // Tự động tích điểm và nâng hạng nếu đơn hàng đã thanh toán
         if (Boolean.TRUE.equals(order.getDaThanhToan())) {

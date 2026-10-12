@@ -18,7 +18,11 @@
                                     Thời gian thống kê: <strong class="text-primary fs-6" th:text="${report.selectedTimeLabel}"></strong>
                                 </p>
                             </div>
-                            <div>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/admin/reports/export-csv(type=${report.filterType}, date=${param.date}, month=${param.month}, year=${param.year}, from=${param.from}, to=${param.to})}"
+                                   class="btn btn-success rounded-pill px-3 btn-sm shadow-sm">
+                                    <i class="fas fa-file-excel me-1"></i> Xuất Excel / CSV
+                                </a>
                                 <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" onclick="window.print()">
                                     <i class="fas fa-print me-1"></i> In báo cáo
                                 </button>

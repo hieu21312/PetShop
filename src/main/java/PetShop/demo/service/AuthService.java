@@ -14,9 +14,10 @@ import java.security.NoSuchAlgorithmException;
 public class AuthService {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private EmployeeRepository employeeRepository;
-    @Autowired private MembershipService membershipService;
+    @Autowired @org.springframework.context.annotation.Lazy private MembershipService membershipService;
 
     public String hashPassword(String password) {
+        if (password == null) return null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(password.getBytes());
@@ -25,13 +26,18 @@ public class AuthService {
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            return null;
+            return password;
         }
     }
 
     public Customer loginCustomer(String email, String password, HttpSession session) {
-
+        // Hỗ trợ cả mật khẩu nguyên bản (dữ liệu cũ) và mật khẩu băm SHA-256
         var customerOpt = customerRepository.findFirstByEmailAndMatKhau(email, password);
+        if (customerOpt.isEmpty()) {
+            String hashed = hashPassword(password);
+            customerOpt = customerRepository.findFirstByEmailAndMatKhau(email, hashed);
+        }
+
         if (customerOpt.isPresent()) {
             Customer c = customerOpt.get();
             session.setAttribute("maKH", c.getMaKH());
@@ -46,6 +52,11 @@ public class AuthService {
 
     public Employee loginEmployee(Integer maNV, String password, HttpSession session) {
         var empOpt = employeeRepository.findByMaNVAndMatKhau(maNV, password);
+        if (empOpt.isEmpty()) {
+            String hashed = hashPassword(password);
+            empOpt = employeeRepository.findByMaNVAndMatKhau(maNV, hashed);
+        }
+
         if (empOpt.isPresent()) {
             Employee e = empOpt.get();
             session.setAttribute("maNV", e.getMaNV());
@@ -55,6 +66,38 @@ public class AuthService {
             return e;
         }
         return null;
+    }
+
+    public boolean changeCustomerPassword(Integer maKH, String oldPassword, String newPassword) {
+        if (maKH == null || oldPassword == null || newPassword == null) return false;
+        var custOpt = customerRepository.findById(maKH);
+        if (custOpt.isEmpty()) return false;
+        Customer c = custOpt.get();
+        String currentStored = c.getMatKhau();
+        String hashedOld = hashPassword(oldPassword);
+        boolean matches = (currentStored != null) && (currentStored.equals(oldPassword) || currentStored.equalsIgnoreCase(hashedOld));
+        if (!matches) {
+            return false;
+        }
+        c.setMatKhau(hashPassword(newPassword));
+        customerRepository.save(c);
+        return true;
+    }
+
+    public boolean changeEmployeePassword(Integer maNV, String oldPassword, String newPassword) {
+        if (maNV == null || oldPassword == null || newPassword == null) return false;
+        var empOpt = employeeRepository.findById(maNV);
+        if (empOpt.isEmpty()) return false;
+        Employee e = empOpt.get();
+        String currentStored = e.getMatKhau();
+        String hashedOld = hashPassword(oldPassword);
+        boolean matches = (currentStored != null) && (currentStored.equals(oldPassword) || currentStored.equalsIgnoreCase(hashedOld));
+        if (!matches) {
+            return false;
+        }
+        e.setMatKhau(hashPassword(newPassword));
+        employeeRepository.save(e);
+        return true;
     }
 
     public void logout(HttpSession session) {

@@ -63,12 +63,75 @@ public class AdminPhieuDichVuController {
     @Autowired
     private BookingRepository bookingRepository;
 
+    public List<Map<String, Object>> getOptimizedStaffList(LocalDateTime start, LocalDateTime end, Integer excludeTicketId) {
+        if (start == null) start = LocalDateTime.now();
+        if (end == null) end = start.plusHours(1);
+
+        LocalDate today = start.toLocalDate();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+        List<Employee> allEmployees = employeeRepository.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Employee emp : allEmployees) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("maNV", emp.getMaNV());
+            item.put("tenNV", emp.getTenNV());
+            item.put("chuyenMon", emp.getChuyenMon() != null ? emp.getChuyenMon() : "Nhân viên");
+
+            String conflict = checkScheduleConflict(emp.getMaNV(), start, end, excludeTicketId);
+            boolean isAvailable = (conflict == null);
+            item.put("available", isAvailable);
+            item.put("conflictMsg", conflict);
+
+            long careCount = phieuRepository.findByMaNVThucHienOrderByNgayTiepNhanDesc(emp.getMaNV())
+                    .stream()
+                    .filter(p -> p.getNgayTiepNhan() != null && !p.getNgayTiepNhan().isBefore(startOfDay) && !p.getNgayTiepNhan().isAfter(endOfDay))
+                    .count();
+            long bookingCount = bookingRepository.findByMaNVOrderByNgayTaoDesc(emp.getMaNV())
+                    .stream()
+                    .filter(b -> b.getNgayDat() != null && b.getNgayDat().isEqual(today))
+                    .count();
+            int tasksToday = (int) (careCount + bookingCount);
+            item.put("tasksToday", tasksToday);
+
+            // Điểm sắp xếp: Khả dụng (ưu tiên 0) + số ca hôm nay; Bận (ưu tiên 1000) + số ca
+            item.put("sortScore", (isAvailable ? 0 : 1000) + tasksToday);
+
+            String roleInfo = (emp.getChuyenMon() != null && !emp.getChuyenMon().trim().isEmpty()) 
+                    ? " (" + emp.getChuyenMon().trim() + ")" 
+                    : "";
+            String label;
+            if (isAvailable) {
+                if (tasksToday == 0) {
+                    label = "⭐ " + emp.getTenNV() + roleInfo + " — Tối ưu nhất (Rảnh, 0 ca)";
+                } else {
+                    label = "✅ " + emp.getTenNV() + roleInfo + " — Khả dụng (" + tasksToday + " ca hôm nay)";
+                }
+            } else {
+                label = "⚠️ " + emp.getTenNV() + roleInfo + " — Đang bận / Trùng lịch";
+            }
+            item.put("displayText", label);
+
+            result.add(item);
+        }
+
+        // Sắp xếp danh sách nhân viên theo thứ tự tối ưu
+        result.sort(Comparator.comparingInt(m -> (Integer) m.get("sortScore")));
+        return result;
+    }
+
     private void populateFormModel(Model model, PhieuDichVuChamSoc ticket) {
         model.addAttribute("ticket", ticket);
         model.addAttribute("pets", hoSoThuCungRepository.findAll());
         model.addAttribute("owners", chuNuoiRepository.findAll());
         model.addAttribute("services", dichVuChamSocRepository.findAll());
-        model.addAttribute("employees", employeeRepository.findAll());
+
+        LocalDateTime start = (ticket != null && ticket.getNgayTiepNhan() != null) ? ticket.getNgayTiepNhan() : LocalDateTime.now();
+        LocalDateTime end = (ticket != null && ticket.getNgayHenTra() != null) ? ticket.getNgayHenTra() : start.plusHours(1);
+        Integer excludeId = (ticket != null) ? ticket.getMaPhieuDV() : null;
+        model.addAttribute("employees", getOptimizedStaffList(start, end, excludeId));
     }
 
     public String checkScheduleConflict(Integer maNV, LocalDateTime start, LocalDateTime end, Integer excludeTicketId) {
@@ -160,6 +223,100 @@ public class AdminPhieuDichVuController {
         }
 
         res.put("hasError", false);
+        return res;
+    }
+
+    // Endpoint lấy danh sách nhân viên đã được sắp xếp theo thứ tự tối ưu (Smart Scheduling)
+    @GetMapping("/optimized-staff-list")
+    @ResponseBody
+    public List<Map<String, Object>> getOptimizedStaffListApi(
+            @RequestParam(value = "ngayHenTra", required = false) String ngayHenTraStr,
+            @RequestParam(value = "excludeTicketId", required = false) Integer excludeTicketId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime ngayHenTra = null;
+        if (ngayHenTraStr != null && !ngayHenTraStr.trim().isEmpty()) {
+            try {
+                ngayHenTra = LocalDateTime.parse(ngayHenTraStr);
+            } catch (Exception ignored) {}
+        }
+        if (ngayHenTra == null) {
+            ngayHenTra = now.plusHours(1);
+        }
+        return getOptimizedStaffList(now, ngayHenTra, excludeTicketId);
+    }
+
+    // Endpoint gợi ý nhân sự tự động thông minh (Smart Scheduling)
+    @GetMapping("/suggest-staff")
+    @ResponseBody
+    public Map<String, Object> suggestStaff(@RequestParam(value = "ngayHenTra", required = false) String ngayHenTraStr,
+                                            @RequestParam(value = "chuyenMon", required = false) String chuyenMon) {
+        Map<String, Object> res = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime ngayHenTra = null;
+        if (ngayHenTraStr != null && !ngayHenTraStr.trim().isEmpty()) {
+            try {
+                ngayHenTra = LocalDateTime.parse(ngayHenTraStr);
+            } catch (Exception ignored) {}
+        }
+        if (ngayHenTra == null) {
+            ngayHenTra = now.plusHours(1);
+        }
+
+        List<Employee> allEmployees = employeeRepository.findAll();
+        List<Employee> eligible = allEmployees.stream().filter(emp -> {
+            if (chuyenMon != null && !chuyenMon.trim().isEmpty()) {
+                String cm = emp.getChuyenMon() != null ? emp.getChuyenMon().toLowerCase() : "";
+                return cm.contains(chuyenMon.toLowerCase());
+            }
+            return true;
+        }).toList();
+
+        if (eligible.isEmpty()) {
+            eligible = allEmployees;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+        Employee bestCandidate = null;
+        int minTasks = Integer.MAX_VALUE;
+        String reason = "";
+
+        for (Employee emp : eligible) {
+            String conflict = checkScheduleConflict(emp.getMaNV(), now, ngayHenTra, null);
+            if (conflict != null) {
+                continue;
+            }
+
+            long careCount = phieuRepository.findByMaNVThucHienOrderByNgayTiepNhanDesc(emp.getMaNV())
+                    .stream()
+                    .filter(p -> p.getNgayTiepNhan() != null && !p.getNgayTiepNhan().isBefore(startOfDay) && !p.getNgayTiepNhan().isAfter(endOfDay))
+                    .count();
+            long bookingCount = bookingRepository.findByMaNVOrderByNgayTaoDesc(emp.getMaNV())
+                    .stream()
+                    .filter(b -> b.getNgayDat() != null && b.getNgayDat().isEqual(today))
+                    .count();
+
+            int totalTasksToday = (int) (careCount + bookingCount);
+            if (totalTasksToday < minTasks) {
+                minTasks = totalTasksToday;
+                bestCandidate = emp;
+                reason = "Khả dụng trong khung giờ và hiện có số ca ít nhất trong ngày (" + totalTasksToday + " ca).";
+            }
+        }
+
+        if (bestCandidate != null) {
+            res.put("success", true);
+            res.put("maNV", bestCandidate.getMaNV());
+            res.put("tenNV", bestCandidate.getTenNV());
+            res.put("chuyenMon", bestCandidate.getChuyenMon());
+            res.put("tasksToday", minTasks);
+            res.put("reason", reason);
+        } else {
+            res.put("success", false);
+            res.put("message", "Tất cả nhân sự phù hợp đều đang bận trong khung giờ này. Vui lòng chọn thời gian khác!");
+        }
         return res;
     }
 

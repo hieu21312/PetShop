@@ -7,7 +7,10 @@ import PetShop.demo.service.AuthService;
 import PetShop.demo.service.CartService;
 import PetShop.demo.service.OrderService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -50,16 +53,35 @@ public class CartController {
 
     // Thêm vào giỏ hàng
     @GetMapping("/ThemGioHang")
-    public String addToCart(@RequestParam int iMaSP,
-                            @RequestParam(required = false, defaultValue = "/") String strURL,
+    public Object addToCart(@RequestParam int iMaSP,
+                            @RequestParam(required = false) String strURL,
+                            HttpServletRequest request,
                             HttpSession session) {
+        boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
+                || (request.getHeader("Accept") != null && request.getHeader("Accept").contains("application/json"));
+
+        String referer = request.getHeader("Referer");
+        String targetUrl = (strURL != null && !strURL.isBlank()) ? strURL : (referer != null && !referer.isBlank() ? referer : "/GioHang");
+
         // Kiểm tra đăng nhập
         if (session.getAttribute("role") == null) {
-            return "redirect:/DangNhap?returnUrl=" + strURL;
+            if (isAjax) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "redirect", "/DangNhap?returnUrl=" + targetUrl));
+            }
+            return "redirect:/DangNhap?returnUrl=" + targetUrl;
         }
+
         // Thêm vào giỏ
         cartService.addToCart(iMaSP, session);
-        return "redirect:" + strURL;
+
+        if (isAjax) {
+            var cart = cartService.getCart(session);
+            int cartCount = cart != null ? cart.size() : 0;
+            return ResponseEntity.ok(Map.of("success", true, "cartCount", cartCount));
+        }
+
+        return "redirect:" + targetUrl;
     }
 
     // Xem giỏ hàng
@@ -199,15 +221,24 @@ public class CartController {
 
         boolean daThanhToan = false;
 
-        Order order = orderService.createOrder(DiaChiGiaoHang, daThanhToan,
-                MaGiamGiaInput, TienGiamInput,
-                hinhThuc, session);
-        if (order == null) return "redirect:/GioHang";
+        try {
+            Order order = orderService.createOrder(DiaChiGiaoHang, daThanhToan,
+                    MaGiamGiaInput, TienGiamInput,
+                    hinhThuc, session);
+            if (order == null) {
+                ra.addFlashAttribute("error", "Không thể tạo đơn hàng. Giỏ hàng của bạn có thể đang trống.");
+                return "redirect:/GioHang";
+            }
 
-        ra.addFlashAttribute("orderId", order.getMaHD());
-        ra.addFlashAttribute("hinhThuc", hinhThuc);
-        ra.addFlashAttribute("tongTien", order.getTongTien());
-        return "redirect:/XacNhanDonHang";
+            ra.addFlashAttribute("orderId", order.getMaHD());
+            ra.addFlashAttribute("hinhThuc", hinhThuc);
+            ra.addFlashAttribute("tongTien", order.getTongTien());
+            return "redirect:/XacNhanDonHang";
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ra.addFlashAttribute("error", "Lỗi đặt hàng: " + ex.getMessage());
+            return "redirect:/DatHang";
+        }
     }
 
     // Xác nhận đơn hàng thành công
