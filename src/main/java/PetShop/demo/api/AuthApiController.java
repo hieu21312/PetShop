@@ -124,10 +124,10 @@ public class AuthApiController {
             empOpt = employeeRepository.findFirstByEmail(input);
         }
 
-        // Nếu không tìm thấy cả tài khoản khách hàng lẫn nhân viên -> Sai tài khoản
+        // Nếu không tìm thấy cả tài khoản khách hàng lẫn nhân viên
         if (customerOpt.isEmpty() && empOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "Tài khoản không tồn tại trên hệ thống!"));
+                    .body(Map.of("success", false, "message", "Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!"));
         }
 
         // Xử lý xác thực Khách hàng
@@ -195,9 +195,9 @@ public class AuthApiController {
             }
         }
 
-        // Tài khoản tồn tại nhưng mật khẩu không khớp -> Sai mật khẩu
+        // Mật khẩu không khớp hoặc thông tin không chính xác
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("success", false, "message", "Mật khẩu không chính xác. Vui lòng thử lại!"));
+                .body(Map.of("success", false, "message", "Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!"));
     }
 
     // Đăng ký

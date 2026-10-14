@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } else {
       if (!mounted) return;
-      final msg = res['message'] as String? ?? 'Đăng nhập thất bại!';
+      final msg = res['message'] as String? ?? 'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!';
       setState(() => _errorMessage = msg);
       _showErrorDialog(msg);
     }
