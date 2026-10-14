@@ -96,33 +96,8 @@ public class AuthApiController {
 
         // 1. Kiểm tra tài khoản Khách hàng
         Optional<Customer> customerOpt = customerRepository.findByEmail(input);
-        if (customerOpt.isPresent()) {
-            Customer c = customerOpt.get();
-            if (pwd.equals(c.getMatKhau()) || (c.getMatKhau() != null && c.getMatKhau().equalsIgnoreCase(hashedPwd))) {
-                if (Boolean.TRUE.equals(c.getIsLocked())) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(Map.of("success", false, "message", "Tài khoản của bạn đã bị khóa"));
-                }
-
-                c = syncCustomerWithChuNuoi(c);
-
-                Map<String, Object> userData = new HashMap<>();
-                userData.put("maKH", c.getMaKH());
-                userData.put("tenKH", c.getTenKH());
-                userData.put("email", c.getEmail());
-                userData.put("dienThoai", c.getDienThoai());
-                userData.put("diaChi", c.getDiaChi());
-                userData.put("hangThanhVien", c.getHangThanhVien());
-                userData.put("diemTichLuy", c.getDiemTichLuy());
-                userData.put("discountPercent", membershipService.getDiscountPercentage(c.getHangThanhVien()));
-                userData.put("role", "KhachHang");
-
-                return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "message", "Đăng nhập thành công",
-                        "user", userData
-                ));
-            }
+        if (customerOpt.isEmpty()) {
+            customerOpt = customerRepository.findByDienThoai(input);
         }
 
         // 2. Kiểm tra tài khoản Nhân viên / Admin
@@ -149,6 +124,44 @@ public class AuthApiController {
             empOpt = employeeRepository.findFirstByEmail(input);
         }
 
+        // Nếu không tìm thấy cả tài khoản khách hàng lẫn nhân viên -> Sai tài khoản
+        if (customerOpt.isEmpty() && empOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "Tài khoản không tồn tại trên hệ thống!"));
+        }
+
+        // Xử lý xác thực Khách hàng
+        if (customerOpt.isPresent()) {
+            Customer c = customerOpt.get();
+            boolean custPwdMatch = pwd.equals(c.getMatKhau()) || (c.getMatKhau() != null && c.getMatKhau().equalsIgnoreCase(hashedPwd));
+            if (custPwdMatch) {
+                if (Boolean.TRUE.equals(c.getIsLocked())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Map.of("success", false, "message", "Tài khoản của bạn đã bị khóa"));
+                }
+
+                c = syncCustomerWithChuNuoi(c);
+
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("maKH", c.getMaKH());
+                userData.put("tenKH", c.getTenKH());
+                userData.put("email", c.getEmail());
+                userData.put("dienThoai", c.getDienThoai());
+                userData.put("diaChi", c.getDiaChi());
+                userData.put("hangThanhVien", c.getHangThanhVien());
+                userData.put("diemTichLuy", c.getDiemTichLuy());
+                userData.put("discountPercent", membershipService.getDiscountPercentage(c.getHangThanhVien()));
+                userData.put("role", "KhachHang");
+
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "Đăng nhập thành công",
+                        "user", userData
+                ));
+            }
+        }
+
+        // Xử lý xác thực Nhân viên / Admin
         if (empOpt.isPresent()) {
             PetShop.demo.model.enity.Employee emp = empOpt.get();
             boolean pwdMatch = pwd.equals(emp.getMatKhau()) || (emp.getMatKhau() != null && emp.getMatKhau().equalsIgnoreCase(hashedPwd));
@@ -182,8 +195,9 @@ public class AuthApiController {
             }
         }
 
+        // Tài khoản tồn tại nhưng mật khẩu không khớp -> Sai mật khẩu
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("success", false, "message", "Sai tài khoản hoặc mật khẩu"));
+                .body(Map.of("success", false, "message", "Mật khẩu không chính xác. Vui lòng thử lại!"));
     }
 
     // Đăng ký

@@ -73,6 +73,17 @@ public class RevenueReportService {
             report.setSelectedTimeLabel("Từ " + start.format(DMY) + " đến " + end.format(DMY));
             processCustomReport(report, start, end);
 
+        } else if ("day".equalsIgnoreCase(type)) {
+            LocalDate target;
+            try {
+                target = (dateStr != null && !dateStr.isBlank()) ? LocalDate.parse(dateStr) : now;
+            } catch (Exception e) {
+                target = now;
+            }
+            report.setSelectedDate(target.toString());
+            report.setSelectedTimeLabel("Ngày " + target.format(DMY));
+            processDayReport(report, target);
+
         } else {
             // Mặc định: Theo tuần
             report.setFilterType("week");
@@ -91,6 +102,63 @@ public class RevenueReportService {
         }
 
         return report;
+    }
+
+    private void processDayReport(RevenueReportDTO report, LocalDate target) {
+        LocalDateTime fromTime = target.atStartOfDay();
+        LocalDateTime toTime = target.atTime(LocalTime.MAX);
+
+        List<Order> orders = orderRepository.findOrdersBetween(fromTime, toTime);
+        List<PhieuDichVuChamSoc> tickets = phieuRepository.findTicketsBetween(fromTime, toTime);
+        report.setOrders(orders);
+        report.setTickets(tickets);
+
+        String[] slotLabels = {"Sáng (00:00 - 12:00)", "Trưa (12:00 - 14:00)", "Chiều (14:00 - 18:00)", "Tối (18:00 - 23:59)"};
+        LocalTime[][] ranges = {
+                {LocalTime.of(0, 0), LocalTime.of(11, 59, 59)},
+                {LocalTime.of(12, 0), LocalTime.of(13, 59, 59)},
+                {LocalTime.of(14, 0), LocalTime.of(17, 59, 59)},
+                {LocalTime.of(18, 0), LocalTime.of(23, 59, 59)}
+        };
+
+        for (int i = 0; i < slotLabels.length; i++) {
+            String label = slotLabels[i];
+            LocalTime rStart = ranges[i][0];
+            LocalTime rEnd = ranges[i][1];
+            report.getChartLabels().add(label);
+
+            BigDecimal pRev = BigDecimal.ZERO;
+            int pCount = 0;
+            for (Order o : orders) {
+                if (o.getNgayLap() != null) {
+                    LocalTime t = o.getNgayLap().toLocalTime();
+                    if (!t.isBefore(rStart) && !t.isAfter(rEnd)) {
+                        if (o.getTongTien() != null) pRev = pRev.add(o.getTongTien());
+                        pCount++;
+                    }
+                }
+            }
+
+            BigDecimal sRev = BigDecimal.ZERO;
+            int sCount = 0;
+            for (PhieuDichVuChamSoc tk : tickets) {
+                if (tk.getNgayTiepNhan() != null) {
+                    LocalTime t = tk.getNgayTiepNhan().toLocalTime();
+                    if (!t.isBefore(rStart) && !t.isAfter(rEnd)) {
+                        BigDecimal val = tk.getThanhToan() != null ? tk.getThanhToan() : tk.getTongTien();
+                        if (val != null) sRev = sRev.add(val);
+                        sCount++;
+                    }
+                }
+            }
+
+            report.getProductRevenues().add(pRev);
+            report.getServiceRevenues().add(sRev);
+            report.getTotalRevenues().add(pRev.add(sRev));
+            report.getBreakdownList().add(new PeriodStat(label, pRev, sRev, pCount, sCount));
+        }
+
+        calculateSummary(report);
     }
 
     private void processWeekReport(RevenueReportDTO report, LocalDate start, LocalDate end) {

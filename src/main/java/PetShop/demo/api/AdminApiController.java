@@ -53,11 +53,27 @@ public class AdminApiController {
     @Autowired
     private ThongBaoService thongBaoService;
 
+    @Autowired
+    private PetShop.demo.service.RevenueReportService revenueReportService;
+
     // 1. Dashboard tổng quan
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard() {
         DashboardDTO dto = adminService.getDashboardData();
         return ResponseEntity.ok(dto);
+    }
+
+    // Báo cáo doanh thu theo ngày, tuần, tháng, năm
+    @GetMapping("/revenue-report")
+    public ResponseEntity<?> getRevenueReport(
+            @RequestParam(defaultValue = "day") String type,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String month,
+            @RequestParam(required = false) Integer year) {
+        PetShop.demo.model.dto.RevenueReportDTO report = revenueReportService.generateReport(type, date, month, year, null, null);
+        report.setOrders(null);
+        report.setTickets(null);
+        return ResponseEntity.ok(report);
     }
 
     // 2. Danh sách toàn bộ đơn hàng

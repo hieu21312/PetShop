@@ -23,12 +23,47 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<Map<String, dynamic>> _bookings = [];
   List<Map<String, dynamic>> _staffList = [];
 
+  String _selectedRevenuePeriod = 'day'; // 'day', 'week', 'month', 'year'
+  DateTime _selectedDate = DateTime.now();
+  Map<String, dynamic>? _revenueReport;
+  bool _isLoadingReport = false;
+
   final _currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
   @override
   void initState() {
     super.initState();
     _loadAllAdminData();
+    _loadRevenueReport();
+  }
+
+  Future<void> _loadRevenueReport() async {
+    setState(() => _isLoadingReport = true);
+    String? dateStr;
+    String? monthStr;
+    int? yearVal;
+
+    if (_selectedRevenuePeriod == 'day' || _selectedRevenuePeriod == 'week') {
+      dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    } else if (_selectedRevenuePeriod == 'month') {
+      monthStr = DateFormat('yyyy-MM').format(_selectedDate);
+    } else if (_selectedRevenuePeriod == 'year') {
+      yearVal = _selectedDate.year;
+    }
+
+    final rep = await ApiService.getAdminRevenueReport(
+      type: _selectedRevenuePeriod,
+      date: dateStr,
+      month: monthStr,
+      year: yearVal,
+    );
+
+    if (mounted) {
+      setState(() {
+        _revenueReport = rep;
+        _isLoadingReport = false;
+      });
+    }
   }
 
   Future<void> _loadAllAdminData() async {
@@ -51,6 +86,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         _isLoading = false;
       });
     }
+    _loadRevenueReport();
   }
 
   Color _getOrderStatusColor(dynamic status) {
@@ -428,9 +464,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       return const Center(child: Text('Không thể tải dữ liệu thống kê'));
     }
 
-    final totalRev = d['tongDoanhThuTongCong'] ?? d['tongDoanhThu'] ?? 0;
-    final prodRev = d['tongDoanhThu'] ?? 0;
-    final servRev = d['tongDoanhThuDichVu'] ?? 0;
+    final rep = _revenueReport;
+    final periodTotalRev = rep != null ? (rep['tongDoanhThuHopNhat'] ?? 0) : (d['tongDoanhThuTongCong'] ?? 0);
+    final periodProdRev = rep != null ? (rep['tongDoanhThuSanPham'] ?? 0) : (d['tongDoanhThu'] ?? 0);
+    final periodServRev = rep != null ? (rep['tongDoanhThuDichVu'] ?? 0) : (d['tongDoanhThuDichVu'] ?? 0);
+    final periodProdCount = rep?['soDonHangSanPham'] ?? 0;
+    final periodServCount = rep?['soPhieuDichVu'] ?? 0;
+    final timeLabel = rep?['selectedTimeLabel'] ?? '';
+
+    String periodTitle;
+    if (_selectedRevenuePeriod == 'day') {
+      periodTitle = 'DOANH THU THEO NGÀY';
+    } else if (_selectedRevenuePeriod == 'week') {
+      periodTitle = 'DOANH THU THEO TUẦN';
+    } else if (_selectedRevenuePeriod == 'month') {
+      periodTitle = 'DOANH THU THEO THÁNG';
+    } else {
+      periodTitle = 'DOANH THU THEO NĂM';
+    }
 
     final topProducts = (d['topProducts'] as List?) ?? [];
     final topServices = (d['topServices'] as List?) ?? [];
@@ -440,9 +491,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Banner Tổng doanh thu hợp nhất
+          // Banner Doanh thu theo Ngày / Tuần / Tháng
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF1E293B), Color(0xFF334155)],
@@ -457,28 +508,90 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('TỔNG DOANH THU HỆ THỐNG', style: TextStyle(color: Colors.white70, fontSize: 13, letterSpacing: 0.8)),
-                    Icon(Icons.monetization_on, color: Colors.amber, size: 24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          periodTitle,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (timeLabel.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            timeLabel,
+                            style: const TextStyle(color: Colors.white38, fontSize: 11),
+                          ),
+                        ],
+                      ],
+                    ),
+                    // Nhấn vào hình mũi tên thay cho logo đồng tiền để xem chi tiết
+                    InkWell(
+                      onTap: _showRevenueDetailModal,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _currencyFormat.format(totalRev),
-                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                const SizedBox(height: 12),
+
+                // Các nút chọn Ngày, Tuần, Tháng
+                Row(
+                  children: [
+                    _buildCardPeriodBtn('day', 'Ngày'),
+                    const SizedBox(width: 8),
+                    _buildCardPeriodBtn('week', 'Tuần'),
+                    const SizedBox(width: 8),
+                    _buildCardPeriodBtn('month', 'Tháng'),
+                  ],
                 ),
                 const SizedBox(height: 14),
+
+                if (_isLoadingReport) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    _currencyFormat.format(periodTotalRev),
+                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                ],
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Bán hàng:', style: TextStyle(color: Colors.white60, fontSize: 12)),
-                          Text(_currencyFormat.format(prodRev),
-                              style: const TextStyle(color: Colors.lightGreenAccent, fontWeight: FontWeight.w600, fontSize: 14)),
+                          Text(
+                            periodProdCount > 0 ? 'Bán hàng ($periodProdCount đơn):' : 'Bán hàng:',
+                            style: const TextStyle(color: Colors.white60, fontSize: 12),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _currencyFormat.format(periodProdRev),
+                            style: const TextStyle(color: Colors.lightGreenAccent, fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
                         ],
                       ),
                     ),
@@ -486,9 +599,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Dịch vụ:', style: TextStyle(color: Colors.white60, fontSize: 12)),
-                          Text(_currencyFormat.format(servRev),
-                              style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.w600, fontSize: 14)),
+                          Text(
+                            periodServCount > 0 ? 'Dịch vụ ($periodServCount phiếu):' : 'Dịch vụ:',
+                            style: const TextStyle(color: Colors.white60, fontSize: 12),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _currencyFormat.format(periodServRev),
+                            style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
                         ],
                       ),
                     ),
@@ -516,7 +635,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               _buildStatCard('Khách hàng', '${d['tongKhachHang'] ?? 0}', Icons.group_outlined, Colors.teal),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Top sản phẩm bán chạy
           Card(
@@ -615,6 +734,298 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCardPeriodBtn(String key, String title) {
+    final isSelected = _selectedRevenuePeriod == key;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedRevenuePeriod == key) return;
+        setState(() {
+          _selectedRevenuePeriod = key;
+          _selectedDate = DateTime.now();
+        });
+        _loadRevenueReport();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE91E63) : Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFE91E63) : Colors.white24,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white70,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showRevenueDetailModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final rep = _revenueReport;
+            final timeLabel = rep?['selectedTimeLabel'] ?? '';
+            final totalRev = rep?['tongDoanhThuHopNhat'] ?? 0;
+            final prodRev = rep?['tongDoanhThuSanPham'] ?? 0;
+            final prodCount = rep?['soDonHangSanPham'] ?? 0;
+            final servRev = rep?['tongDoanhThuDichVu'] ?? 0;
+            final servCount = rep?['soPhieuDichVu'] ?? 0;
+
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.insights, color: Color(0xFFE91E63), size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'Chi tiết doanh thu',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Nút chọn Ngày, Tuần, Tháng, Năm trong modal
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      children: [
+                        _buildModalPeriodItem('day', 'Ngày', setModalState),
+                        _buildModalPeriodItem('week', 'Tuần', setModalState),
+                        _buildModalPeriodItem('month', 'Tháng', setModalState),
+                        _buildModalPeriodItem('year', 'Năm', setModalState),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Điều hướng thời gian
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF0F5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left, size: 22, color: Color(0xFFE91E63)),
+                          onPressed: () async {
+                            setState(() {
+                              if (_selectedRevenuePeriod == 'day') {
+                                _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                              } else if (_selectedRevenuePeriod == 'week') {
+                                _selectedDate = _selectedDate.subtract(const Duration(days: 7));
+                              } else if (_selectedRevenuePeriod == 'month') {
+                                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1, 1);
+                              } else if (_selectedRevenuePeriod == 'year') {
+                                _selectedDate = DateTime(_selectedDate.year - 1, 1, 1);
+                              }
+                            });
+                            await _loadRevenueReport();
+                            setModalState(() {});
+                          },
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: _selectedDate,
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2030),
+                              );
+                              if (picked != null) {
+                                setState(() => _selectedDate = picked);
+                                await _loadRevenueReport();
+                                setModalState(() {});
+                              }
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.calendar_today, size: 14, color: Color(0xFFE91E63)),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    timeLabel.isNotEmpty ? timeLabel : 'Chọn thời gian',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2C3E50)),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right, size: 22, color: Color(0xFFE91E63)),
+                          onPressed: () async {
+                            setState(() {
+                              if (_selectedRevenuePeriod == 'day') {
+                                _selectedDate = _selectedDate.add(const Duration(days: 1));
+                              } else if (_selectedRevenuePeriod == 'week') {
+                                _selectedDate = _selectedDate.add(const Duration(days: 7));
+                              } else if (_selectedRevenuePeriod == 'month') {
+                                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 1);
+                              } else if (_selectedRevenuePeriod == 'year') {
+                                _selectedDate = DateTime(_selectedDate.year + 1, 1, 1);
+                              }
+                            });
+                            await _loadRevenueReport();
+                            setModalState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (_isLoadingReport)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(color: Color(0xFFE91E63)),
+                      ),
+                    )
+                  else ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Tổng doanh thu:', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                              Text(
+                                _currencyFormat.format(totalRev),
+                                style: const TextStyle(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 18),
+                              ),
+                            ],
+                          ),
+                          const Divider(color: Colors.white24, height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Bán hàng ($prodCount đơn):', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _currencyFormat.format(prodRev),
+                                      style: const TextStyle(color: Colors.lightGreenAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Dịch vụ ($servCount phiếu):', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _currencyFormat.format(servRev),
+                                      style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildModalPeriodItem(String key, String title, StateSetter setModalState) {
+    final isSelected = _selectedRevenuePeriod == key;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          setState(() {
+            _selectedRevenuePeriod = key;
+          });
+          await _loadRevenueReport();
+          setModalState(() {});
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFE91E63) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              color: isSelected ? Colors.white : Colors.blueGrey,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -926,28 +1337,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Danh sách nhân sự (${_staffList.length})',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E293B),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                icon: const Icon(Icons.storefront, size: 16),
-                label: const Text('Xem Cửa Hàng'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => HomeScreen(currentUser: widget.currentUser)),
-                  );
-                },
-              ),
-            ],
-          ),
+          Text('Danh sách nhân sự (${_staffList.length})',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
           const SizedBox(height: 12),
           ..._staffList.map((st) {
             final isWorking = st['trangThai'] == null || st['trangThai'] == 'Đang làm việc';

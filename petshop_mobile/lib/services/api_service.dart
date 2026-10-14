@@ -39,23 +39,35 @@ class ApiService {
   }
 
   // 1. Đăng nhập
-  static Future<UserModel?> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        if (data['success'] == true && data['user'] != null) {
-          return UserModel.fromJson(data['user']);
-        }
+      final data = jsonDecode(utf8.decode(res.bodyBytes));
+      if (res.statusCode == 200 && data['success'] == true && data['user'] != null) {
+        return {
+          'success': true,
+          'user': UserModel.fromJson(data['user']),
+          'message': data['message'] ?? 'Đăng nhập thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'user': null,
+          'message': data['message'] ?? 'Đăng nhập thất bại. Vui lòng thử lại!',
+        };
       }
     } catch (e) {
       debugPrint('Login error: $e');
+      return {
+        'success': false,
+        'user': null,
+        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!',
+      };
     }
-    return null;
   }
 
   // 1b. Lấy thông tin tài khoản & thành viên mới nhất
@@ -469,5 +481,29 @@ class ApiService {
       debugPrint('getAdminStaffList error: $e');
     }
     return [];
+  }
+
+  // Báo cáo thống kê doanh thu theo ngày, tuần, tháng, năm
+  static Future<Map<String, dynamic>?> getAdminRevenueReport({
+    String type = 'day',
+    String? date,
+    String? month,
+    int? year,
+  }) async {
+    try {
+      final queryParams = <String, String>{'type': type};
+      if (date != null && date.isNotEmpty) queryParams['date'] = date;
+      if (month != null && month.isNotEmpty) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year.toString();
+
+      final uri = Uri.parse('$baseUrl/api/admin/revenue-report').replace(queryParameters: queryParams);
+      final res = await http.get(uri);
+      if (res.statusCode == 200) {
+        return jsonDecode(utf8.decode(res.bodyBytes));
+      }
+    } catch (e) {
+      debugPrint('getAdminRevenueReport error: $e');
+    }
+    return null;
   }
 }
