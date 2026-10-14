@@ -52,10 +52,20 @@ public class ThongBaoService {
         return thongBaoRepository.countByMaKHAndTrangThai(maKH, "Chưa đọc");
     }
 
-    public void dánhDauDaDoc(Integer maThongBao) {
+    public void danhDauDaDoc(Integer maThongBao) {
+        if (maThongBao == null) return;
         thongBaoRepository.findById(maThongBao).ifPresent(tb -> {
             tb.setTrangThai("Đã đọc");
             thongBaoRepository.save(tb);
         });
+    }
+
+    public void danhDauTatCaDaDoc(Integer maKH) {
+        if (maKH == null) return;
+        List<ThongBao> unread = thongBaoRepository.findByMaKHAndTrangThaiOrderByNgayTaoDesc(maKH, "Chưa đọc");
+        for (ThongBao tb : unread) {
+            tb.setTrangThai("Đã đọc");
+        }
+        thongBaoRepository.saveAll(unread);
     }
 }

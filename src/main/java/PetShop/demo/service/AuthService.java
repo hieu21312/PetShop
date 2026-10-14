@@ -85,6 +85,19 @@ public class AuthService {
         return isAdmin(session) || isCashier(session);
     }
 
+    public boolean canManageBookings(HttpSession session) {
+        return isAdmin(session) || isCashier(session);
+    }
+
+    public boolean isCareStaff(HttpSession session) {
+        Object role = session.getAttribute("role");
+        if (role == null) return false;
+        String roleStr = role.toString().trim();
+        return "Nhân viên chăm sóc".equalsIgnoreCase(roleStr) || 
+               "Chăm sóc thú cưng".equalsIgnoreCase(roleStr) || 
+               "Care".equalsIgnoreCase(roleStr);
+    }
+
     public boolean canViewTreatment(HttpSession session) {
         return isAdmin(session) || isDoctor(session);
     }

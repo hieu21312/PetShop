@@ -43,6 +43,9 @@ public class AdminPhieuDichVuController {
     private EmployeeRepository employeeRepository;
 
     @Autowired
+    private PetShop.demo.service.EmployeeService employeeService;
+
+    @Autowired
     private PetShop.demo.service.ThongBaoService thongBaoService;
 
     @Autowired
@@ -78,7 +81,7 @@ public class AdminPhieuDichVuController {
         model.addAttribute("pets", hoSoThuCungRepository.findAll());
         model.addAttribute("owners", chuNuoiRepository.findAll());
         model.addAttribute("services", dichVuChamSocRepository.findAll());
-        model.addAttribute("employees", employeeRepository.findAll());
+        model.addAttribute("employees", employeeService.getActiveEmployeesWithWorkload());
         return "admin/care-ticket-form";
     }
 
@@ -119,7 +122,7 @@ public class AdminPhieuDichVuController {
         if (ticket == null) return "redirect:/admin/care-tickets";
 
         model.addAttribute("ticket", ticket);
-        model.addAttribute("employees", employeeRepository.findAll());
+        model.addAttribute("employees", employeeService.getActiveEmployeesWithWorkload());
         return "admin/care-ticket-detail";
     }
 
@@ -129,6 +132,7 @@ public class AdminPhieuDichVuController {
                                @RequestParam("trangThaiThanhToan") String trangThaiThanhToan,
                                @RequestParam(value = "hinhThucThanhToan", required = false) String hinhThucThanhToan,
                                @RequestParam(value = "ketQuaChamSoc", required = false) String ketQuaChamSoc,
+                               @RequestParam(value = "maNVThucHien", required = false) Integer maNVThucHien,
                                HttpSession session) {
         if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
 
@@ -139,6 +143,7 @@ public class AdminPhieuDichVuController {
             ticket.setTrangThaiThanhToan(trangThaiThanhToan);
             if (hinhThucThanhToan != null) ticket.setHinhThucThanhToan(hinhThucThanhToan);
             if (ketQuaChamSoc != null) ticket.setKetQuaChamSoc(ketQuaChamSoc);
+            if (maNVThucHien != null) ticket.setMaNVThucHien(maNVThucHien);
 
             if ("Đã bàn giao thú cưng".equals(trangThaiDichVu) || "Hoàn thành chăm sóc".equals(trangThaiDichVu)) {
                 if (ticket.getNgayTraThucTe() == null) {

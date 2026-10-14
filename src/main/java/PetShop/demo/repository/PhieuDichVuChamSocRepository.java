@@ -11,4 +11,5 @@ public interface PhieuDichVuChamSocRepository extends JpaRepository<PhieuDichVuC
     List<PhieuDichVuChamSoc> findByTrangThaiDichVu(String trangThaiDichVu);
     List<PhieuDichVuChamSoc> findByMaChuNuoi(Integer maChuNuoi);
     List<PhieuDichVuChamSoc> findByMaThuCung(Integer maThuCung);
+    long countByMaNVThucHienAndTrangThaiDichVuIn(Integer maNVThucHien, List<String> trangThaiDichVuList);
 }
