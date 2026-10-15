@@ -139,6 +139,10 @@
                    th:href="@{/admin/care-tickets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Phiếu chăm sóc (Thu ngân)">
                     <i class="fas fa-clipboard-list me-2 text-danger"></i><span class="menu-text"> Phiếu chăm sóc (Thu ngân)</span>
                 </a>
+                <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+                   th:href="@{/admin/thu-ngan}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Quầy Thu ngân (POS)">
+                    <i class="fas fa-cash-register me-2 text-primary"></i><span class="menu-text"> Quầy Thu ngân (POS)</span>
+                </a>
                 <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ'))}" 
                    th:href="@{/admin/doctor/treatment}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Nhật ký điều trị (Bác sĩ)">
                     <i class="fas fa-user-md me-2 text-info"></i><span class="menu-text"> Nhật ký điều trị (Bác sĩ)</span>

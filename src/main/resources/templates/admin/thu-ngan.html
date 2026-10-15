@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section>
+        <div class="row">
+            <!-- SIDEBAR -->
+            <div class="col-md-3 col-lg-2 no-print">
+                <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
+            </div>
+
+            <!-- NỘI DUNG CHÍNH: QUẦY THU NGÂN -->
+            <div class="col-md-9 col-lg-10">
+                <!-- Tiêu đề trang -->
+                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                    <div>
+                        <h3 class="fw-bold mb-0 text-primary">
+                            <i class="fas fa-cash-register me-2"></i>Quầy Thu Ngân & Điểm Bán (POS)
+                        </h3>
+                        <small class="text-muted">Lập hóa đơn dịch vụ, thanh toán Tiền mặt & VNPay Sandbox</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-dark border px-3 py-2 shadow-sm rounded-pill">
+                            <i class="fas fa-user-circle text-primary me-1"></i>
+                            <span th:text="${currentTenNV} ?: 'Thu ngân trực ca'">Thu ngân</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row g-3 no-print">
+                    <!-- CỘT TRÁI: DANH SÁCH DỊCH VỤ -->
+                    <div class="col-xl-7 col-lg-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-header bg-white border-0 pt-3 pb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="fw-bold mb-0 text-dark">
+                                        <i class="fas fa-list-ul me-2 text-primary"></i>Danh Sách Dịch Vụ
+                                    </h5>
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1">
+                                        <span id="serviceCount" th:text="${#lists.size(services)}">0</span> dịch vụ
+                                    </span>
+                                </div>
+                                <!-- Ô tìm kiếm dịch vụ -->
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" id="searchServiceInput" class="form-control bg-light border-start-0 rounded-end-pill"
+                                           placeholder="Tìm kiếm dịch vụ theo tên..." onkeyup="filterServices()">
+                                </div>
+                            </div>
+
+                            <div class="card-body p-3 overflow-auto" style="max-height: 650px;">
+                                <!-- Lưới các dịch vụ -->
+                                <div class="row g-3" id="servicesGrid">
+                                    <div class="col-sm-6 col-12 service-item"
+                                         th:each="sv : ${services}"
+                                         th:data-id="${sv.maDV}"
+                                         th:data-name="${sv.tenDV}"
+                                         th:data-price="${sv.giaDichVu}">
+                                        <div class="card h-100 border service-card p-3 rounded-4 shadow-sm"
+                                             th:onclick="addService([[${sv.maDV}]], [[${sv.tenDV}]], [[${sv.giaDichVu}]])">
+                                            <div class="d-flex align-items-start justify-content-between">
+                                                <div class="service-icon-box bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center mb-2"
+                                                     style="width: 44px; height: 44px; font-size: 1.2rem;">
+                                                    <i class="fas fa-paw"></i>
+                                                </div>
+                                                <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">
+                                                    Sẵn sàng
+                                                </span>
+                                            </div>
+                                            <h6 class="fw-bold mb-1 text-dark service-name" th:text="${sv.tenDV}">Tên dịch vụ</h6>
+                                            <small class="text-muted text-truncate mb-2" th:text="${sv.moTa} ?: 'Dịch vụ chăm sóc thú cưng chuyên nghiệp'">Mô tả dịch vụ</small>
+                                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                                <span class="fw-bold text-danger fs-6"
+                                                      th:text="${sv.giaDichVu != null ? #numbers.formatDecimal(sv.giaDichVu, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">
+                                                    0 đ
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1">
+                                                    <i class="fas fa-plus me-1"></i>Chọn
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${#lists.isEmpty(services)}" class="col-12 text-center py-5">
+                                        <i class="fas fa-folder-open text-muted fa-3x mb-3"></i>
+                                        <p class="text-muted">Chưa có dịch vụ nào trong cơ sở dữ liệu.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: HÓA ĐƠN & THANH TOÁN -->
+                    <div class="col-xl-5 col-lg-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-header bg-white border-0 pt-3 pb-2">
+                                <h5 class="fw-bold mb-0 text-dark">
+                                    <i class="fas fa-receipt me-2 text-danger"></i>Hóa Đơn Thu Ngân
+                                </h5>
+                            </div>
+
+                            <div class="card-body p-3">
+                                <!-- 1. THÔNG TIN KHÁCH HÀNG -->
+                                <div class="bg-light p-3 rounded-4 mb-3 border">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold text-dark small">
+                                            <i class="fas fa-user text-primary me-1"></i>Thông tin khách hàng
+                                        </span>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" id="checkKhachVangLai" onchange="toggleKhachHangMode()">
+                                            <label class="form-check-label small text-muted" for="checkKhachVangLai">Khách lẻ / Vãng lai</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dropdown khách có sẵn -->
+                                    <div id="boxKhachCoSan">
+                                        <select id="selectKhachHang" class="form-select rounded-3 mb-2" onchange="onSelectCustomerChange()">
+                                            <option value="">-- Chọn khách hàng đã có tài khoản --</option>
+                                            <option th:each="c : ${customers}"
+                                                    th:value="${c.maKH}"
+                                                    th:data-name="${c.tenKH}"
+                                                    th:data-phone="${c.dienThoai}"
+                                                    th:text="${c.tenKH + ' - ' + (c.dienThoai ?: 'Không có SĐT')}">
+                                                Nguyễn Văn A - 0901234567
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Nhập khách vãng lai -->
+                                    <div id="boxKhachVangLai" class="d-none">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <input type="text" id="inputTenKhach" class="form-control form-control-sm rounded-3" placeholder="Tên khách hàng">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="text" id="inputSdtKhach" class="form-control form-control-sm rounded-3" placeholder="Số điện thoại">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ghi chú hóa đơn -->
+                                    <input type="text" id="inputGhiChu" class="form-control form-control-sm rounded-3 mt-2" placeholder="Ghi chú đơn (ví dụ: Chăm sóc bé Poodle màu trắng...)">
+                                </div>
+
+                                <!-- 2. BẢNG DỊCH VỤ ĐÃ CHỌN -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-bold small text-dark">
+                                            <i class="fas fa-shopping-cart text-success me-1"></i>Dịch vụ đã chọn
+                                        </span>
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="clearCart()">
+                                            <i class="fas fa-trash-alt me-1"></i>Xóa hết
+                                        </button>
+                                    </div>
+
+                                    <div class="table-responsive border rounded-3 overflow-auto" style="max-height: 220px;">
+                                        <table class="table table-hover align-middle mb-0" id="cartTable">
+                                            <thead class="table-light small">
+                                                <tr>
+                                                    <th>Dịch vụ</th>
+                                                    <th class="text-center" style="width: 100px;">SL</th>
+                                                    <th class="text-end">Đơn giá</th>
+                                                    <th class="text-end">Tổng</th>
+                                                    <th style="width: 30px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="cartTableBody">
+                                                <!-- Dòng rỗng mặc định -->
+                                                <tr id="emptyCartRow">
+                                                    <td colspan="5" class="text-center py-4 text-muted small">
+                                                        <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào. Hãy click vào dịch vụ bên trái.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- 3. TỔNG TIỀN -->
+                                <div class="bg-light p-3 rounded-4 mb-3 border">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted small">Tạm tính:</span>
+                                        <span class="fw-bold text-dark" id="displaySubTotal">0 đ</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                        <span class="fw-bold fs-6 text-dark">TỔNG CỘNG:</span>
+                                        <span class="fw-bold fs-4 text-danger" id="displayGrandTotal">0 đ</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4. PHƯƠNG THỨC THANH TOÁN -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-dark mb-2">
+                                        <i class="fas fa-credit-card text-warning me-1"></i>Phương thức thanh toán:
+                                    </label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <input type="radio" class="btn-check" name="paymentMethod" id="payMethodCash" value="TienMat" checked onchange="onPaymentMethodChange()">
+                                            <label class="btn btn-outline-success w-100 py-2 rounded-3 text-start d-flex align-items-center" for="payMethodCash">
+                                                <i class="fas fa-money-bill-wave fa-lg me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold small">Tiền mặt</div>
+                                                    <div style="font-size: 0.7rem;" class="text-muted">Thu tiền tại quầy</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="radio" class="btn-check" name="paymentMethod" id="payMethodVNPay" value="VNPay" onchange="onPaymentMethodChange()">
+                                            <label class="btn btn-outline-primary w-100 py-2 rounded-3 text-start d-flex align-items-center" for="payMethodVNPay">
+                                                <i class="fas fa-qrcode fa-lg me-2 text-danger"></i>
+                                                <div>
+                                                    <div class="fw-bold small text-primary">VNPay Sandbox</div>
+                                                    <div style="font-size: 0.7rem;" class="text-muted">Quét QR / Cổng test</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- KHUNG NHẬP TIỀN MẶT -->
+                                <div id="cashDetailsBox" class="bg-success-subtle p-3 rounded-4 mb-3 border border-success-subtle">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-6">
+                                            <label class="small fw-semibold text-success">Tiền khách đưa:</label>
+                                            <input type="number" id="inputCashGiven" class="form-control form-control-sm rounded-3"
+                                                   placeholder="0" oninput="calculateChange()">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="small fw-semibold text-secondary">Tiền thối lại:</label>
+                                            <div class="fw-bold text-dark fs-6" id="displayCashChange">0 đ</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- NÚT HÀNH ĐỘNG THANH TOÁN -->
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmitPayment" onclick="handleCheckout()">
+                                        <i class="fas fa-check-circle me-2"></i>Xác Nhận & Thanh Toán
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BẢNG HÓA ĐƠN GẦN ĐÂY -->
+                <div class="card border-0 shadow-sm rounded-4 mt-4 no-print" th:if="${not #lists.isEmpty(recentInvoices)}">
+                    <div class="card-header bg-white border-0 pt-3 pb-2 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="fas fa-history text-secondary me-2"></i>Hóa Đơn Dịch Vụ Vừa Lập Gần Đây
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th class="ps-3">Mã HĐ</th>
+                                        <th>Thời gian</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Phương thức</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-end pe-3">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="hd : ${recentInvoices}">
+                                        <td class="ps-3 fw-bold text-primary">#HDDV-<span th:text="${hd.maHDDV}"></span></td>
+                                        <td class="small text-muted" th:text="${hd.ngaySuDung != null ? #temporals.format(hd.ngaySuDung, 'dd/MM/yyyy HH:mm') : ''}"></td>
+                                        <td class="fw-bold text-danger" th:text="${hd.tongTien != null ? #numbers.formatDecimal(hd.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}"></td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border" th:text="${hd.phuongThucThanhToan ?: 'TienMat'}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" th:classappend="${hd.trangThai == 'DaThanhToan' ? 'bg-success' : 'bg-warning'}" th:text="${hd.trangThai == 'DaThanhToan' ? 'Đã thanh toán' : 'Chưa thanh toán'}"></span>
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <a th:href="@{'/admin/thu-ngan/hoa-don/' + ${hd.maHDDV}}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="fas fa-print me-1"></i>Xem & In HĐ
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL 1: THANH TOÁN QUA VNPAY SANDBOX (GIỮ NGUYÊN GIAO DIỆN SANDBOX BAN ĐẦU) -->
+                <div class="modal fade" id="vnpayQrModal" tabindex="-1" aria-labelledby="vnpayQrModalLabel" aria-hidden="true" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow-lg">
+                            <div class="modal-header bg-primary text-white border-0 py-3 rounded-top-4">
+                                <h5 class="modal-title fw-bold" id="vnpayQrModalLabel">
+                                    <i class="fas fa-qrcode me-2"></i>Thanh Toán VNPay Sandbox
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4 text-center">
+                                <div class="mb-3">
+                                    <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill fw-semibold fs-6">
+                                        Mã hóa đơn: #HDDV-<span id="qrModalMaHD">---</span>
+                                    </span>
+                                    <h3 class="fw-bold text-danger mt-2 mb-0" id="qrModalAmount">0 đ</h3>
+                                </div>
+
+                                <!-- Ảnh mã QR VNPay Sandbox -->
+                                <div class="d-inline-block p-2 bg-white rounded-4 shadow-sm border mb-3">
+                                    <img id="qrCodeImage" src="" alt="VNPay QR Code" class="img-fluid rounded-3" style="width: 230px; height: 230px; object-fit: contain;">
+                                </div>
+
+                                <!-- Nút mở cổng thanh toán VNPay Sandbox trực tiếp -->
+                                <div class="mb-3">
+                                    <a id="btnOpenVnPayLink" href="#" target="_blank" class="btn btn-primary btn-lg rounded-pill px-4 fw-bold shadow">
+                                        <i class="fas fa-external-link-alt me-2"></i>Mở Cổng Thanh Toán VNPay Sandbox
+                                    </a>
+                                </div>
+
+                                <!-- BẢNG THÔNG TIN THẺ TEST NCB SANDBOX -->
+                                <div class="bg-light p-3 rounded-4 text-start small border mx-auto mb-2" style="max-width: 420px;">
+                                    <div class="fw-bold text-dark mb-1">
+                                        <i class="fas fa-credit-card me-1 text-primary"></i>Thông tin thẻ test VNPay Sandbox (NCB):
+                                    </div>
+                                    <div class="row g-1 text-muted">
+                                        <div class="col-5">Ngân hàng:</div>
+                                        <div class="col-7"><strong class="text-dark">NCB</strong></div>
+                                        <div class="col-5">Số thẻ:</div>
+                                        <div class="col-7"><strong class="text-primary fs-6">9704198526191432198</strong></div>
+                                        <div class="col-5">Tên chủ thẻ:</div>
+                                        <div class="col-7"><strong class="text-dark">NGUYEN VAN A</strong></div>
+                                        <div class="col-5">Ngày phát hành:</div>
+                                        <div class="col-7"><strong class="text-dark">07/15</strong></div>
+                                        <div class="col-5">Mã OTP:</div>
+                                        <div class="col-7"><strong class="text-danger fw-bold">123456</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 bg-light rounded-bottom-4 justify-content-between p-3">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" id="btnConfirmQrPaid" onclick="confirmVNPayPaymentSuccess()">
+                                    <i class="fas fa-check-circle me-1"></i>Xác Nhận Đã Thanh Toán Thành Công
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL 2: XUẤT HÓA ĐƠN DỊCH VỤ ĐÃ THANH TOÁN (IN NGAY & XEM CHI TIẾT) -->
+                <div class="modal fade" id="invoiceReceiptModal" tabindex="-1" aria-labelledby="invoiceReceiptModalLabel" aria-hidden="true" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-4 border-0 shadow-lg">
+                            <div class="modal-header bg-success text-white border-0 py-3 rounded-top-4 no-print">
+                                <h5 class="modal-title fw-bold" id="invoiceReceiptModalLabel">
+                                    <i class="fas fa-check-circle me-2"></i>Thanh Toán Thành Công - Xuất Hóa Đơn Dịch Vụ
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="resetForm()"></button>
+                            </div>
+
+                            <div class="modal-body p-4 p-md-5" id="printableReceiptArea" style="background-color: #fff;">
+                                <!-- Header phiếu hóa đơn -->
+                                <div class="row align-items-center pb-3 border-bottom mb-3">
+                                    <div class="col-7">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 38px; height: 38px; font-size: 1.2rem;">
+                                                <i class="fas fa-paw"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0 text-primary">PET SHOP CARE & BEAUTY</h5>
+                                        </div>
+                                        <small class="text-muted d-block">123 Đường Thú Cưng, Quận 1, TP. Hồ Chí Minh</small>
+                                        <small class="text-muted d-block">Hotline: 0900.123.456 - Website: www.petshopdemo.vn</small>
+                                    </div>
+                                    <div class="col-5 text-end">
+                                        <h4 class="fw-bold text-dark text-uppercase mb-1">HÓA ĐƠN DỊCH VỤ</h4>
+                                        <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-1 rounded-pill fw-bold border border-danger-subtle">
+                                            Mã: #HDDV-<span id="rcptInvoiceId">---</span>
+                                        </span>
+                                        <div class="small text-muted mt-1" id="rcptDateTime">14/10/2026 09:30</div>
+                                    </div>
+                                </div>
+
+                                <!-- Thông tin khách hàng & thu ngân -->
+                                <div class="row g-2 bg-light p-3 rounded-3 mb-3 border small">
+                                    <div class="col-6">
+                                        <div><strong>Khách hàng:</strong> <span id="rcptCustomerName">Khách lẻ / Vãng lai</span></div>
+                                        <div><strong>Số điện thoại:</strong> <span id="rcptCustomerPhone">Chưa có</span></div>
+                                        <div><strong>Ghi chú:</strong> <span id="rcptNote" class="fst-italic text-secondary">Không có</span></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div><strong>Thu ngân:</strong> <span id="rcptCashierName" th:text="${currentTenNV} ?: 'Thu ngân trực ca'">Thu ngân</span></div>
+                                        <div><strong>Phương thức:</strong> <span class="badge bg-primary" id="rcptPaymentMethod">Tiền mặt</span></div>
+                                        <div><strong>Trạng thái:</strong> <span class="badge bg-success">ĐÃ THANH TOÁN</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Bảng dịch vụ đã thanh toán -->
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-bordered align-middle small mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width: 40px;">STT</th>
+                                                <th>Tên Dịch Vụ</th>
+                                                <th style="width: 70px;">SL</th>
+                                                <th class="text-end" style="width: 120px;">Đơn Giá</th>
+                                                <th class="text-end" style="width: 130px;">Thành Tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rcptServicesBody">
+                                            <!-- Được render bằng JavaScript từ giỏ hàng đã thanh toán -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Tổng tiền & Con dấu -->
+                                <div class="row align-items-center mb-3">
+                                    <div class="col-6 text-center text-sm-start">
+                                        <div class="receipt-stamp">
+                                            <div class="stamp-txt">PET SHOP - ĐÃ THANH TOÁN</div>
+                                            <small id="rcptStampDate">PAID</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-light p-3 rounded-3 border text-end">
+                                            <div class="small text-muted mb-1">Cộng tiền dịch vụ: <span class="fw-bold text-dark" id="rcptSubTotal">0 đ</span></div>
+                                            <div class="small text-muted mb-2">Chiết khấu: <span class="fw-bold text-muted">0 đ</span></div>
+                                            <div class="pt-2 border-top">
+                                                <span class="fw-bold text-dark fs-6 me-2">TỔNG THANH TOÁN:</span>
+                                                <span class="fw-bold fs-4 text-danger" id="rcptGrandTotal">0 đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center pt-2 border-top text-muted small fst-italic">
+                                    🐾 Cảm ơn Quý khách và chúc bé cưng luôn khỏe mạnh, sạch đẹp!
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 bg-light rounded-bottom-4 justify-content-between p-3 no-print">
+                                <div>
+                                    <button type="button" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm" onclick="printReceiptDirectly()">
+                                        <i class="fas fa-print me-2"></i>In Hóa Đơn Ngay
+                                    </button>
+                                    <a id="btnViewFullInvoicePage" href="#" target="_blank" class="btn btn-outline-primary rounded-pill px-3 ms-2 fw-semibold">
+                                        <i class="fas fa-external-link-alt me-1"></i>Xem & In Bản Chuẩn A4/A5
+                                    </a>
+                                </div>
+                                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-dismiss="modal" onclick="resetForm()">
+                                    <i class="fas fa-plus me-1"></i>Lập Hóa Đơn Mới
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- STYLE TÙY CHỈNH CHO GIAO DIỆN THU NGÂN & IN HÓA ĐƠN -->
+        <style>
+            .service-card {
+                cursor: pointer;
+                transition: all 0.2s ease-in-out;
+                border-color: #e2e8f0;
+            }
+            .service-card:hover {
+                transform: translateY(-3px);
+                border-color: #3b82f6 !important;
+                box-shadow: 0 8px 16px rgba(59, 130, 246, 0.12) !important;
+            }
+            .service-card:active {
+                transform: scale(0.98);
+            }
+            .btn-qty {
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                font-size: 0.75rem;
+            }
+            .receipt-stamp {
+                display: inline-block;
+                border: 2px dashed #e02424;
+                border-radius: 8px;
+                padding: 6px 14px;
+                color: #e02424;
+                font-weight: 800;
+                transform: rotate(-6deg);
+                text-transform: uppercase;
+                background-color: rgba(254, 242, 242, 0.8);
+            }
+            .receipt-stamp .stamp-txt {
+                font-size: 0.95rem;
+                letter-spacing: 1.5px;
+            }
+
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                #printableReceiptArea, #printableReceiptArea * {
+                    visibility: visible;
+                }
+                #printableReceiptArea {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    padding: 15px !important;
+                    background: #fff !important;
+                }
+                .no-print {
+                    display: none !important;
+                }
+                .receipt-stamp {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            }
+        </style>
+
+        <!-- JAVASCRIPT XỬ LÝ CHỨC NĂNG THU NGÂN, VNPAY SANDBOX & XUẤT HÓA ĐƠN -->
+        <script>
+            let selectedCart = {};
+            let currentInvoiceId = null;
+            let paidCustomerInfo = {};
+
+            function formatVND(amount) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            }
+
+            function addService(id, name, price) {
+                if (!selectedCart[id]) {
+                    selectedCart[id] = {
+                        id: id,
+                        name: name,
+                        price: parseFloat(price) || 0,
+                        qty: 1
+                    };
+                } else {
+                    selectedCart[id].qty += 1;
+                }
+                renderCart();
+            }
+
+            function changeQty(id, delta) {
+                if (selectedCart[id]) {
+                    selectedCart[id].qty += delta;
+                    if (selectedCart[id].qty <= 0) {
+                        delete selectedCart[id];
+                    }
+                    renderCart();
+                }
+            }
+
+            function removeCartItem(id) {
+                if (selectedCart[id]) {
+                    delete selectedCart[id];
+                    renderCart();
+                }
+            }
+
+            function clearCart() {
+                selectedCart = {};
+                renderCart();
+            }
+
+            function renderCart() {
+                const tbody = document.getElementById('cartTableBody');
+                const keys = Object.keys(selectedCart);
+
+                if (keys.length === 0) {
+                    tbody.innerHTML = `
+                        <tr id="emptyCartRow">
+                            <td colspan="5" class="text-center py-4 text-muted small">
+                                <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào. Hãy click vào dịch vụ bên trái.
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('displaySubTotal').innerText = '0 đ';
+                    document.getElementById('displayGrandTotal').innerText = '0 đ';
+                    calculateChange();
+                    return;
+                }
+
+                let html = '';
+                let grandTotal = 0;
+
+                keys.forEach(id => {
+                    const item = selectedCart[id];
+                    const itemTotal = item.price * item.qty;
+                    grandTotal += itemTotal;
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="fw-semibold small text-dark">${item.name}</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-qty" onclick="changeQty(${item.id}, -1)">-</button>
+                                    <span class="small fw-bold px-1">${item.qty}</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-qty" onclick="changeQty(${item.id}, 1)">+</button>
+                                </div>
+                            </td>
+                            <td class="text-end small">${formatVND(item.price)}</td>
+                            <td class="text-end fw-bold small text-danger">${formatVND(itemTotal)}</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-link text-muted p-0" onclick="removeCartItem(${item.id})">
+                                    <i class="fas fa-times text-danger"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+                document.getElementById('displaySubTotal').innerText = formatVND(grandTotal);
+                document.getElementById('displayGrandTotal').innerText = formatVND(grandTotal);
+                calculateChange();
+            }
+
+            function filterServices() {
+                const query = document.getElementById('searchServiceInput').value.toLowerCase().trim();
+                const items = document.querySelectorAll('.service-item');
+                let visibleCount = 0;
+
+                items.forEach(item => {
+                    const name = item.getAttribute('data-name').toLowerCase();
+                    if (name.includes(query)) {
+                        item.classList.remove('d-none');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('d-none');
+                    }
+                });
+                document.getElementById('serviceCount').innerText = visibleCount;
+            }
+
+            function toggleKhachHangMode() {
+                const isVangLai = document.getElementById('checkKhachVangLai').checked;
+                const boxCoSan = document.getElementById('boxKhachCoSan');
+                const boxVangLai = document.getElementById('boxKhachVangLai');
+
+                if (isVangLai) {
+                    boxCoSan.classList.add('d-none');
+                    boxVangLai.classList.remove('d-none');
+                } else {
+                    boxCoSan.classList.remove('d-none');
+                    boxVangLai.classList.add('d-none');
+                }
+            }
+
+            function onSelectCustomerChange() {}
+
+            function onPaymentMethodChange() {
+                const isVNPay = document.getElementById('payMethodVNPay').checked;
+                const cashBox = document.getElementById('cashDetailsBox');
+                const btnSubmit = document.getElementById('btnSubmitPayment');
+
+                if (isVNPay) {
+                    cashBox.classList.add('d-none');
+                    btnSubmit.innerHTML = '<i class="fas fa-qrcode me-2"></i>Tạo Đơn & Mở VNPay Sandbox';
+                    btnSubmit.classList.remove('btn-success');
+                    btnSubmit.classList.add('btn-primary');
+                } else {
+                    cashBox.classList.remove('d-none');
+                    btnSubmit.innerHTML = '<i class="fas fa-check-circle me-2"></i>Xác Nhận & Xuất Hóa Đơn';
+                    btnSubmit.classList.remove('btn-primary');
+                    btnSubmit.classList.add('btn-success');
+                    calculateChange();
+                }
+            }
+
+            function calculateChange() {
+                const keys = Object.keys(selectedCart);
+                let grandTotal = 0;
+                keys.forEach(id => grandTotal += selectedCart[id].price * selectedCart[id].qty);
+
+                const cashGiven = parseFloat(document.getElementById('inputCashGiven').value) || 0;
+                const change = cashGiven - grandTotal;
+
+                const displayChange = document.getElementById('displayCashChange');
+                if (change >= 0) {
+                    displayChange.innerText = formatVND(change);
+                    displayChange.className = 'fw-bold text-success fs-6';
+                } else {
+                    displayChange.innerText = 'Thiếu ' + formatVND(Math.abs(change));
+                    displayChange.className = 'fw-bold text-danger fs-6';
+                }
+            }
+
+            function getCartGrandTotal() {
+                const keys = Object.keys(selectedCart);
+                let total = 0;
+                keys.forEach(id => total += selectedCart[id].price * selectedCart[id].qty);
+                return total;
+            }
+
+            async function handleCheckout() {
+                const grandTotal = getCartGrandTotal();
+                if (grandTotal <= 0) {
+                    alert('Vui lòng chọn ít nhất 1 dịch vụ vào đơn hàng!');
+                    return;
+                }
+
+                const isVangLai = document.getElementById('checkKhachVangLai').checked;
+                let maKH = null;
+                let tenKhachHienThi = 'Khách lẻ / Vãng lai';
+                let sdtKhachHienThi = 'Chưa có';
+                let ghiChuKhach = '';
+
+                if (isVangLai) {
+                    const tenKhach = document.getElementById('inputTenKhach').value.trim();
+                    const sdtKhach = document.getElementById('inputSdtKhach').value.trim();
+                    if (tenKhach) tenKhachHienThi = tenKhach;
+                    if (sdtKhach) sdtKhachHienThi = sdtKhach;
+                    ghiChuKhach = (tenKhach || sdtKhach) ? `Khách lẻ: ${tenKhach} (${sdtKhach}). ` : 'Khách lẻ vãng lai. ';
+                } else {
+                    const selectEl = document.getElementById('selectKhachHang');
+                    if (selectEl && selectEl.value) {
+                        maKH = parseInt(selectEl.value);
+                        const selectedOption = selectEl.options[selectEl.selectedIndex];
+                        if (selectedOption) {
+                            tenKhachHienThi = selectedOption.getAttribute('data-name') || selectedOption.text.split('-')[0].trim();
+                            sdtKhachHienThi = selectedOption.getAttribute('data-phone') || 'Chưa cập nhật';
+                        }
+                    }
+                }
+
+                const ghiChuDon = document.getElementById('inputGhiChu').value.trim();
+                const ghiChuTong = ghiChuKhach + ghiChuDon;
+                const isVNPay = document.getElementById('payMethodVNPay').checked;
+                const paymentMethod = isVNPay ? 'VNPay' : 'TienMat';
+
+                // Chuẩn bị danh sách chi tiết dịch vụ
+                const items = Object.values(selectedCart).map(item => ({
+                    maDV: item.id,
+                    tenDV: item.name,
+                    soLuong: item.qty,
+                    giaDichVu: item.price
+                }));
+
+                // Lưu thông tin khách hàng để in phiếu
+                paidCustomerInfo = {
+                    tenKH: tenKhachHienThi,
+                    dienThoai: sdtKhachHienThi,
+                    ghiChu: ghiChuTong,
+                    cartCopy: JSON.parse(JSON.stringify(selectedCart)),
+                    grandTotal: grandTotal,
+                    method: isVNPay ? 'VNPay Sandbox' : 'Tiền mặt'
+                };
+
+                const payload = {
+                    maKH: maKH,
+                    maNV: null,
+                    tongTien: grandTotal,
+                    ghiChu: ghiChuTong,
+                    phuongThucThanhToan: paymentMethod,
+                    items: items
+                };
+
+                const btn = document.getElementById('btnSubmitPayment');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+
+                try {
+                    // Tạo hóa đơn mới
+                    const resp = await fetch('/api/hoa-don', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await resp.json();
+                    if (!data.success) {
+                        alert('Lỗi tạo hóa đơn: ' + (data.message || 'Không xác định'));
+                        btn.disabled = false;
+                        onPaymentMethodChange();
+                        return;
+                    }
+
+                    const maHDDV = data.maHDDV || data.maHoaDon;
+                    currentInvoiceId = maHDDV;
+
+                    if (isVNPay) {
+                        // Gọi API lấy URL thanh toán VNPay Sandbox & QR Code
+                        const qrResp = await fetch(`/api/hoa-don/${maHDDV}/vnpay-url`, { method: 'POST' });
+                        const qrData = await qrResp.json();
+
+                        if (qrData.success) {
+                            document.getElementById('qrModalMaHD').innerText = maHDDV;
+                            document.getElementById('qrModalAmount').innerText = formatVND(grandTotal);
+
+                            // Gán ảnh QR VNPay Sandbox
+                            if (qrData.qrCodeBase64) {
+                                document.getElementById('qrCodeImage').src = qrData.qrCodeBase64;
+                            }
+                            // Gán link mở cổng thanh toán Sandbox
+                            document.getElementById('btnOpenVnPayLink').href = qrData.paymentUrl || '#';
+
+                            const qrModal = new bootstrap.Modal(document.getElementById('vnpayQrModal'));
+                            qrModal.show();
+                        } else {
+                            alert('Không thể tạo mã QR: ' + (qrData.message || 'Lỗi server'));
+                        }
+                    } else {
+                        // Thanh toán tiền mặt: xác nhận ngay và xuất hóa đơn
+                        const payResp = await fetch(`/api/hoa-don/${maHDDV}/thanh-toan`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ phuongThucThanhToan: 'TienMat' })
+                        });
+
+                        const payData = await payResp.json();
+                        if (payData.success) {
+                            showInvoiceReceiptModal(maHDDV);
+                        } else {
+                            alert('Lỗi xác nhận thanh toán: ' + payData.message);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Lỗi giao dịch:', err);
+                    alert('Lỗi kết nối máy chủ: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    onPaymentMethodChange();
+                }
+            }
+
+            async function confirmVNPayPaymentSuccess() {
+                if (!currentInvoiceId) return;
+
+                const btn = document.getElementById('btnConfirmQrPaid');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang cập nhật...';
+
+                try {
+                    const payResp = await fetch(`/api/hoa-don/${currentInvoiceId}/thanh-toan`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phuongThucThanhToan: 'VNPay' })
+                    });
+                    const payData = await payResp.json();
+
+                    // Đóng modal VNPay
+                    const qrModalEl = document.getElementById('vnpayQrModal');
+                    const modal = bootstrap.Modal.getInstance(qrModalEl);
+                    if (modal) modal.hide();
+
+                    if (payData.success) {
+                        // Hiển thị modal Xuất Hóa Đơn Dịch Vụ đã thanh toán
+                        showInvoiceReceiptModal(currentInvoiceId);
+                    } else {
+                        alert('Lỗi cập nhật trạng thái: ' + payData.message);
+                    }
+                } catch (err) {
+                    console.error('Lỗi xác nhận:', err);
+                    alert('Lỗi kết nối: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle me-1"></i>Xác Nhận Đã Thanh Toán Thành Công';
+                }
+            }
+
+            function showInvoiceReceiptModal(invoiceId) {
+                document.getElementById('rcptInvoiceId').innerText = invoiceId;
+                document.getElementById('rcptDateTime').innerText = new Date().toLocaleString('vi-VN');
+
+                if (paidCustomerInfo) {
+                    document.getElementById('rcptCustomerName').innerText = paidCustomerInfo.tenKH || 'Khách lẻ / Vãng lai';
+                    document.getElementById('rcptCustomerPhone').innerText = paidCustomerInfo.dienThoai || 'Chưa có';
+                    document.getElementById('rcptNote').innerText = paidCustomerInfo.ghiChu || 'Không có';
+                    document.getElementById('rcptPaymentMethod').innerText = paidCustomerInfo.method || 'Đã thanh toán';
+                    document.getElementById('rcptSubTotal').innerText = formatVND(paidCustomerInfo.grandTotal || 0);
+                    document.getElementById('rcptGrandTotal').innerText = formatVND(paidCustomerInfo.grandTotal || 0);
+
+                    // Render bảng dịch vụ đã thanh toán
+                    const tbody = document.getElementById('rcptServicesBody');
+                    let html = '';
+                    let stt = 1;
+                    const cart = paidCustomerInfo.cartCopy || selectedCart;
+                    Object.values(cart).forEach(item => {
+                        const rowTotal = item.price * item.qty;
+                        html += `
+                            <tr>
+                                <td class="text-center">${stt++}</td>
+                                <td><strong>${item.name}</strong></td>
+                                <td class="text-center fw-bold">${item.qty}</td>
+                                <td class="text-end">${formatVND(item.price)}</td>
+                                <td class="text-end fw-bold text-dark">${formatVND(rowTotal)}</td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                }
+
+                document.getElementById('rcptStampDate').innerText = new Date().toLocaleDateString('vi-VN');
+                document.getElementById('btnViewFullInvoicePage').href = `/admin/thu-ngan/hoa-don/${invoiceId}`;
+
+                const receiptModal = new bootstrap.Modal(document.getElementById('invoiceReceiptModal'));
+                receiptModal.show();
+            }
+
+            function printReceiptDirectly() {
+                window.print();
+            }
+
+            function resetForm() {
+                clearCart();
+                document.getElementById('inputGhiChu').value = '';
+                document.getElementById('inputCashGiven').value = '';
+                document.getElementById('inputTenKhach').value = '';
+                document.getElementById('inputSdtKhach').value = '';
+                const selectEl = document.getElementById('selectKhachHang');
+                if (selectEl) selectEl.value = '';
+                document.getElementById('payMethodCash').checked = true;
+                onPaymentMethodChange();
+                currentInvoiceId = null;
+                paidCustomerInfo = {};
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                onPaymentMethodChange();
+            });
+        </script>
+    </section>
+</div>
+</body>
+</html>

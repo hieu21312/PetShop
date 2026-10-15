@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="container my-4">
+    <!-- THANH CÔNG CỤ ĐIỀU HƯỚNG (ẨN KHI IN) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print flex-wrap gap-2">
+        <a th:href="@{/admin/thu-ngan}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Quay Lại Quầy Thu Ngân
+        </a>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <!-- Nút xác nhận thanh toán nếu hóa đơn chưa thanh toán -->
+            <form th:if="${hoaDon.trangThai != 'DaThanhToan'}" 
+                  th:action="@{'/admin/thu-ngan/hoa-don/' + ${hoaDon.maHDDV} + '/xac-nhan'}" 
+                  method="post" class="d-inline m-0">
+                <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="fas fa-check-circle me-1"></i>Xác Nhận Đã Thu Tiền
+                </button>
+            </form>
+            <button type="button" onclick="window.print()" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+                <i class="fas fa-print me-2"></i>In Hóa Đơn / Xuất PDF
+            </button>
+            <a th:href="@{/admin/thu-ngan}" class="btn btn-success rounded-pill px-4 shadow-sm fw-bold">
+                <i class="fas fa-plus me-2"></i>Tạo Hóa Đơn Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- CẢNH BÁO NẾU CHƯA THANH TOÁN (ẨN KHI IN) -->
+    <div th:if="${hoaDon.trangThai != 'DaThanhToan'}" class="alert alert-warning rounded-4 shadow-sm mb-4 no-print d-flex align-items-center justify-content-between">
+        <div>
+            <i class="fas fa-exclamation-triangle me-2 fs-5 text-warning"></i>
+            <strong>Hóa đơn này hiện chưa được thanh toán.</strong> Bạn có thể thu tiền và bấm nút <em>"Xác Nhận Đã Thu Tiền"</em> ở trên.
+        </div>
+    </div>
+
+    <!-- KHUNG HÓA ĐƠN CHÍNH (ĐƯỢC IN ẤN) -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden invoice-card mx-auto" style="max-width: 800px; background-color: #fff;">
+        <div class="card-body p-4 p-md-5">
+
+            <!-- 1. HEADER CỬA HÀNG -->
+            <div class="row align-items-center pb-4 border-bottom mb-4">
+                <div class="col-sm-7 text-start">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 48px; height: 48px; font-size: 1.5rem;">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-primary">PET SHOP CARE & BEAUTY</h4>
+                            <small class="text-muted fst-italic">Dịch vụ Spa & Chăm sóc Thú cưng chuyên nghiệp</small>
+                        </div>
+                    </div>
+                    <div class="small text-secondary ps-1">
+                        <div><i class="fas fa-map-marker-alt me-2 text-danger"></i>123 Đường Thú Cưng, Quận 1, TP. Hồ Chí Minh</div>
+                        <div><i class="fas fa-phone me-2 text-success"></i>Hotline: 0900.123.456 - (028) 38.888.999</div>
+                        <div><i class="fas fa-globe me-2 text-info"></i>Website: www.petshopdemo.vn</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-5 text-sm-end text-start mt-3 mt-sm-0">
+                    <h3 class="fw-bold text-dark text-uppercase mb-1 tracking-wide">HÓA ĐƠN DỊCH VỤ</h3>
+                    <div class="badge bg-danger-subtle text-danger fs-6 px-3 py-1 rounded-pill fw-bold border border-danger-subtle mb-2">
+                        Mã HĐ: #HDDV-<span th:text="${hoaDon.maHDDV}">000</span>
+                    </div>
+                    <div class="small text-muted">
+                        Ngày lập: <strong class="text-dark" th:text="${hoaDon.ngaySuDung != null ? #temporals.format(hoaDon.ngaySuDung, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}">14/10/2026 09:00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. THÔNG TIN KHÁCH HÀNG & THANH TOÁN -->
+            <div class="row g-3 bg-light p-3 rounded-4 mb-4 border">
+                <div class="col-md-6 border-end-md">
+                    <h6 class="fw-bold text-dark mb-2 text-uppercase small text-muted">
+                        <i class="fas fa-user-circle me-1 text-primary"></i>Thông tin Khách hàng
+                    </h6>
+                    <div class="mb-1">
+                        <span class="text-muted small">Họ và tên:</span>
+                        <strong class="text-dark ms-1" th:text="${customer != null ? customer.tenKH : 'Khách lẻ / Vãng lai'}">Nguyễn Văn A</strong>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted small">Số điện thoại:</span>
+                        <span class="text-dark ms-1" th:text="${customer != null && customer.dienThoai != null ? customer.dienThoai : 'Chưa cập nhật'}">0901234567</span>
+                    </div>
+                    <div th:if="${hoaDon.ghiChu != null and !#strings.isEmpty(hoaDon.ghiChu)}">
+                        <span class="text-muted small">Ghi chú:</span>
+                        <span class="text-secondary ms-1 fst-italic" th:text="${hoaDon.ghiChu}">Chăm sóc bé Poodle</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 ps-md-4">
+                    <h6 class="fw-bold text-dark mb-2 text-uppercase small text-muted">
+                        <i class="fas fa-receipt me-1 text-success"></i>Thông tin Giao dịch
+                    </h6>
+                    <div class="mb-1">
+                        <span class="text-muted small">Thu ngân lập phiếu:</span>
+                        <strong class="text-dark ms-1" th:text="${employee != null ? employee.tenNV : 'Quầy Thu Ngân'}">Nhân viên thu ngân</strong>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted small">Phương thức:</span>
+                        <span class="badge bg-primary ms-1" th:text="${hoaDon.phuongThucThanhToan == 'VNPay' ? 'VNPay Sandbox' : (hoaDon.phuongThucThanhToan == 'TienMat' ? 'Tiền mặt' : (hoaDon.phuongThucThanhToan ?: 'Tiền mặt'))}">Tiền mặt</span>
+                    </div>
+                    <div>
+                        <span class="text-muted small">Trạng thái:</span>
+                        <span class="badge ms-1" 
+                              th:classappend="${hoaDon.trangThai == 'DaThanhToan' ? 'bg-success' : 'bg-warning text-dark'}" 
+                              th:text="${hoaDon.trangThai == 'DaThanhToan' ? 'ĐÃ THANH TOÁN' : 'CHƯA THANH TOÁN'}">
+                            CHƯA THANH TOÁN
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. DANH SÁCH CHI TIẾT DỊCH VỤ -->
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-primary text-center small text-uppercase">
+                        <tr>
+                            <th style="width: 50px;">STT</th>
+                            <th>Tên Dịch Vụ</th>
+                            <th style="width: 90px;">Số Lượng</th>
+                            <th style="width: 140px;" class="text-end">Đơn Giá</th>
+                            <th style="width: 150px;" class="text-end">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item, stat : ${details}">
+                            <td class="text-center" th:text="${stat.count}">1</td>
+                            <td>
+                                <strong class="text-dark" th:text="${item.petService != null ? item.petService.tenDV : ('Dịch vụ #' + item.id.maDV)}">Tắm & Cắt tỉa lông</strong>
+                            </td>
+                            <td class="text-center fw-bold" th:text="${item.soLuong}">1</td>
+                            <td class="text-end" th:text="${item.giaDichVu != null ? #numbers.formatDecimal(item.giaDichVu, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">150,000 đ</td>
+                            <td class="text-end fw-bold text-dark" th:text="${item.giaDichVu != null && item.soLuong != null ? #numbers.formatDecimal(item.giaDichVu * item.soLuong, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">150,000 đ</td>
+                        </tr>
+
+                        <!-- Nếu chưa có dòng chi tiết nào -->
+                        <tr th:if="${#lists.isEmpty(details)}">
+                            <td class="text-center">1</td>
+                            <td>
+                                <strong class="text-dark">Dịch vụ chăm sóc thú cưng tổng hợp</strong>
+                            </td>
+                            <td class="text-center fw-bold">1</td>
+                            <td class="text-end" th:text="${hoaDon.tongTien != null ? #numbers.formatDecimal(hoaDon.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">0 đ</td>
+                            <td class="text-end fw-bold text-dark" th:text="${hoaDon.tongTien != null ? #numbers.formatDecimal(hoaDon.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">0 đ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. TÍNH TỔNG TIỀN & CON DẤU XÁC NHẬN -->
+            <div class="row align-items-center mb-4">
+                <!-- Con dấu ĐÃ THANH TOÁN HOẶC CHƯA THANH TOÁN -->
+                <div class="col-sm-6 text-center text-sm-start mb-3 mb-sm-0">
+                    <div th:if="${hoaDon.trangThai == 'DaThanhToan'}" class="paid-stamp d-inline-block">
+                        <div class="stamp-inner">
+                            <div class="stamp-title">PET SHOP</div>
+                            <div class="stamp-status">ĐÃ THANH TOÁN</div>
+                            <div class="stamp-date" th:text="${hoaDon.ngaySuDung != null ? #temporals.format(hoaDon.ngaySuDung, 'dd/MM/yyyy') : 'PAID'}">PAID</div>
+                        </div>
+                    </div>
+                    <div th:if="${hoaDon.trangThai != 'DaThanhToan'}" class="unpaid-stamp d-inline-block">
+                        <div class="stamp-inner">
+                            <div class="stamp-title">PET SHOP</div>
+                            <div class="stamp-status">CHƯA THANH TOÁN</div>
+                            <div class="stamp-date">UNPAID</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng tổng thành tiền -->
+                <div class="col-sm-6">
+                    <div class="bg-light p-3 rounded-4 border">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Cộng tiền dịch vụ:</span>
+                            <span class="fw-semibold text-dark" th:text="${hoaDon.tongTien != null ? #numbers.formatDecimal(hoaDon.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Chiết khấu / Giảm giá:</span>
+                            <span class="fw-semibold text-muted">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <span class="fw-bold fs-6 text-dark">TỔNG THANH TOÁN:</span>
+                            <span class="fw-bold fs-4 text-danger" th:text="${hoaDon.tongTien != null ? #numbers.formatDecimal(hoaDon.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">0 đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. CHỮ KÝ & LỜI CẢM ƠN -->
+            <div class="row text-center mt-4 pt-2">
+                <div class="col-6">
+                    <div class="fw-bold text-dark small text-uppercase">Khách Hàng</div>
+                    <small class="text-muted fst-italic">(Ký và ghi rõ họ tên)</small>
+                    <div style="height: 60px;"></div>
+                </div>
+                <div class="col-6">
+                    <div class="fw-bold text-dark small text-uppercase">Người Lập Phiếu</div>
+                    <small class="text-muted fst-italic">(Ký và ghi rõ họ tên)</small>
+                    <div style="height: 60px;"></div>
+                    <div class="fw-bold text-primary small" th:text="${employee != null ? employee.tenNV : 'Thu ngân'}">Thu ngân</div>
+                </div>
+            </div>
+
+            <!-- Footer ghi chú hóa đơn -->
+            <div class="text-center pt-4 border-top mt-4 text-muted small">
+                <div><i class="fas fa-heart text-danger me-1"></i> <strong>PetShop</strong> chân thành cảm ơn Quý khách đã tin tưởng và sử dụng dịch vụ!</div>
+                <div class="fst-italic mt-1">Chúc bé thú cưng luôn khỏe mạnh, sạch đẹp và vui tươi!</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    /* CON DẤU ĐIỆN TỬ ĐÃ THANH TOÁN */
+    .paid-stamp {
+        border: 3px double #e02424;
+        border-radius: 12px;
+        padding: 8px 18px;
+        color: #e02424;
+        text-transform: uppercase;
+        font-family: 'Courier New', Courier, monospace;
+        transform: rotate(-7deg);
+        display: inline-block;
+        background-color: rgba(254, 242, 242, 0.7);
+    }
+    .paid-stamp .stamp-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    .paid-stamp .stamp-status {
+        font-size: 1.15rem;
+        font-weight: 900;
+        letter-spacing: 3px;
+        border-top: 1px dashed #e02424;
+        border-bottom: 1px dashed #e02424;
+        margin: 3px 0;
+        padding: 2px 0;
+    }
+    .paid-stamp .stamp-date {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    /* CON DẤU CHƯA THANH TOÁN */
+    .unpaid-stamp {
+        border: 3px double #f59e0b;
+        border-radius: 12px;
+        padding: 8px 18px;
+        color: #d97706;
+        text-transform: uppercase;
+        font-family: 'Courier New', Courier, monospace;
+        transform: rotate(-7deg);
+        display: inline-block;
+        background-color: rgba(254, 243, 199, 0.7);
+    }
+    .unpaid-stamp .stamp-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    .unpaid-stamp .stamp-status {
+        font-size: 1.15rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        border-top: 1px dashed #f59e0b;
+        border-bottom: 1px dashed #f59e0b;
+        margin: 3px 0;
+        padding: 2px 0;
+    }
+    .unpaid-stamp .stamp-date {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    /* CSS ĐỊNH DẠNG IN ẤN CHUYÊN NGHIỆP */
+    @media print {
+        body {
+            background-color: #fff !important;
+            color: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        header, footer, .no-print, #chatbot-widget {
+            display: none !important;
+        }
+        .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .invoice-card {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+        .card-body {
+            padding: 10px !important;
+        }
+        .paid-stamp, .unpaid-stamp {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+    }
+</style>
+</body>
+</html>
