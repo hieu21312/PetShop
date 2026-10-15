@@ -42,7 +42,61 @@
                     </div>
                 </div>
 
-                <!-- Notification Messages -->
+                <div class="row g-3 mb-4" th:if="${staffStats != null}">
+                    <div class="col-md-3 col-6">
+                        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success-subtle text-success p-3 me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-user-md fa-lg"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block fw-semibold">Bác sĩ đang rảnh</small>
+                                    <span class="fs-4 fw-bold text-success" th:text="${staffStats.vetFree}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-danger-subtle text-danger p-3 me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-stethoscope fa-lg"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block fw-semibold">Bác sĩ đang làm</small>
+                                    <span class="fs-4 fw-bold text-danger" th:text="${staffStats.vetBusy}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success-subtle text-success p-3 me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-user-check fa-lg"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block fw-semibold">Nhân viên đang rảnh</small>
+                                    <span class="fs-4 fw-bold text-success" th:text="${staffStats.careFree}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card border-0 shadow-sm rounded-4 bg-white p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-warning-subtle text-warning p-3 me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-cut fa-lg"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block fw-semibold">Nhân viên đang làm</small>
+                                    <span class="fs-4 fw-bold text-dark" th:text="${staffStats.careBusy}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -86,14 +140,15 @@
                                     <td class="text-nowrap">
                                         <form th:action="@{/admin/bookings/assignStaff}" method="post" class="d-inline">
                                             <input type="hidden" name="id" th:value="${b.maDatLich}">
-                                            <select name="maNV" class="form-select form-select-sm rounded-pill shadow-sm d-inline-block w-auto px-3 py-1 border-1" onchange="this.form.submit()">
-                                                <option value="">-- Chưa phân công --</option>
+                                            <select name="maNV" class="form-select form-select-sm rounded-pill shadow-sm d-inline-block px-2 py-1 border-1" style="max-width: 170px; font-size: 0.82rem;" onchange="this.form.submit()">
+                                                <option value="">-- Chưa phân --</option>
                                                 <optgroup label="👨‍⚕️ Bác sĩ thú y">
                                                     <option th:each="e : ${employees}"
                                                             th:if="${e.role != null and e.role.tenVaiTro == 'Bác sĩ thú y'}"
                                                             th:value="${e.maNV}"
                                                             th:selected="${b.maNV == e.maNV}"
-                                                            th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : '')">
+                                                            th:title="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : '')"
+                                                            th:text="${e.tenNV} + ' - ' + (${e.soCaDangLam == 0 ? '🟢 Rảnh' : '🔴 Bận ' + e.soCaDangLam})">
                                                     </option>
                                                 </optgroup>
                                                 <optgroup label="✂️ Staff Spa / Chăm sóc">
@@ -101,11 +156,20 @@
                                                             th:if="${e.role == null or e.role.tenVaiTro != 'Bác sĩ thú y'}"
                                                             th:value="${e.maNV}"
                                                             th:selected="${b.maNV == e.maNV}"
-                                                            th:text="${e.tenNV} + (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')">
+                                                            th:title="${e.tenNV} + (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')"
+                                                            th:text="${e.tenNV} + ' - ' + (${e.soCaDangLam == 0 ? '🟢 Rảnh' : '🔴 Bận ' + e.soCaDangLam})">
                                                     </option>
                                                 </optgroup>
                                             </select>
                                         </form>
+                                        <div th:each="e : ${employees}" th:if="${e.maNV == b.maNV}" class="mt-1">
+                                            <span th:if="${e.soCaDangLam == 0}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.72rem;">
+                                                <i class="fas fa-check-circle me-1"></i>🟢 Đang rảnh
+                                            </span>
+                                            <span th:if="${e.soCaDangLam > 0}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1" style="font-size: 0.72rem;">
+                                                <i class="fas fa-briefcase me-1"></i>🔴 Đang làm (<span th:text="${e.soCaDangLam}"></span> ca)
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="text-center text-nowrap">
                                         <span class="badge px-3 py-2 rounded-pill text-nowrap"

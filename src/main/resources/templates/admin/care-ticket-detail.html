@@ -131,8 +131,19 @@
                                 </div>
                             </div>
 
-                            <!-- Form cập nhật trạng thái -->
                             <form th:action="@{/admin/care-tickets/update-status/{id}(id=${ticket.maPhieuDV})}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Nhân sự / Bác sĩ phụ trách thực hiện</label>
+                                    <select name="maNVThucHien" class="form-select rounded-3">
+                                        <option value="">-- Chưa phân công --</option>
+                                        <option th:each="e : ${employees}" 
+                                                th:value="${e.maNV}" 
+                                                th:selected="${ticket.maNVThucHien == e.maNV}"
+                                                th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')) + ' - ' + (${e.soCaDangLam == 0} ? '🟢 Đang rảnh' : '🔴 Đang làm (' + ${e.soCaDangLam} + ' ca)')">
+                                        </option>
+                                    </select>
+                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">1. Trạng thái thực hiện dịch vụ</label>
                                     <select name="trangThaiDichVu" class="form-select rounded-3">

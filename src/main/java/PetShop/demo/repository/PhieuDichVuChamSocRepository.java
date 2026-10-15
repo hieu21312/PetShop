@@ -14,6 +14,9 @@ public interface PhieuDichVuChamSocRepository extends JpaRepository<PhieuDichVuC
     List<PhieuDichVuChamSoc> findByTrangThaiDichVu(String trangThaiDichVu);
     List<PhieuDichVuChamSoc> findByMaChuNuoi(Integer maChuNuoi);
     List<PhieuDichVuChamSoc> findByMaThuCung(Integer maThuCung);
+
+    long countByMaNVThucHienAndTrangThaiDichVuIn(Integer maNVThucHien, List<String> trangThaiDichVuList);
+
     List<PhieuDichVuChamSoc> findByMaNVThucHienOrderByNgayTiepNhanDesc(Integer maNVThucHien);
     List<PhieuDichVuChamSoc> findByMaNVThucHienAndTrangThaiDichVuIn(Integer maNVThucHien, List<String> trangThaiList);
     List<PhieuDichVuChamSoc> findByMaThuCungAndTrangThaiDichVuIn(Integer maThuCung, List<String> trangThaiList);
@@ -39,4 +42,5 @@ public interface PhieuDichVuChamSocRepository extends JpaRepository<PhieuDichVuC
            "LOWER(nv.tenNV) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
            "ORDER BY p.ngayTiepNhan DESC")
     List<PhieuDichVuChamSoc> searchTickets(@Param("status") String status, @Param("keyword") String keyword);
+
 }

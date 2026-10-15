@@ -105,11 +105,19 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Kỹ thuật viên / Bác sĩ trực tiếp thực hiện</label>
+
+                                <select th:field="*{maNVThucHien}" class="form-select rounded-3">
+                                    <option value="" selected>-- Chưa phân công --</option>
+                                    <option th:each="e : ${employees}" 
+                                            th:value="${e.maNV}" 
+                                            th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')) + ' - ' + (${e.soCaDangLam == 0} ? '🟢 Đang rảnh' : '🔴 Đang làm (' + ${e.soCaDangLam} + ' ca)')">
+
                                 <select th:field="*{maNVThucHien}" id="maNVSelect" class="form-select rounded-3">
                                     <option value="" selected>-- Chọn nhân sự (Đã sắp xếp theo thứ tự tối ưu) --</option>
                                     <option th:each="e : ${employees}" 
                                             th:value="${e.maNV}" 
                                             th:text="${e.displayText != null ? e.displayText : (e.tenNV + (e.chuyenMon != null ? ' - ' + e.chuyenMon : ''))}">
+
                                     </option>
                                 </select>
                                 <div id="employeeConflictMsg" class="text-danger small mt-1 d-none fw-semibold"></div>

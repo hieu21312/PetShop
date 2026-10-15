@@ -31,6 +31,17 @@
                 border-color: #fbcfe8;
             }
 
+
+        <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#petCareSubmenu" href="#petCareSubmenu" role="button" aria-expanded="true">
+            <span><i class="fas fa-paw me-2"></i> Quản Lý Pet & Dịch Vụ</span>
+            <i class="fas fa-chevron-down small text-muted"></i>
+        </a>
+        <div th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+             class="collapse show ps-3 my-1" id="petCareSubmenu">
+            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/owners}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-id-card me-2 text-primary"></i> Hồ sơ chủ nuôi
+=======
             /* Responsive col adjustments on collapse */
             .col-sidebar-collapsed {
                 flex: 0 0 78px !important;
@@ -96,6 +107,7 @@
             </a>
             <a th:if="${session.role == 'Admin'}" th:href="@{/admin/reports}" class="list-group-item list-group-item-action" title="Báo cáo doanh thu">
                 <i class="fas fa-chart-bar me-2"></i><span class="menu-text"> Báo cáo doanh thu</span>
+
             </a>
             <a th:if="${session.role == 'Admin'}" th:href="@{/admin/products}" class="list-group-item list-group-item-action" title="Quản Lý sản phẩm">
                 <i class="fas fa-shopping-bag me-2"></i><span class="menu-text"> Quản Lý sản phẩm</span>
@@ -117,6 +129,18 @@
                th:href="@{/admin/customers}" class="list-group-item list-group-item-action" title="Quản Lý khách hàng">
                 <i class="fas fa-user-friends me-2"></i><span class="menu-text"> Quản Lý khách hàng</span>
             </a>
+
+
+        <a th:if="${session.role == 'Admin'}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#staffSubmenu" href="#staffSubmenu" role="button" aria-expanded="false">
+            <span><i class="fas fa-user-tie me-2"></i> Quản Lý Nhân sự</span>
+            <i class="fas fa-chevron-down small text-muted"></i>
+        </a>
+        <div th:if="${session.role == 'Admin'}" class="collapse ps-3 my-1" id="staffSubmenu">
+            <a th:href="@{/admin/staff?roleFilter=vet}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-stethoscope me-2 text-primary"></i> Bác sĩ thú y
+            </a>
+            <a th:href="@{/admin/staff?roleFilter=cashier}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;">
+                <i class="fas fa-cash-register me-2 text-success"></i> Nhân viên thu ngân
 
             <!-- Submenu Pet & Dịch vụ -->
             <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
@@ -167,6 +191,7 @@
 
             <a th:if="${session.role == 'Admin'}" th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action" title="Quản Lý mã giảm giá">
                 <i class="fas fa-ticket-alt me-2"></i><span class="menu-text"> Quản Lý mã giảm giá</span>
+
             </a>
             <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
                th:href="@{/admin/bookings}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" title="Quản Lý đặt lịch">

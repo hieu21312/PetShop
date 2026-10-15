@@ -1,6 +1,7 @@
 package PetShop.demo.controller;
 
 import PetShop.demo.model.enity.Booking;
+import PetShop.demo.model.enity.Employee;
 import PetShop.demo.model.enity.PetService;
 import PetShop.demo.repository.PetServiceRepository;
 import PetShop.demo.service.BookingService;
@@ -148,34 +149,33 @@ public class BookingController {
     @Autowired
     private EmployeeService employeeService;
 
-    // ADMIN: Xem danh sách lịch đặt (Hỗ trợ lọc trạng thái)
     @GetMapping("/admin/bookings")
     public String listBookings(@RequestParam(value = "status", required = false, defaultValue = "all") String status,
                                Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageBookings(session)) return "redirect:/DangNhap?url=/admin/bookings";
         List<Booking> bookings = bookingService.getBookingsByStatus(status);
         long pendingCount = bookingService.countPendingBookings();
+        List<Employee> employees = employeeService.getActiveEmployeesWithWorkload();
 
         model.addAttribute("bookings", bookings);
-        model.addAttribute("employees", employeeService.getActiveEmployees());
+        model.addAttribute("employees", employees);
+        model.addAttribute("staffStats", employeeService.getStaffWorkloadStats(employees));
         model.addAttribute("currentStatus", status);
         model.addAttribute("pendingBookingCount", pendingCount);
         return "admin/bookings";
     }
 
-    // ADMIN: Cập nhật trạng thái lịch đặt
     @PostMapping("/admin/bookings/updateStatus")
     public String updateStatus(@RequestParam Integer id, @RequestParam String status, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageBookings(session)) return "redirect:/DangNhap?url=/admin/bookings";
         bookingService.updateStatus(id, status);
         ra.addFlashAttribute("success", "Cập nhật trạng thái thành công.");
         return "redirect:/admin/bookings";
     }
 
-    // ADMIN: Gán Bác sĩ / Nhân viên phụ trách
     @PostMapping("/admin/bookings/assignStaff")
     public String assignStaff(@RequestParam Integer id, @RequestParam(required = false) Integer maNV, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageBookings(session)) return "redirect:/DangNhap?url=/admin/bookings";
 
         Booking b = bookingService.getBookingById(id);
         if (b != null && maNV != null) {
@@ -192,10 +192,9 @@ public class BookingController {
         return "redirect:/admin/bookings";
     }
 
-    // ADMIN: Xóa lịch đặt
     @GetMapping("/admin/bookings/delete/{id}")
     public String deleteBooking(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.canManageBookings(session)) return "redirect:/DangNhap?url=/admin/bookings";
         bookingService.deleteBooking(id);
         ra.addFlashAttribute("success", "Xóa lịch đặt thành công.");
         return "redirect:/admin/bookings";
