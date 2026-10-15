@@ -84,6 +84,9 @@ public class PhieuDichVuChamSoc {
     @Column(name = "GhiChu")
     private String ghiChu;
 
+    @Column(name = "DaCongDiem")
+    private Boolean daCongDiem = false;
+
     public PhieuDichVuChamSoc() {
         this.ngayTiepNhan = LocalDateTime.now();
     }
@@ -159,4 +162,7 @@ public class PhieuDichVuChamSoc {
 
     public String getGhiChu() { return ghiChu; }
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+
+    public Boolean getDaCongDiem() { return daCongDiem != null ? daCongDiem : false; }
+    public void setDaCongDiem(Boolean daCongDiem) { this.daCongDiem = daCongDiem; }
 }

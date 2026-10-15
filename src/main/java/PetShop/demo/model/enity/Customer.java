@@ -17,6 +17,8 @@ public class Customer {
     @Column(name = "Email") private String email;
     @Column(name = "DiaChi") private String diaChi;
     @Column(name = "IsLocked") private Boolean isLocked = false;
+    @Column(name = "DiemTichLuy") private Integer diemTichLuy = 0;
+    @Column(name = "HangThanhVien") private String hangThanhVien = "Tiêu chuẩn";
     @OneToMany(mappedBy = "customer") private List<Order> orders;
 
     public Customer() {}
@@ -45,4 +47,8 @@ public class Customer {
     public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
     public List<Order> getOrders() { return orders; }
     public void setOrders(List<Order> orders) { this.orders = orders; }
+    public Integer getDiemTichLuy() { return diemTichLuy != null ? diemTichLuy : 0; }
+    public void setDiemTichLuy(Integer diemTichLuy) { this.diemTichLuy = diemTichLuy; }
+    public String getHangThanhVien() { return (hangThanhVien != null && !hangThanhVien.isBlank()) ? hangThanhVien : "Tiêu chuẩn"; }
+    public void setHangThanhVien(String hangThanhVien) { this.hangThanhVien = hangThanhVien; }
 }

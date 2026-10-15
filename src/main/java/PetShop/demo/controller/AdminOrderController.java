@@ -28,6 +28,9 @@ public class AdminOrderController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private PetShop.demo.service.MembershipService membershipService;
+
     // Danh sách đơn hàng
     @GetMapping
     public String listOrders(Model model, HttpSession session) {
@@ -45,8 +48,13 @@ public class AdminOrderController {
         if (order == null) return "redirect:/admin/orders";
         model.addAttribute("order", order);
         model.addAttribute("statuses", orderStatusRepository.findAll());
+        int pointsEarned = membershipService.calculatePoints(order.getTongTien());
+        model.addAttribute("pointsEarned", pointsEarned);
         return "admin/order-detail";
     }
+
+    @Autowired
+    private PetShop.demo.service.OrderService orderService;
 
     // Cập nhật đơn hàng (tình trạng, địa chỉ, thanh toán)
     @PostMapping("/update")
@@ -63,8 +71,18 @@ public class AdminOrderController {
         order.setDaThanhToan(updatedOrder.getDaThanhToan());
         orderRepository.save(order);
 
+        // Hoàn lại kho và voucher nếu đơn hàng chuyển sang trạng thái Đã hủy (5)
+        if (updatedOrder.getTinhTrang() != null && updatedOrder.getTinhTrang() == 5 && (oldStatus == null || oldStatus != 5)) {
+            orderService.cancelOrderAndRestoreStock(order);
+        }
+
+        // Tự động tích điểm và nâng hạng nếu đơn hàng đã thanh toán
+        if (Boolean.TRUE.equals(order.getDaThanhToan())) {
+            membershipService.processOrderPoints(order);
+        }
+
         // Phát thông báo tự động cho khách hàng khi thay đổi tình trạng đơn hàng
-        if (order.getMaKH() != null && !oldStatus.equals(updatedOrder.getTinhTrang())) {
+        if (order.getMaKH() != null && oldStatus != null && !oldStatus.equals(updatedOrder.getTinhTrang())) {
             String statusText = "đã được cập nhật";
             if (updatedOrder.getTinhTrang() == 2) statusText = "đã được XÁC NHẬN";
             else if (updatedOrder.getTinhTrang() == 3) statusText = "đang được GIAO HÀNG";

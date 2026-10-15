@@ -12,7 +12,7 @@ public class HomeController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/")
+    @GetMapping({"/", "/CuaHang"})
     public String home(Model model) {
         model.addAttribute("products", productService.getAllProducts());
         model.addAttribute("page", "shop :: content"); // fragment

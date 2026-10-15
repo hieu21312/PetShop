@@ -5,18 +5,351 @@
                 <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
             </div>
             <div class="col-md-9">
-                <div class="row g-4 mb-4">
-                    <div class="col-md-3"><div class="card stat-card product-card text-white p-3"><div class="fw-bold">Tổng sản phẩm</div><h3 th:text="${dashboard.tongSanPham}">0</h3></div></div>
-                    <div class="col-md-3"><div class="card stat-card customer-card text-white p-3"><div class="fw-bold">Khách hàng</div><h3 th:text="${dashboard.tongKhachHang}">0</h3></div></div>
-                    <div class="col-md-3"><div class="card stat-card order-card text-white p-3"><div class="fw-bold">Hóa đơn</div><h3 th:text="${dashboard.tongHoaDon}">0</h3></div></div>
-                    <div class="col-md-3"><div class="card stat-card revenue-card text-white p-3"><div class="fw-bold">Doanh thu</div><h4 class="revenue-text" th:text="${#numbers.formatDecimal(dashboard.tongDoanhThu, 0, 0, 'COMMA')} + ' đ'">0 đ</h4></div></div>
+                <!-- Tiêu đề & Nút chuyển đổi Dashboard -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                    <div class="card-body p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h4 class="fw-bold mb-1 text-dark">
+                                Dashboard Thống Kê
+                            </h4>
+                            <div class="text-muted small">
+                                <span>Tổng doanh thu toàn bộ: </span>
+                                <span class="badge bg-primary-subtle text-primary fw-bold fs-6"
+                                      th:text="${dashboard.tongDoanhThuTongCong != null ? #numbers.formatDecimal(dashboard.tongDoanhThuTongCong, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Nút chuyển đổi Dashboard Sản phẩm / Dịch vụ -->
+                            <div class="btn-group p-1 bg-light rounded-pill border" role="group" aria-label="Toggle Dashboard">
+                                <button type="button" class="btn btn-sm rounded-pill px-4 py-2 fw-bold" id="btnProductTab"
+                                        onclick="switchDashboard('product')"
+                                        style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; transition: all 0.3s ease;">
+                                    Doanh thu Sản phẩm
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill px-4 py-2 fw-bold text-secondary" id="btnServiceTab"
+                                        onclick="switchDashboard('service')"
+                                        style="background: transparent; transition: all 0.3s ease;">
+                                    Doanh thu Dịch vụ
+                                </button>
+                            </div>
+
+                            <a th:href="@{/admin/reports}" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-semibold text-white shadow-sm"
+                               style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+                                Xem Báo Cáo Doanh Thu
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="row g-4">
-                    <div class="col-md-8"><div class="card shadow-sm border-0 rounded-4"><div class="card-header bg-white fw-bold">📈 Doanh thu 7 ngày gần nhất</div><div class="card-body"><canvas id="revenueChart" height="120"></canvas></div></div></div>
-                    <div class="col-md-4"><div class="card shadow-sm border-0 rounded-4"><div class="card-header bg-white fw-bold">🔥 Sản phẩm bán chạy</div><div class="card-body p-0"><ul class="list-group list-group-flush"><li th:each="tp : ${dashboard.topProducts}" class="list-group-item d-flex justify-content-between align-items-center"><span th:text="${tp.tenSP}">Tên SP</span><span class="badge bg-danger rounded-pill" th:text="${tp.soLuongBan}">0</span></li></ul></div></div></div>
+
+                <!-- 1. DASHBOARD DOANH THU SẢN PHẨM -->
+                <div id="productDashboard">
+                    <!-- Stat Cards Sản phẩm -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card product-card text-white p-3">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Tổng sản phẩm</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongSanPham}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card customer-card text-white p-3">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Khách hàng</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongKhachHang}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card order-card text-white p-3">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Hóa đơn SP</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongHoaDon}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card revenue-card text-white p-3">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Doanh thu SP</span>
+                                </div>
+                                <h4 class="revenue-text mb-0" th:text="${dashboard.tongDoanhThu != null ? #numbers.formatDecimal(dashboard.tongDoanhThu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ & Top Sản phẩm -->
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-header bg-white fw-bold py-3 border-0 d-flex justify-content-between align-items-center">
+                                    <span>Doanh thu sản phẩm 7 ngày gần nhất</span>
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Theo ngày</span>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="productRevenueChart" height="130"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-header bg-white fw-bold py-3 border-0">
+                                    Top 5 sản phẩm bán chạy
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li th:each="tp, stat : ${dashboard.topProducts}" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-light text-dark me-2 rounded-circle border" style="width: 26px; height: 26px; line-height: 18px; text-align: center;" th:text="${stat.count}">1</span>
+                                                <span class="fw-semibold text-truncate" style="max-width: 170px;" th:text="${tp.tenSP}">Tên SP</span>
+                                            </div>
+                                            <span class="badge bg-danger rounded-pill px-3" th:text="${tp.soLuongBan} + ' đã bán'">0</span>
+                                        </li>
+                                        <li th:if="${#lists.isEmpty(dashboard.topProducts)}" class="list-group-item text-center text-muted py-4">
+                                            Chưa có dữ liệu bán hàng
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- 2. DASHBOARD DOANH THU DỊCH VỤ -->
+                <div id="serviceDashboard" style="display: none;">
+                    <!-- Stat Cards Dịch vụ -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card text-white p-3" style="background: linear-gradient(135deg, #06b6d4, #0ea5e9);">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Gói dịch vụ</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongDichVu}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card text-white p-3" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Lịch hẹn đặt</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongDatLich}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card text-white p-3" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Phiếu chăm sóc</span>
+                                </div>
+                                <h3 class="mb-0 fw-bold" th:text="${dashboard.tongPhieuDichVu}">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card text-white p-3" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <div class="mb-2">
+                                    <span class="fw-bold">Doanh thu Dịch vụ</span>
+                                </div>
+                                <h4 class="revenue-text mb-0" th:text="${dashboard.tongDoanhThuDichVu != null ? #numbers.formatDecimal(dashboard.tongDoanhThuDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ & Top Dịch vụ -->
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-header bg-white fw-bold py-3 border-0 d-flex justify-content-between align-items-center">
+                                    <span>Doanh thu dịch vụ chăm sóc 7 ngày gần nhất</span>
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-3">Theo ngày</span>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="serviceRevenueChart" height="130"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow-sm border-0 rounded-4 h-100">
+                                <div class="card-header bg-white fw-bold py-3 border-0">
+                                    Top 5 dịch vụ sử dụng nhiều nhất
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li th:each="ts, stat : ${dashboard.topServices}" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-light text-dark me-2 rounded-circle border" style="width: 26px; height: 26px; line-height: 18px; text-align: center;" th:text="${stat.count}">1</span>
+                                                <span class="fw-semibold text-truncate" style="max-width: 170px;" th:text="${ts.tenDV}">Tên dịch vụ</span>
+                                            </div>
+                                            <span class="badge bg-success rounded-pill px-3" th:text="${ts.soLuotSuDung} + ' lượt'">0 lượt</span>
+                                        </li>
+                                        <li th:if="${#lists.isEmpty(dashboard.topServices)}" class="list-group-item text-center text-muted py-4">
+                                            Chưa có dữ liệu dịch vụ
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                <script> const labels = [[${dashboard.labels}]]; const revenues = [[${dashboard.revenues}]]; new Chart(document.getElementById('revenueChart'), { type: 'line', data: { labels: labels, datasets: [{ label: 'Doanh thu (đ)', data: revenues, borderColor: '#4e73df', backgroundColor: 'rgba(78,115,223,0.05)', fill: true }] } }); </script>
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    const productLabels = /*[[${dashboard.labels}]]*/ [];
+                    const productRevenues = /*[[${dashboard.revenues}]]*/ [];
+
+                    const serviceLabels = /*[[${dashboard.serviceLabels}]]*/ [];
+                    const serviceRevenues = /*[[${dashboard.serviceRevenues}]]*/ [];
+
+                    let productChart = null;
+                    let serviceChart = null;
+
+                    // Khởi tạo biểu đồ sản phẩm
+                    const pCtx = document.getElementById('productRevenueChart');
+                    if (pCtx) {
+                        productChart = new Chart(pCtx, {
+                            type: 'line',
+                            data: {
+                                labels: productLabels,
+                                datasets: [{
+                                    label: 'Doanh thu sản phẩm (VND)',
+                                    data: productRevenues,
+                                    borderColor: '#4e73df',
+                                    backgroundColor: 'rgba(78, 115, 223, 0.08)',
+                                    borderWidth: 2.5,
+                                    fill: true,
+                                    tension: 0.35,
+                                    pointBackgroundColor: '#4e73df',
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                let val = context.parsed.y || 0;
+                                                return ' ' + val.toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return value.toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Khởi tạo biểu đồ dịch vụ
+                    const sCtx = document.getElementById('serviceRevenueChart');
+                    if (sCtx) {
+                        serviceChart = new Chart(sCtx, {
+                            type: 'line',
+                            data: {
+                                labels: serviceLabels,
+                                datasets: [{
+                                    label: 'Doanh thu dịch vụ (VND)',
+                                    data: serviceRevenues,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                                    borderWidth: 2.5,
+                                    fill: true,
+                                    tension: 0.35,
+                                    pointBackgroundColor: '#10b981',
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                let val = context.parsed.y || 0;
+                                                return ' ' + (val || 0).toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Hàm chuyển đổi qua lại giữa 2 Dashboard
+                    function switchDashboard(mode) {
+                        const prodDash = document.getElementById('productDashboard');
+                        const servDash = document.getElementById('serviceDashboard');
+                        const btnProd = document.getElementById('btnProductTab');
+                        const btnServ = document.getElementById('btnServiceTab');
+
+                        if (mode === 'service') {
+                            prodDash.style.display = 'none';
+                            servDash.style.display = 'block';
+
+                            btnProd.className = 'btn btn-sm rounded-pill px-4 py-2 fw-bold text-secondary';
+                            btnProd.style.background = 'transparent';
+                            btnProd.style.color = '#6c757d';
+
+                            btnServ.className = 'btn btn-sm rounded-pill px-4 py-2 fw-bold text-white shadow-sm';
+                            btnServ.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                            btnServ.style.color = 'white';
+
+                            if (serviceChart) {
+                                serviceChart.resize();
+                                serviceChart.update();
+                            }
+                            localStorage.setItem('admin_dashboard_tab', 'service');
+                        } else {
+                            prodDash.style.display = 'block';
+                            servDash.style.display = 'none';
+
+                            btnProd.className = 'btn btn-sm rounded-pill px-4 py-2 fw-bold text-white shadow-sm';
+                            btnProd.style.background = 'linear-gradient(135deg, #4f46e5, #7c3aed)';
+                            btnProd.style.color = 'white';
+
+                            btnServ.className = 'btn btn-sm rounded-pill px-4 py-2 fw-bold text-secondary';
+                            btnServ.style.background = 'transparent';
+                            btnServ.style.color = '#6c757d';
+
+                            if (productChart) {
+                                productChart.resize();
+                                productChart.update();
+                            }
+                            localStorage.setItem('admin_dashboard_tab', 'product');
+                        }
+                    }
+
+                    // Tự động khôi phục tab đã chọn trước đó hoặc qua URL hash (#service)
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const hash = window.location.hash;
+                        const savedTab = localStorage.getItem('admin_dashboard_tab');
+                        if (hash === '#service' || (hash !== '#product' && savedTab === 'service')) {
+                            switchDashboard('service');
+                        }
+                    });
+                    /*]]>*/
+                </script>
             </div>
         </div>
     </section>

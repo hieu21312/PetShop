@@ -16,7 +16,10 @@
                             <h3 class="fw-bold mb-0 text-dark">Chi tiết phiếu dịch vụ chăm sóc</h3>
                             <small class="text-muted">Tiếp nhận lúc: <span th:text="${#temporals.format(ticket.ngayTiepNhan, 'dd/MM/yyyy HH:mm')}"></span></small>
                         </div>
-                        <div>
+                        <div class="d-flex gap-2 no-print">
+                            <button type="button" onclick="window.print()" class="btn btn-outline-dark rounded-pill px-3 shadow-sm">
+                                <i class="fas fa-print me-1"></i> In phiếu
+                            </button>
                             <a th:href="@{/admin/care-tickets}" class="btn btn-outline-secondary rounded-pill px-4">
                                 <i class="fas fa-arrow-left me-1"></i> Danh sách phiếu
                             </a>
@@ -73,7 +76,16 @@
                             <h5 class="fw-bold mb-0 text-success"><i class="fas fa-id-card me-2"></i>Hồ sơ chủ nuôi</h5>
                         </div>
                         <div class="card-body p-4 pt-0" th:if="${ticket.chuNuoi != null}">
-                            <div class="fw-bold fs-6 text-dark" th:text="${ticket.chuNuoi.hoTenChuNuoi}"></div>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <div class="fw-bold fs-6 text-dark" th:text="${ticket.chuNuoi.hoTenChuNuoi}"></div>
+                                <span class="badge" 
+                                      th:classappend="${ticket.chuNuoi.loaiChuNuoi == 'VVIP' ? 'bg-danger' : (ticket.chuNuoi.loaiChuNuoi == 'VIP' ? 'bg-warning text-dark' : (ticket.chuNuoi.loaiChuNuoi == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                      th:text="${ticket.chuNuoi.loaiChuNuoi ?: 'Tiêu chuẩn'}">
+                                </span>
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-star text-warning me-1"></i>Điểm tích lũy: <strong class="text-dark" th:text="${ticket.chuNuoi.diemTichLuy ?: 0}"></strong> điểm
+                            </div>
                             <div class="text-muted small mb-2"><i class="fas fa-phone text-success me-1"></i><span th:text="${ticket.chuNuoi.soDienThoai}"></span></div>
                             <div class="small text-secondary mb-2" th:if="${ticket.chuNuoi.diaChi != null}">
                                 <i class="fas fa-map-marker-alt text-danger me-1"></i><span th:text="${ticket.chuNuoi.diaChi}"></span>
@@ -97,16 +109,25 @@
                             <div class="bg-light p-3 rounded-4 mb-4">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Tổng tiền dịch vụ:</span>
-                                    <strong th:text="${#numbers.formatDecimal(ticket.tongTien, 0, 0, 'COMMA')} + ' đ'"></strong>
+                                    <strong th:text="${ticket.tongTien != null ? #numbers.formatDecimal(ticket.tongTien, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></strong>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Giảm giá:</span>
-                                    <span class="text-danger" th:text="'-' + ${#numbers.formatDecimal(ticket.tienGiamGia, 0, 0, 'COMMA')} + ' đ'"></span>
+                                    <span class="text-muted">Ưu đãi giảm giá:</span>
+                                    <span class="text-danger" th:text="'-' + (${ticket.tienGiamGia != null ? #numbers.formatDecimal(ticket.tienGiamGia, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'})"></span>
                                 </div>
                                 <hr class="my-2">
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="fw-bold fs-5 text-dark">Thành tiền cần thu:</span>
-                                    <span class="fw-bold fs-4 text-danger" th:text="${#numbers.formatDecimal(ticket.thanhToan, 0, 0, 'COMMA')} + ' đ'"></span>
+                                    <span class="fw-bold fs-4 text-danger" th:text="${ticket.thanhToan != null ? #numbers.formatDecimal(ticket.thanhToan, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="small text-muted">Tích lũy điểm dịch vụ:</span>
+                                    <span th:if="${ticket.daCongDiem}" class="badge bg-success-subtle text-success py-2 px-3">
+                                        <i class="fas fa-check-circle me-1"></i> Đã tích +<span th:text="${pointsEarned}"></span> điểm
+                                    </span>
+                                    <span th:unless="${ticket.daCongDiem}" class="badge bg-light text-muted border py-2 px-3">
+                                        <i class="fas fa-star text-warning me-1"></i> Tích lũy +<span th:text="${pointsEarned}"></span> điểm (khi hoàn tất)
+                                    </span>
                                 </div>
                             </div>
 

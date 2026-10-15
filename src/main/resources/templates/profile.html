@@ -1,0 +1,237 @@
+<div th:replace="~{layout :: layout(content=~{::section})}">
+    <section class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}"><i class="fas fa-home me-1"></i>Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân & Thú cưng</li>
+            </ol>
+        </nav>
+
+        <!-- Thông báo thành công -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <!-- CỘT TRÁI: THẺ THÀNH VIÊN & TỔNG QUAN -->
+            <div class="col-lg-4">
+                <!-- Thẻ Thành Viên Điện Tử -->
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4"
+                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="card-body p-4 position-relative">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-uppercase fw-bold small" style="letter-spacing: 1px; opacity: 0.9;">PetShop Membership</span>
+                            <i class="fas fa-paw fa-2x opacity-50"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" th:text="${customer.tenKH}">Nguyễn Văn A</h4>
+                        <p class="small mb-3 opacity-75" th:text="${customer.email}">email@example.com</p>
+                        
+                        <div class="pt-3 border-top border-white border-opacity-25 d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="d-block opacity-75">Hạng hội viên</small>
+                                <span class="badge px-3 py-2 fw-bold"
+                                      style="background: rgba(255,255,255,0.25); font-size: 0.9rem;"
+                                      th:text="${hangThanhVien}">Tiêu chuẩn</span>
+                            </div>
+                            <div class="text-end">
+                                <small class="d-block opacity-75">Điểm tích lũy</small>
+                                <strong class="fs-5" th:text="${diemTichLuy} + ' ⭐'">0 ⭐</strong>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 p-2 rounded-3 text-center small fw-semibold" style="background: rgba(255,255,255,0.15);">
+                            <i class="fas fa-tag me-1"></i> Đặc quyền: Giảm <span th:text="${discountPercent}">0</span>% mọi đơn hàng & dịch vụ
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thao tác nhanh -->
+                <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+                    <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-link me-2 text-primary"></i>Liên kết nhanh</h6>
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/DonHang/CuaToi}" class="btn btn-outline-primary text-start rounded-pill py-2">
+                            <i class="fas fa-box-open me-2"></i>Đơn hàng của tôi
+                        </a>
+                        <a th:href="@{/LichSuDatLich}" class="btn btn-outline-info text-start rounded-pill py-2">
+                            <i class="fas fa-calendar-check me-2"></i>Lịch hẹn dịch vụ
+                        </a>
+                        <a th:href="@{/DoiMatKhau}" class="btn btn-outline-warning text-start rounded-pill py-2">
+                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: FORM CHỈNH SỬA & THÚ CƯNG -->
+            <div class="col-lg-8">
+                <!-- Tabs -->
+                <ul class="nav nav-pills custom-tab-wrapper shadow-sm mb-4" id="profileTabs" role="tablist">
+                    <li class="nav-item flex-fill text-center" role="presentation">
+                        <button class="nav-link active w-100 fw-bold py-3" id="tab-info" data-bs-toggle="tab" data-bs-target="#info-pane" type="button" role="tab">
+                            <i class="fas fa-user-edit me-2"></i>Thông tin cá nhân
+                        </button>
+                    </li>
+                    <li class="nav-item flex-fill text-center" role="presentation">
+                        <button class="nav-link w-100 fw-bold py-3" id="tab-pets" data-bs-toggle="tab" data-bs-target="#pets-pane" type="button" role="tab">
+                            <i class="fas fa-dog me-2"></i>Thú cưng của tôi (<span th:text="${#lists.size(myPets)}">0</span>)
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="profileTabContent">
+                    <!-- TAB 1: FORM CẬP NHẬT THÔNG TIN -->
+                    <div class="tab-pane fade show active" id="info-pane" role="tabpanel">
+                        <div class="card border-0 shadow-sm rounded-4 p-4">
+                            <h5 class="fw-bold mb-4 text-gradient"><i class="fas fa-id-card me-2 text-danger"></i>Cập nhật thông tin</h5>
+                            <form th:action="@{/ThongTinCaNhan/CapNhat}" method="post">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                                        <input type="text" name="tenKH" class="form-control rounded-3" required th:value="${customer.tenKH}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Email</label>
+                                        <input type="email" class="form-control rounded-3 bg-light" disabled th:value="${customer.email}">
+                                        <small class="text-muted">Email đăng nhập không thể thay đổi</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Số điện thoại</label>
+                                        <input type="tel" name="dienThoai" class="form-control rounded-3" placeholder="Nhập số điện thoại" th:value="${customer.dienThoai}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Giới tính</label>
+                                        <select name="gioiTinh" class="form-select rounded-3">
+                                            <option value="Nam" th:selected="${customer.gioiTinh == 'Nam'}">Nam</option>
+                                            <option value="Nữ" th:selected="${customer.gioiTinh == 'Nữ'}">Nữ</option>
+                                            <option value="Khác" th:selected="${customer.gioiTinh == 'Khác'}">Khác</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Năm sinh</label>
+                                        <input type="number" name="namSinh" class="form-control rounded-3" min="1940" max="2026" placeholder="VD: 2000" th:value="${customer.namSinh}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Địa chỉ nhận hàng mặc định</label>
+                                        <input type="text" name="diaChi" class="form-control rounded-3" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP" th:value="${customer.diaChi}">
+                                    </div>
+                                    <div class="col-12 text-end mt-4">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm">
+                                            <i class="fas fa-save me-1"></i> Lưu thông tin
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: THÚ CƯNG CỦA TÔI -->
+                    <div class="tab-pane fade" id="pets-pane" role="tabpanel">
+                        <div class="card border-0 shadow-sm rounded-4 p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-gradient"><i class="fas fa-paw me-2 text-danger"></i>Danh sách bé cưng</h5>
+                                <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPetModal">
+                                    <i class="fas fa-plus me-1"></i> Thêm bé cưng mới
+                                </button>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(myPets)}" class="text-center py-5">
+                                <i class="fas fa-dog fa-3x text-muted mb-3 opacity-50"></i>
+                                <h6 class="text-secondary fw-semibold">Bạn chưa đăng ký bé cưng nào trong hệ thống</h6>
+                                <p class="text-muted small">Hãy bấm nút "Thêm bé cưng mới" để PetShop hỗ trợ chăm sóc và theo dõi sức khỏe cho bé tốt nhất!</p>
+                            </div>
+
+                            <div th:unless="${#lists.isEmpty(myPets)}" class="row g-3">
+                                <div th:each="pet : ${myPets}" class="col-md-6">
+                                    <div class="card border border-light shadow-sm rounded-4 p-3 h-100" style="background: #fffafa;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white"
+                                                 style="width: 55px; height: 55px; background: var(--gradient-pink); font-size: 1.4rem;">
+                                                <i class="fas fa-paw"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1 text-dark" th:text="${pet.tenThuCung}">Miu Miu</h6>
+                                                <span class="badge bg-primary me-1" th:text="${pet.loaiThuCung}">Mèo</span>
+                                                <span class="badge bg-secondary" th:text="${pet.giongLoai ?: '---'}">Anh lông ngắn</span>
+                                            </div>
+                                        </div>
+                                        <hr class="my-2 opacity-25">
+                                        <div class="small text-secondary d-flex justify-content-between">
+                                            <span>Giới tính: <strong class="text-dark" th:text="${pet.gioiTinh ?: '---'}"></strong></span>
+                                            <span>Cân nặng: <strong class="text-dark" th:text="${pet.canNang != null ? pet.canNang + ' kg' : '---'}"></strong></span>
+                                        </div>
+                                        <div class="small text-secondary mt-1" th:if="${pet.ghiChuDacBiet != null and !pet.ghiChuDacBiet.isEmpty()}">
+                                            <i class="fas fa-info-circle text-info me-1"></i>Lưu ý: <span th:text="${pet.ghiChuDacBiet}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL THÊM BÉ CƯNG -->
+        <div class="modal fade" id="addPetModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-gradient"><i class="fas fa-paw me-2 text-danger"></i>Đăng ký bé cưng mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/ThongTinCaNhan/ThemThuCung}" method="post">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Tên bé cưng <span class="text-danger">*</span></label>
+                                <input type="text" name="tenThuCung" class="form-control rounded-3" required placeholder="VD: Lu Lu, Miu Miu...">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Loài <span class="text-danger">*</span></label>
+                                    <select name="loaiThuCung" class="form-select rounded-3" required>
+                                        <option value="Chó">Chó</option>
+                                        <option value="Mèo">Mèo</option>
+                                        <option value="Hamster">Hamster</option>
+                                        <option value="Thỏ">Thỏ</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Giống loài</label>
+                                    <input type="text" name="giongLoai" class="form-control rounded-3" placeholder="VD: Poodle, Corgi...">
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Giới tính</label>
+                                    <select name="gioiTinh" class="form-select rounded-3">
+                                        <option value="Đực">Đực</option>
+                                        <option value="Cái">Cái</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Cân nặng (kg)</label>
+                                    <input type="number" step="0.1" name="canNang" class="form-control rounded-3" placeholder="VD: 3.5">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Màu sắc</label>
+                                <input type="text" name="mauSac" class="form-control rounded-3" placeholder="VD: Trắng, Vàng nâu...">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold">Ghi chú đặc biệt / Dị ứng</label>
+                                <textarea name="ghiChu" class="form-control rounded-3" rows="2" placeholder="Ví dụ: Sợ nước, nhát người lạ, dị ứng hải sản..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Xác nhận thêm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

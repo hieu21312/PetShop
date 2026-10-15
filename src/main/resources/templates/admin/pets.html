@@ -89,7 +89,7 @@
                                         <td class="text-nowrap">
                                             <div th:if="${p.chuNuoi != null}">
                                                 <div class="fw-bold text-primary" th:text="${p.chuNuoi.hoTenChuNuoi}"></div>
-                                                <small class="text-muted"><i class="fas fa-phone me-1"></i><span th:text="${p.chuNuoi.soDienThoai}"></span></small>
+                                                <small class="text-muted"><span th:text="${p.chuNuoi.soDienThoai}"></span></small>
                                             </div>
                                             <span th:unless="${p.chuNuoi != null}" class="text-muted">Chưa gán</span>
                                         </td>

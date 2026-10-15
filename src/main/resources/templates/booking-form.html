@@ -36,7 +36,7 @@
                                 <p class="text-muted mb-0 small" th:text="${service.moTa}"></p>
                             </div>
                             <span class="badge fs-6 px-3 py-2 rounded-pill text-white shadow-sm" style="background: linear-gradient(45deg, #ff4d6d, #ff758f);"
-                                  th:text="${#numbers.formatDecimal(service.giaDichVu, 0, 0)} + ' đ'"></span>
+                                  th:text="${service.giaDichVu != null ? #numbers.formatDecimal(service.giaDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}"></span>
                         </div>
                     </div>
 

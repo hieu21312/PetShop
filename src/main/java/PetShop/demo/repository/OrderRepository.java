@@ -14,6 +14,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order o WHERE o.ngayLap >= :from AND o.ngayLap <= :to AND o.tinhTrang = 4")
     List<Order> findCompletedOrdersBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
+    @Query("SELECT o FROM Order o WHERE o.ngayLap >= :from AND o.ngayLap <= :to ORDER BY o.ngayLap ASC")
+    List<Order> findOrdersBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
     // Sửa native query để lấy doanh thu 7 ngày
     @Query(value = "SELECT CAST(o.NgayLap AS date) as ngay, SUM(o.TongTien) as doanhThu " +
             "FROM tblHoaDon o WHERE o.NgayLap >= :sevenDaysAgo GROUP BY CAST(o.NgayLap AS date)",
