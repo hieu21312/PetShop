@@ -39,23 +39,35 @@ class ApiService {
   }
 
   // 1. Đăng nhập
-  static Future<UserModel?> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final res = await http.post(
         Uri.parse('$baseUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        if (data['success'] == true && data['user'] != null) {
-          return UserModel.fromJson(data['user']);
-        }
+      final data = jsonDecode(utf8.decode(res.bodyBytes));
+      if (res.statusCode == 200 && data['success'] == true && data['user'] != null) {
+        return {
+          'success': true,
+          'user': UserModel.fromJson(data['user']),
+          'message': data['message'] ?? 'Đăng nhập thành công',
+        };
+      } else {
+        return {
+          'success': false,
+          'user': null,
+          'message': data['message'] ?? 'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!',
+        };
       }
     } catch (e) {
       debugPrint('Login error: $e');
+      return {
+        'success': false,
+        'user': null,
+        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!',
+      };
     }
-    return null;
   }
 
   // 1b. Lấy thông tin tài khoản & thành viên mới nhất
@@ -301,5 +313,197 @@ class ApiService {
       debugPrint('markAllNotificationsAsRead error: $e');
       return false;
     }
+  }
+
+  // --- STAFF APIs ---
+  // Lấy danh sách nhiệm vụ / ca làm việc của nhân viên
+  static Future<Map<String, dynamic>> getStaffTasks(int maNV) async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/staff/tasks?maNV=$maNV'));
+      if (res.statusCode == 200) {
+        return jsonDecode(utf8.decode(res.bodyBytes));
+      }
+    } catch (e) {
+      debugPrint('getStaffTasks error: $e');
+    }
+    return {'bookings': [], 'careTickets': []};
+  }
+
+  // Cập nhật tiến độ lịch hẹn (Staff)
+  static Future<Map<String, dynamic>> updateStaffBookingProgress(int id, String trangThai, {String? ghiChu}) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/staff/tasks/update-booking'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'id': id, 'trangThai': trangThai, 'ghiChu': ghiChu}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Cập nhật tiến độ phiếu chăm sóc (Staff)
+  static Future<Map<String, dynamic>> updateStaffTicketProgress(int id, String trangThaiDichVu, {String? ketQuaChamSoc}) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/staff/tasks/update-ticket'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'id': id, 'trangThaiDichVu': trangThaiDichVu, 'ketQuaChamSoc': ketQuaChamSoc}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // --- ADMIN APIs ---
+  // Dashboard tổng quan
+  static Future<Map<String, dynamic>?> getAdminDashboard() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/dashboard'));
+      if (res.statusCode == 200) {
+        return jsonDecode(utf8.decode(res.bodyBytes));
+      }
+    } catch (e) {
+      debugPrint('getAdminDashboard error: $e');
+    }
+    return null;
+  }
+
+  // Danh sách toàn bộ đơn hàng
+  static Future<List<Map<String, dynamic>>> getAdminOrders() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/orders'));
+      if (res.statusCode == 200) {
+        final List list = jsonDecode(utf8.decode(res.bodyBytes));
+        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (e) {
+      debugPrint('getAdminOrders error: $e');
+    }
+    return [];
+  }
+
+  // Cập nhật trạng thái đơn hàng (Admin)
+  static Future<Map<String, dynamic>> updateAdminOrderStatus(int maHD, {int? tinhTrang, bool? daThanhToan}) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/admin/orders/update-status'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'maHD': maHD, 'tinhTrang': tinhTrang, 'daThanhToan': daThanhToan}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Danh sách phiếu dịch vụ chăm sóc
+  static Future<List<Map<String, dynamic>>> getAdminCareTickets() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/care-tickets'));
+      if (res.statusCode == 200) {
+        final List list = jsonDecode(utf8.decode(res.bodyBytes));
+        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (e) {
+      debugPrint('getAdminCareTickets error: $e');
+    }
+    return [];
+  }
+
+  // Phân công nhân viên cho phiếu chăm sóc
+  static Future<Map<String, dynamic>> assignAdminCareTicketStaff(int maPhieuDV, int maNV) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/admin/care-tickets/assign'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'maPhieuDV': maPhieuDV, 'maNV': maNV}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Danh sách toàn bộ lịch hẹn
+  static Future<List<Map<String, dynamic>>> getAdminBookings() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/bookings'));
+      if (res.statusCode == 200) {
+        final List list = jsonDecode(utf8.decode(res.bodyBytes));
+        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (e) {
+      debugPrint('getAdminBookings error: $e');
+    }
+    return [];
+  }
+
+  // Phân công nhân sự cho lịch hẹn
+  static Future<Map<String, dynamic>> assignAdminBookingStaff(int maDatLich, int maNV) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/admin/bookings/assign'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'maDatLich': maDatLich, 'maNV': maNV}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Cập nhật trạng thái lịch hẹn (Admin)
+  static Future<Map<String, dynamic>> updateAdminBookingStatus(int maDatLich, String trangThai) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/admin/bookings/update-status'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'maDatLich': maDatLich, 'trangThai': trangThai}),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Danh sách nhân sự
+  static Future<List<Map<String, dynamic>>> getAdminStaffList() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/staff'));
+      if (res.statusCode == 200) {
+        final List list = jsonDecode(utf8.decode(res.bodyBytes));
+        return list.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (e) {
+      debugPrint('getAdminStaffList error: $e');
+    }
+    return [];
+  }
+
+  // Báo cáo thống kê doanh thu theo ngày, tuần, tháng, năm
+  static Future<Map<String, dynamic>?> getAdminRevenueReport({
+    String type = 'day',
+    String? date,
+    String? month,
+    int? year,
+  }) async {
+    try {
+      final queryParams = <String, String>{'type': type};
+      if (date != null && date.isNotEmpty) queryParams['date'] = date;
+      if (month != null && month.isNotEmpty) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year.toString();
+
+      final uri = Uri.parse('$baseUrl/api/admin/revenue-report').replace(queryParameters: queryParams);
+      final res = await http.get(uri);
+      if (res.statusCode == 200) {
+        return jsonDecode(utf8.decode(res.bodyBytes));
+      }
+    } catch (e) {
+      debugPrint('getAdminRevenueReport error: $e');
+    }
+    return null;
   }
 }

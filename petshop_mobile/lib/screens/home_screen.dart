@@ -11,6 +11,8 @@ import 'product_detail_screen.dart';
 import 'login_screen.dart';
 import 'cart_screen.dart';
 import 'notification_screen.dart';
+import 'admin_home_screen.dart';
+import 'staff_tasks_screen.dart';
 import '../widgets/app_toast.dart';
 import '../widgets/qr_payment_dialog.dart';
 
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadUserProfile() async {
+    if (_currentUser.maKH <= 0) return;
     final updated = await ApiService.getProfile(_currentUser.maKH);
     if (updated != null && mounted) {
       setState(() {
@@ -74,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadNotificationsCount() async {
+    if (_currentUser.maKH <= 0) return;
     final count = await ApiService.getUnreadNotificationCount(_currentUser.maKH);
     if (mounted) {
       setState(() => _unreadNotificationCount = count);
@@ -115,6 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadHistory() async {
+    if (_currentUser.maKH <= 0) {
+      if (mounted) setState(() => _isLoadingHistory = false);
+      return;
+    }
     setState(() => _isLoadingHistory = true);
     final bookings = await ApiService.getMyBookings(_currentUser.maKH);
     final orders = await ApiService.getMyOrders(_currentUser.maKH);
@@ -297,6 +305,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 4),
           ],
+          if (_currentUser.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings, color: Colors.amberAccent),
+              tooltip: 'Về Bảng Quản Trị Admin',
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => AdminHomeScreen(currentUser: _currentUser)),
+                );
+              },
+            ),
+          if (_currentUser.isStaff)
+            IconButton(
+              icon: const Icon(Icons.assignment_ind, color: Colors.amberAccent),
+              tooltip: 'Về Lịch Làm Việc',
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => StaffTasksScreen(currentUser: _currentUser)),
+                );
+              },
+            ),
         ],
       ),
       body: _buildCurrentTab(),
@@ -1127,7 +1157,49 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          if (_currentUser.isAdmin) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E293B),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => AdminHomeScreen(currentUser: _currentUser)),
+                  );
+                },
+                icon: const Icon(Icons.admin_panel_settings, color: Colors.amberAccent),
+                label: const Text('BẢNG QUẢN TRỊ HỆ THỐNG (ADMIN)', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ] else if (_currentUser.isStaff) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE91E63),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => StaffTasksScreen(currentUser: _currentUser)),
+                  );
+                },
+                icon: const Icon(Icons.assignment_ind),
+                label: const Text('LỊCH LÀM VIỆC CỦA TÔI (NHÂN VIÊN)', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           SizedBox(
             width: double.infinity,
             height: 48,
