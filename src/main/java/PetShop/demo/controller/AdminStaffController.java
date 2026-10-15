@@ -28,6 +28,7 @@ public class AdminStaffController {
     @Autowired
     private AuthService authService;
 
+    // Hiển thị danh sách Bác sĩ thú y & Nhân viên chăm sóc (Hỗ trợ lọc roleFilter và statusFilter)
     @GetMapping
     public String listStaff(
             @RequestParam(required = false) String roleFilter,
@@ -35,8 +36,9 @@ public class AdminStaffController {
             Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return "redirect:/DangNhap";
 
-        List<Employee> allStaff = employeeService.getAllEmployeesWithWorkload();
+        List<Employee> allStaff = employeeService.getAllEmployees();
 
+        // Thống kê tổng số lượng nhân sự
         long totalCount = allStaff.size();
         long workingCount = allStaff.stream()
                 .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))
@@ -47,6 +49,7 @@ public class AdminStaffController {
 
         List<Employee> filteredList = allStaff;
 
+        // 1. Lọc theo vai trò (roleFilter)
         if ("admin".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getRole() != null && "Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()))
@@ -54,31 +57,29 @@ public class AdminStaffController {
             roleFilter = "admin";
         } else if ("vet".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
-                    .filter(e -> e.getRole() != null && ("Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()) || "Bác sĩ".equalsIgnoreCase(e.getRole().getTenVaiTro())))
+                    .filter(e -> e.getRole() != null && "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
                     .toList();
             roleFilter = "vet";
-        } else if ("cashier".equalsIgnoreCase(roleFilter) || "consultant".equalsIgnoreCase(roleFilter)) {
+        } else if ("consultant".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getRole() != null && (
-                            "Thu ngân".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Nhân viên thu ngân".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Nhân viên bán hàng".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Tư vấn viên".equalsIgnoreCase(e.getRole().getTenVaiTro())
+                            "Tư vấn viên".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Nhân viên tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Tư vấn viên".contains(e.getRole().getTenVaiTro())
                     ))
                     .toList();
-            roleFilter = "cashier";
+            roleFilter = "consultant";
         } else if ("care".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
-                    .filter(e -> e.getRole() != null && (
-                            "Nhân viên chăm sóc".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Chăm sóc thú cưng".equalsIgnoreCase(e.getRole().getTenVaiTro())
-                    ))
+                    .filter(e -> e.getRole() == null || (!"Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()) && !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro())))
                     .toList();
             roleFilter = "care";
         } else {
             roleFilter = "all";
         }
 
+        // 2. Lọc theo trạng thái làm việc (statusFilter)
         if ("active".equalsIgnoreCase(statusFilter) || "working".equalsIgnoreCase(statusFilter) || "Đang làm việc".equalsIgnoreCase(statusFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))

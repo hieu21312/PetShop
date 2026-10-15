@@ -38,20 +38,16 @@ public class Employee {
     private String anhDaiDien;
 
     @Column(name = "TrangThai")
-    private String trangThai;
+    private String trangThai; // 'Đang làm việc', 'Tạm nghỉ'
 
     @ManyToOne
     @JoinColumn(name = "VaiTro", insertable = false, updatable = false)
     private Role role;
 
-    @Transient
-    private int soCaDangLam;
-
-    @Transient
-    private String trangThaiLamViec;
-
+    // Constructors
     public Employee() {}
 
+    // Getters and Setters
     public Integer getMaNV() { return maNV; }
     public void setMaNV(Integer maNV) { this.maNV = maNV; }
 
@@ -87,10 +83,4 @@ public class Employee {
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
-
-    public int getSoCaDangLam() { return soCaDangLam; }
-    public void setSoCaDangLam(int soCaDangLam) { this.soCaDangLam = soCaDangLam; }
-
-    public String getTrangThaiLamViec() { return trangThaiLamViec; }
-    public void setTrangThaiLamViec(String trangThaiLamViec) { this.trangThaiLamViec = trangThaiLamViec; }
 }

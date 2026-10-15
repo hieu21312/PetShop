@@ -247,13 +247,13 @@ GO
 
 INSERT INTO [dbo].[tblVaiTro] ([TenVaiTro], [MoTa]) VALUES
 (N'Admin', N'Quản trị hệ thống'),
-(N'Thu ngân', N'Thu ngân, lập hóa đơn, quản lý đặt lịch và phiếu dịch vụ'),
+(N'Nhân viên bán hàng', N'Xử lý đơn hàng và chăm sóc khách hàng'),
 (N'Bác sĩ thú y', N'Thực hiện các dịch vụ y tế và đưa ra hướng giải quyết cho sức khỏe của thú cưng'),
 (N'Quản lý kho', N'Kiểm tra, nhập và xuất hàng'),
 (N'Nhân viên marketing', N'Quảng bá sản phẩm và chương trình khuyến mãi'),
 (N'Kế toán', N'Theo dõi doanh thu và chi phí'),
 (N'Tư vấn viên', N'Hỗ trợ khách hàng chọn sản phẩm'),
-(N'Nhân viên chăm sóc', N'Thực hiện tắm spa, cắt tỉa lông và chăm sóc thú cưng'),
+(N'Chăm sóc thú cưng', N'Thực hiện tắm, cắt tỉa, trông giữ'),
 (N'Nhân viên giao hàng', N'Vận chuyển đơn hàng đến khách'),
 (N'Thử việc', N'Nhân viên mới đang được đào tạo'),
 (N'Quản lý cửa hàng', N'Giám sát hoạt động kinh doanh và nhân sự tại cửa hàng'),
@@ -265,20 +265,20 @@ GO
 
 INSERT INTO [dbo].[tblNhanVien] ([MatKhau], [TenNV], [GioiTinh], [NamSinh], [VaiTro]) VALUES
 (N'123456', N'Phan Thị Thắng', N'Nam', 1999, 1),
-(N'123456', N'Nguyễn Khánh Quỳnh Hoa', N'Nữ', 2000, 3),
+(N'123456', N'Nguyễn Khánh Quỳnh Hoa', N'Nữ', 2000, 2),
 (N'123456', N'Phạm An Thành', N'Nam', 1998, 3),
-(N'123456', N'Nguyễn Thị Huệ', N'Nữ', 1997, 3),
-(N'123456', N'Hoàng Nam Quang', N'Nam', 1996, 3),
-(N'123456', N'Huỳnh Thị Ngọc Tú', N'Nữ', 2001, 3),
-(N'123456', N'Trương Minh Tuấn', N'Nam', 1995, 2),
-(N'123456', N'Bùi Ngọc Thúy', N'Nữ', 1998, 2),
-(N'123456', N'Lê Văn Minh', N'Nam', 1999, 2),
-(N'123456', N'Nguyễn Hồng Ngân', N'Nữ', 2000, 8),
-(N'123456', N'Đặng Văn Hòa', N'Nam', 1994, 8),
-(N'123456', N'Trần Thị Mỹ Duyên', N'Nữ', 2002, 8),
-(N'123456', N'Ngô Minh Nhật', N'Nam', 2003, 8),
-(N'123456', N'Lê Thị Thanh Trúc', N'Nữ', 2003, 8),
-(N'123456', N'Phạm Văn Tài', N'Nam', 2002, 8)
+(N'123456', N'Nguyễn Thị Huệ', N'Nữ', 1997, 4),
+(N'123456', N'Hoàng Nam Quang', N'Nam', 1996, 5),
+(N'123456', N'Huỳnh Thị Ngọc Tú', N'Nữ', 2001, 6),
+(N'123456', N'Trương Minh Tuấn', N'Nam', 1995, 7),
+(N'123456', N'Bùi Ngọc Thúy', N'Nữ', 1998, 8),
+(N'123456', N'Lê Văn Minh', N'Nam', 1999, 9),
+(N'123456', N'Nguyễn Hồng Ngân', N'Nữ', 2000, 10),
+(N'123456', N'Đặng Văn Hòa', N'Nam', 1994, 11),
+(N'123456', N'Trần Thị Mỹ Duyên', N'Nữ', 2002, 12),
+(N'123456', N'Ngô Minh Nhật', N'Nam', 2003, 13),
+(N'123456', N'Lê Thị Thanh Trúc', N'Nữ', 2003, 14),
+(N'123456', N'Phạm Văn Tài', N'Nam', 2002, 15)
 GO
 
 INSERT INTO [dbo].[tblKhachHang] ([TenKH], [MatKhau], [GioiTinh], [NamSinh], [Avarta], [DienThoai], [Email], [DiaChi]) VALUES
