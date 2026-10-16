@@ -1,7 +1,10 @@
 package PetShop.demo.controller;
 
 import PetShop.demo.model.enity.Booking;
+import PetShop.demo.model.enity.PetService;
 import PetShop.demo.model.enity.PhieuDichVuChamSoc;
+import PetShop.demo.repository.BookingRepository;
+import PetShop.demo.repository.PetServiceRepository;
 import PetShop.demo.repository.PhieuDichVuChamSocRepository;
 import PetShop.demo.service.AuthService;
 import PetShop.demo.service.BookingService;
@@ -15,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/staff/my-tasks")
@@ -24,10 +29,16 @@ public class StaffTaskController {
     private BookingService bookingService;
 
     @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
     private AuthService authService;
 
     @Autowired
     private PhieuDichVuChamSocRepository phieuRepository;
+
+    @Autowired
+    private PetServiceRepository petServiceRepository;
 
     @Autowired
     private ThongBaoService thongBaoService;
@@ -40,13 +51,25 @@ public class StaffTaskController {
             return "redirect:/DangNhap";
         }
 
-        List<Booking> myBookings = (maNV != null) ? bookingService.getBookingsByStaff(maNV) : List.of();
+        // Lấy danh sách lịch đặt: các lịch phân công cho bác sĩ này hoặc chưa phân công
+        List<Booking> myBookings = (maNV != null)
+                ? bookingRepository.findStaffAndUnassignedBookings(maNV)
+                : bookingRepository.findAllByOrderByNgayTaoDesc();
+
+        // Lấy danh sách phiếu chăm sóc: các phiếu phân công cho bác sĩ này hoặc chưa phân công
         List<PhieuDichVuChamSoc> myCareTickets = (maNV != null) 
-                ? phieuRepository.findByMaNVThucHienOrderByNgayTiepNhanDesc(maNV)
+                ? phieuRepository.findStaffAndUnassignedTickets(maNV)
                 : phieuRepository.findByOrderByNgayTiepNhanDesc();
 
         model.addAttribute("myBookings", myBookings);
         model.addAttribute("myCareTickets", myCareTickets);
+
+        // Nạp danh sách tên dịch vụ để hiển thị an toàn
+        Map<Integer, String> serviceNames = petServiceRepository.findAll().stream()
+                .filter(s -> s.getMaDV() != null)
+                .collect(Collectors.toMap(PetService::getMaDV, PetService::getTenDV, (v1, v2) -> v1));
+        model.addAttribute("serviceNames", serviceNames);
+
         return "staff/my-tasks";
     }
 
@@ -60,8 +83,20 @@ public class StaffTaskController {
         Booking booking = bookingService.getBookingById(id);
 
         if (booking != null) {
-            bookingService.updateProgressAndNotes(id, trangThai, ghiChu);
-            ra.addFlashAttribute("success", "Cập nhật tiến độ lịch hẹn #" + id + " thành công.");
+            Integer currentMaNV = (Integer) session.getAttribute("maNV");
+            if (booking.getMaNV() == null && currentMaNV != null) {
+                booking.setMaNV(currentMaNV);
+            }
+            booking.setTrangThai(trangThai);
+            if (ghiChu != null) {
+                booking.setGhiChu(ghiChu.trim());
+            }
+            bookingRepository.save(booking);
+
+            String extraMsg = "Hoàn thành".equalsIgnoreCase(trangThai) 
+                    ? " Dịch vụ đã hoàn thành và được chuyển tự động sang quầy Thu ngân để sẵn sàng thanh toán & in hóa đơn."
+                    : "";
+            ra.addFlashAttribute("success", "Cập nhật tiến độ lịch hẹn #" + id + " thành công." + extraMsg);
         } else {
             ra.addFlashAttribute("error", "Không tìm thấy lịch hẹn.");
         }
@@ -73,10 +108,15 @@ public class StaffTaskController {
     public String updateCareTicket(@RequestParam Integer id,
                                   @RequestParam String trangThaiDichVu,
                                   @RequestParam(required = false) String ketQuaChamSoc,
+                                  HttpSession session,
                                   RedirectAttributes ra) {
         var ticketOpt = phieuRepository.findById(id);
         if (ticketOpt.isPresent()) {
             PhieuDichVuChamSoc ticket = ticketOpt.get();
+            Integer currentMaNV = (Integer) session.getAttribute("maNV");
+            if (ticket.getMaNVThucHien() == null && currentMaNV != null) {
+                ticket.setMaNVThucHien(currentMaNV);
+            }
             ticket.setTrangThaiDichVu(trangThaiDichVu);
             if (ketQuaChamSoc != null) {
                 ticket.setKetQuaChamSoc(ketQuaChamSoc);
@@ -93,7 +133,11 @@ public class StaffTaskController {
                 thongBaoService.taoThongBaoNhacLich(ticket.getChuNuoi().getMaKH(), null, "Cập nhật tiến độ chăm sóc thú cưng", msg, null);
             }
 
-            ra.addFlashAttribute("success", "Cập nhật phiếu chăm sóc " + ticket.getSoPhieu() + " thành công!");
+            String extraMsg = ("Hoàn thành chăm sóc".equalsIgnoreCase(trangThaiDichVu) || "Đã bàn giao thú cưng".equalsIgnoreCase(trangThaiDichVu))
+                    ? " Dịch vụ đã hoàn thành và được chuyển tự động sang quầy Thu ngân với số tiền đúng đăng ký để thanh toán & in hóa đơn."
+                    : "";
+
+            ra.addFlashAttribute("success", "Cập nhật phiếu chăm sóc " + ticket.getSoPhieu() + " thành công!" + extraMsg);
         } else {
             ra.addFlashAttribute("error", "Không tìm thấy phiếu dịch vụ chăm sóc.");
         }

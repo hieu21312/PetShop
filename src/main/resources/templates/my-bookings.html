@@ -49,7 +49,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-pink text-nowrap">
                     <tr>
-                        <th class="ps-4 text-nowrap">Mã lịch</th>
+                        <th class="ps-4 text-nowrap">Mã dịch vụ</th>
                         <th class="text-nowrap">Ngày hẹn</th>
                         <th class="text-nowrap">Khung giờ</th>
                         <th class="text-nowrap">Họ tên</th>
@@ -61,7 +61,10 @@
                     </thead>
                     <tbody>
                     <tr th:each="b : ${bookings}">
-                        <td class="ps-4 fw-bold text-nowrap" th:text="'#' + ${b.maDatLich}"></td>
+                        <td class="ps-4 text-nowrap">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fs-6 fw-bold rounded-pill" th:text="${b.maDichVu}">BK-0001</span>
+                            <small class="d-block text-muted mt-1" th:text="'#DAT' + ${b.maDatLich}"></small>
+                        </td>
                         <td class="text-nowrap" th:text="${#temporals.format(b.ngayDat, 'dd/MM/yyyy')}"></td>
                         <td class="fw-semibold text-nowrap" style="color: #ff4d6d;" th:text="${#temporals.format(b.gioDat, 'HH:mm')}"></td>
                         <td class="text-nowrap" th:text="${b.tenKhachHang}"></td>
@@ -74,8 +77,20 @@
                             <span th:if="${b.trangThai == 'Đã xác nhận'}" class="badge bg-primary text-white px-3 py-2 rounded-pill text-nowrap">
                                 <i class="fas fa-check me-1"></i> Đã xác nhận
                             </span>
-                            <span th:if="${b.trangThai == 'Hoàn thành'}" class="badge bg-success px-3 py-2 rounded-pill text-nowrap">
-                                <i class="fas fa-check-double me-1"></i> Hoàn thành
+                            <span th:if="${b.trangThai == 'Đang thực hiện'}" class="badge bg-info text-dark px-3 py-2 rounded-pill text-nowrap">
+                                <i class="fas fa-user-md me-1"></i> Đang thực hiện
+                            </span>
+                            <span th:if="${b.trangThai == 'Hoàn thành' and b.trangThaiThanhToan == 'Đã thanh toán'}" class="badge bg-success px-3 py-2 rounded-pill text-nowrap">
+                                <i class="fas fa-check-double me-1"></i> Hoàn thành & Đã thanh toán
+                            </span>
+                            <div th:if="${b.trangThai == 'Hoàn thành' and b.trangThaiThanhToan != 'Đã thanh toán'}">
+                                <span class="badge bg-info text-dark px-3 py-2 rounded-pill text-nowrap shadow-sm">
+                                    <i class="fas fa-cash-register me-1"></i> Hoàn thành - Chờ thanh toán
+                                </span>
+                                <small class="d-block text-danger mt-1 fw-semibold">Đọc mã <span th:text="${b.maDichVu}"></span> tại quầy</small>
+                            </div>
+                            <span th:if="${b.trangThai == 'Đã thanh toán'}" class="badge bg-success px-3 py-2 rounded-pill text-nowrap">
+                                <i class="fas fa-receipt me-1"></i> Đã thanh toán
                             </span>
                             <span th:if="${b.trangThai == 'Đã hủy'}" class="badge bg-secondary px-3 py-2 rounded-pill text-nowrap">
                                 <i class="fas fa-times me-1"></i> Đã hủy
@@ -103,6 +118,6 @@
     </div>
 </div>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+<footer th:replace="~{fragments/footer :: footer}"></footer >
 </body>
 </html>

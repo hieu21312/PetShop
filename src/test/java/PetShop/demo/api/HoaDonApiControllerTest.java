@@ -1,5 +1,6 @@
 package PetShop.demo.api;
 
+import PetShop.demo.model.dto.DichVuChoThanhToanDTO;
 import PetShop.demo.model.dto.HoaDonRequestDTO;
 import PetShop.demo.model.dto.ThanhToanRequestDTO;
 import PetShop.demo.model.enity.Customer;
@@ -8,6 +9,7 @@ import PetShop.demo.model.enity.HoaDonDichVu;
 import PetShop.demo.repository.ChiTietHoaDonDichVuRepository;
 import PetShop.demo.repository.CustomerRepository;
 import PetShop.demo.repository.EmployeeRepository;
+import PetShop.demo.repository.PetServiceRepository;
 import PetShop.demo.service.HoaDonDichVuService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,19 +25,20 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class HoaDonApiControllerTest {
+public class HoaDonApiControllerTest {
 
     private MockMvc mockMvc;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
@@ -46,6 +49,9 @@ class HoaDonApiControllerTest {
 
     @Mock
     private EmployeeRepository employeeRepository;
+
+    @Mock
+    private PetServiceRepository petServiceRepository;
 
     @Mock
     private ChiTietHoaDonDichVuRepository chiTietHoaDonDichVuRepository;
@@ -85,6 +91,66 @@ class HoaDonApiControllerTest {
                 .andExpect(jsonPath("$.maHDDV").value(101))
                 .andExpect(jsonPath("$.maHoaDon").value(101))
                 .andExpect(jsonPath("$.trangThai").value("ChuaThanhToan"));
+    }
+
+    @Test
+    void testCreateHoaDon_WithMaPhieuDV() throws Exception {
+        HoaDonRequestDTO request = new HoaDonRequestDTO(1, 2, new BigDecimal("250000"), "Dịch vụ khám", "TienMat");
+        request.setMaPhieuDV(10);
+        request.setSoPhieu("PDV-2026-0001");
+
+        mockHoaDon.setMaPhieuDV(10);
+        when(hoaDonDichVuService.createHoaDon(eq(1), eq(2), any(BigDecimal.class), eq("TienMat"), eq("Dịch vụ khám"), eq(10), isNull()))
+                .thenReturn(mockHoaDon);
+
+        mockMvc.perform(post("/api/hoa-don")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.maHDDV").value(101))
+                .andExpect(jsonPath("$.maPhieuDV").value(10));
+    }
+
+    @Test
+    void testGetDanhSachChoThanhToan() throws Exception {
+        DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+        dto.setMaDichVu("PDV-2026-0001");
+        dto.setTenKhachHang("Trần Văn B");
+        dto.setThanhToan(new BigDecimal("300000"));
+
+        when(hoaDonDichVuService.getDanhSachDichVuChoThanhToan()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/hoa-don/cho-thanh-toan"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].maDichVu").value("PDV-2026-0001"))
+                .andExpect(jsonPath("$[0].tenKhachHang").value("Trần Văn B"))
+                .andExpect(jsonPath("$[0].thanhToan").value(300000));
+    }
+
+    @Test
+    void testTraCuuDichVu_Success() throws Exception {
+        DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+        dto.setMaDichVu("BK-0005");
+        dto.setTenKhachHang("Lê Thị C");
+        dto.setThanhToan(new BigDecimal("180000"));
+
+        when(hoaDonDichVuService.traCuuDichVuTheoMa("BK-0005")).thenReturn(Optional.of(dto));
+
+        mockMvc.perform(get("/api/hoa-don/tra-cuu").param("maDichVu", "BK-0005"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.maDichVu").value("BK-0005"))
+                .andExpect(jsonPath("$.data.tenKhachHang").value("Lê Thị C"));
+    }
+
+    @Test
+    void testTraCuuDichVu_NotFound() throws Exception {
+        when(hoaDonDichVuService.traCuuDichVuTheoMa("INVALID")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/hoa-don/tra-cuu").param("maDichVu", "INVALID"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false));
     }
 
     @Test

@@ -24,4 +24,12 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     long countByMaNVAndNgayDatAndGioDatAndTrangThaiNotAndMaDatLichNot(Integer maNV, LocalDate ngayDat, LocalTime gioDat, String trangThai, Integer maDatLich);
     long countByTrangThai(String trangThai);
     List<Booking> findByTrangThaiOrderByNgayTaoDesc(String trangThai);
+
+    // Lấy danh sách lịch đặt theo nhân sự phụ trách hoặc chưa phân công
+    @Query("SELECT b FROM Booking b WHERE b.maNV = :maNV OR b.maNV IS NULL ORDER BY b.ngayTao DESC")
+    List<Booking> findStaffAndUnassignedBookings(@Param("maNV") Integer maNV);
+
+    // Lấy danh sách lịch đặt dịch vụ hoàn thành chờ thanh toán
+    @Query("SELECT b FROM Booking b WHERE b.trangThai = 'Hoàn thành' AND (b.trangThaiThanhToan IS NULL OR b.trangThaiThanhToan != 'Đã thanh toán') ORDER BY b.ngayDat DESC, b.gioDat DESC")
+    List<Booking> findCompletedAwaitingPayment();
 }

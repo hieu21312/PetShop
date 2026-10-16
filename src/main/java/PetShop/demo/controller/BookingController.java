@@ -82,6 +82,7 @@ public class BookingController {
         booking.setNgayDat(date);
         booking.setGioDat(time);
         booking.setGhiChu(ghiChu);
+        booking.setTrangThaiThanhToan("Chưa thanh toán");
 
         // Nếu khách hàng đã đăng nhập, lưu mã KH
         Integer maKH = (Integer) session.getAttribute("maKH");
@@ -92,8 +93,10 @@ public class BookingController {
             session.setAttribute("bookingPhone", soDienThoai.trim());
         }
 
-        bookingService.saveBooking(booking);
-        ra.addFlashAttribute("success", "Đặt lịch dịch vụ thành công! Cảm ơn quý khách. Chúng tôi sẽ liên hệ qua SĐT (" + soDienThoai + ") để xác nhận sớm nhất.");
+        Booking saved = bookingService.saveBooking(booking);
+        String serviceCode = (saved != null && saved.getMaDichVu() != null) ? saved.getMaDichVu() : ("BK-" + String.format("%04d", booking.getMaDatLich() != null ? booking.getMaDatLich() : 1));
+        ra.addFlashAttribute("success", "Đặt lịch dịch vụ thành công! Mã dịch vụ của quý khách: " + serviceCode + ". Sau khi bác sĩ/nhân viên hoàn thành dịch vụ, quý khách chỉ cần đọc mã này tại quầy để thanh toán và in hóa đơn.");
+        ra.addFlashAttribute("serviceCode", serviceCode);
 
         return "redirect:/LichSuDatLich";
     }

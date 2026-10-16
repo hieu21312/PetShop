@@ -17,6 +17,10 @@ public class Booking {
     @Column(name = "MaDV")
     private Integer maDV;  // dịch vụ được đặt
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "MaDV", insertable = false, updatable = false)
+    private PetService petService;
+
     @Column(name = "TenKhachHang")
     private String tenKhachHang;
 
@@ -36,7 +40,10 @@ public class Booking {
     private String ghiChu;
 
     @Column(name = "TrangThai")
-    private String trangThai;  // Chờ xác nhận, Đã xác nhận, Hoàn thành, Hủy
+    private String trangThai;  // Chờ xác nhận, Đã xác nhận, Đang thực hiện, Hoàn thành, Đã thanh toán, Đã hủy
+
+    @Column(name = "TrangThaiThanhToan")
+    private String trangThaiThanhToan = "Chưa thanh toán";
 
     @Column(name = "NgayTao")
     private LocalDateTime ngayTao;
@@ -52,13 +59,24 @@ public class Booking {
     private Employee employee;
 
     // Constructors
-    public Booking() {}
+    public Booking() {
+        this.ngayTao = LocalDateTime.now();
+        this.trangThaiThanhToan = "Chưa thanh toán";
+    }
 
-    // Getters and Setters (generate all)
+    // Helper: Trả về mã dịch vụ hiển thị chuẩn hoá (ví dụ BK-0001)
+    public String getMaDichVu() {
+        if (maDatLich == null) return "BK-NEW";
+        return "BK-" + String.format("%04d", maDatLich);
+    }
+
+    // Getters and Setters
     public Integer getMaDatLich() { return maDatLich; }
     public void setMaDatLich(Integer maDatLich) { this.maDatLich = maDatLich; }
     public Integer getMaDV() { return maDV; }
     public void setMaDV(Integer maDV) { this.maDV = maDV; }
+    public PetService getPetService() { return petService; }
+    public void setPetService(PetService petService) { this.petService = petService; }
     public String getTenKhachHang() { return tenKhachHang; }
     public void setTenKhachHang(String tenKhachHang) { this.tenKhachHang = tenKhachHang; }
     public String getSoDienThoai() { return soDienThoai; }
@@ -73,6 +91,8 @@ public class Booking {
     public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    public String getTrangThaiThanhToan() { return trangThaiThanhToan != null ? trangThaiThanhToan : "Chưa thanh toán"; }
+    public void setTrangThaiThanhToan(String trangThaiThanhToan) { this.trangThaiThanhToan = trangThaiThanhToan; }
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
     public Integer getMaKH() { return maKH; }

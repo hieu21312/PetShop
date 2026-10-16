@@ -1,5 +1,6 @@
 package PetShop.demo.controller;
 
+import PetShop.demo.model.dto.DichVuChoThanhToanDTO;
 import PetShop.demo.model.enity.ChiTietHoaDonDichVu;
 import PetShop.demo.model.enity.Customer;
 import PetShop.demo.model.enity.Employee;
@@ -11,6 +12,7 @@ import PetShop.demo.repository.EmployeeRepository;
 import PetShop.demo.repository.HoaDonDichVuRepository;
 import PetShop.demo.repository.PetServiceRepository;
 import PetShop.demo.service.AuthService;
+import PetShop.demo.service.HoaDonDichVuService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +40,9 @@ public class AdminThuNganController {
 
     @Autowired
     private ChiTietHoaDonDichVuRepository chiTietHoaDonDichVuRepository;
+
+    @Autowired
+    private HoaDonDichVuService hoaDonDichVuService;
 
     @Autowired
     private AuthService authService;
@@ -70,6 +75,11 @@ public class AdminThuNganController {
             recentInvoices = recentInvoices.subList(0, 10);
         }
         model.addAttribute("recentInvoices", recentInvoices);
+
+        // THÔNG SUỐT DỊCH VỤ: Danh sách dịch vụ bác sĩ/nhân viên chăm sóc đã hoàn thành chờ thu ngân thanh toán
+        List<DichVuChoThanhToanDTO> pendingServices = hoaDonDichVuService.getDanhSachDichVuChoThanhToan();
+        model.addAttribute("pendingServices", pendingServices);
+        model.addAttribute("pendingCount", pendingServices.size());
 
         // Thông tin nhân viên hiện tại đang trực thu ngân
         Integer currentMaNV = (Integer) session.getAttribute("maNV");
@@ -130,22 +140,7 @@ public class AdminThuNganController {
             return "redirect:/DangNhap";
         }
 
-        Optional<HoaDonDichVu> hdOpt = hoaDonDichVuRepository.findById(id);
-        if (hdOpt.isPresent()) {
-            HoaDonDichVu hd = hdOpt.get();
-            hd.setTrangThai(HoaDonDichVu.TRANG_THAI_DA_THANH_TOAN);
-            if (hd.getPhuongThucThanhToan() == null || hd.getPhuongThucThanhToan().isBlank()) {
-                hd.setPhuongThucThanhToan(phuongThuc);
-            }
-            // Gán nhân viên thu ngân xác nhận nếu chưa có
-            if (hd.getMaNV() == null) {
-                Integer currentMaNV = (Integer) session.getAttribute("maNV");
-                if (currentMaNV != null) {
-                    hd.setMaNV(currentMaNV);
-                }
-            }
-            hoaDonDichVuRepository.save(hd);
-        }
+        hoaDonDichVuService.xacNhanThanhToan(id, phuongThuc);
 
         return "redirect:/admin/thu-ngan/hoa-don/" + id;
     }

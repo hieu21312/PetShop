@@ -28,6 +28,18 @@ public class HoaDonRequestDTO {
     @JsonAlias({"PhuongThucThanhToan", "phuong_thuc_thanh_toan", "paymentMethod"})
     private String phuongThucThanhToan;
 
+    @JsonProperty("maPhieuDV")
+    @JsonAlias({"MaPhieuDV", "ma_phieu_dv", "careTicketId"})
+    private Integer maPhieuDV;
+
+    @JsonProperty("maDatLich")
+    @JsonAlias({"MaDatLich", "ma_dat_lich", "bookingId"})
+    private Integer maDatLich;
+
+    @JsonProperty("soPhieu")
+    @JsonAlias({"SoPhieu", "so_phieu", "maDichVu", "serviceCode"})
+    private String soPhieu;
+
     @JsonProperty("items")
     @JsonAlias({"Items", "chiTietDichVu", "services"})
     private List<ChiTietDichVuItemDTO> items;
@@ -80,6 +92,30 @@ public class HoaDonRequestDTO {
 
     public void setPhuongThucThanhToan(String phuongThucThanhToan) {
         this.phuongThucThanhToan = phuongThucThanhToan;
+    }
+
+    public Integer getMaPhieuDV() {
+        return maPhieuDV;
+    }
+
+    public void setMaPhieuDV(Integer maPhieuDV) {
+        this.maPhieuDV = maPhieuDV;
+    }
+
+    public Integer getMaDatLich() {
+        return maDatLich;
+    }
+
+    public void setMaDatLich(Integer maDatLich) {
+        this.maDatLich = maDatLich;
+    }
+
+    public String getSoPhieu() {
+        return soPhieu;
+    }
+
+    public void setSoPhieu(String soPhieu) {
+        this.soPhieu = soPhieu;
     }
 
     public List<ChiTietDichVuItemDTO> getItems() {

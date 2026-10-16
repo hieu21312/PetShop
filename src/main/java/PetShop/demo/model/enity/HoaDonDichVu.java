@@ -34,13 +34,21 @@ public class HoaDonDichVu {
     @Column(name = "GhiChu")
     private String ghiChu;
 
-    // 1. Trường TrangThai (String) - Mặc định: 'ChuaThanhToan'
+    // Trường TrangThai (String) - Mặc định: 'ChuaThanhToan'
     @Column(name = "TrangThai", length = 50)
     private String trangThai = TRANG_THAI_CHUA_THANH_TOAN;
 
-    // 1. Trường PhuongThucThanhToan (String)
+    // Trường PhuongThucThanhToan (String)
     @Column(name = "PhuongThucThanhToan", length = 100)
     private String phuongThucThanhToan;
+
+    // Liên kết trực tiếp tới Phiếu dịch vụ chăm sóc (nếu thanh toán từ phiếu)
+    @Column(name = "MaPhieuDV")
+    private Integer maPhieuDV;
+
+    // Liên kết trực tiếp tới Lịch đặt dịch vụ (nếu thanh toán từ lịch đặt)
+    @Column(name = "MaDatLich")
+    private Integer maDatLich;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -135,6 +143,22 @@ public class HoaDonDichVu {
 
     public void setPhuongThucThanhToan(String phuongThucThanhToan) {
         this.phuongThucThanhToan = phuongThucThanhToan;
+    }
+
+    public Integer getMaPhieuDV() {
+        return maPhieuDV;
+    }
+
+    public void setMaPhieuDV(Integer maPhieuDV) {
+        this.maPhieuDV = maPhieuDV;
+    }
+
+    public Integer getMaDatLich() {
+        return maDatLich;
+    }
+
+    public void setMaDatLich(Integer maDatLich) {
+        this.maDatLich = maDatLich;
     }
 
     public Customer getCustomer() {

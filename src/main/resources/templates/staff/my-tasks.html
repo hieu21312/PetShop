@@ -23,10 +23,10 @@
             .col-status { min-width: 140px; text-align: center; white-space: nowrap; }
             .col-action { min-width: 230px; text-align: right; white-space: nowrap; }
 
-            .col-b-id { min-width: 110px; white-space: nowrap; }
+            .col-b-id { min-width: 120px; white-space: nowrap; }
             .col-b-customer { min-width: 160px; white-space: nowrap; }
             .col-b-time { min-width: 175px; white-space: nowrap; }
-            .col-b-service { min-width: 110px; text-align: center; white-space: nowrap; }
+            .col-b-service { min-width: 120px; text-align: center; white-space: nowrap; }
             .col-b-status { min-width: 140px; text-align: center; white-space: nowrap; }
             .col-b-note { min-width: 180px; max-width: 300px; }
             .col-b-action { min-width: 230px; text-align: right; white-space: nowrap; }
@@ -36,7 +36,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2 class="fw-bold text-gradient"><i class="fas fa-tasks me-2"></i> Cổng tác vụ ca làm việc của tôi</h2>
-                        <p class="text-muted mb-0">Xem và cập nhật tiến độ công việc chăm sóc thú cưng tiếp nhận tại quầy và lịch hẹn trực tuyến</p>
+                        <p class="text-muted mb-0">Xem và cập nhật tiến độ công việc chăm sóc thú cưng tiếp nhận tại quầy và lịch hẹn trực tuyến. Khi bấm <strong>Hoàn thành</strong>, phiếu sẽ tự động chuyển sang quầy Thu ngân để thanh toán.</p>
                     </div>
                 </div>
 
@@ -73,15 +73,15 @@
                             <div class="card-body p-0">
                                 <div th:if="${#lists.isEmpty(myCareTickets)}" class="text-center py-5">
                                     <i class="fas fa-check-circle text-muted mb-3" style="font-size: 3rem;"></i>
-                                    <h5 class="text-secondary fw-bold">Hiện không có phiếu chăm sóc nào được phân công</h5>
-                                    <p class="text-muted">Các phiếu tiếp nhận dịch vụ thú cưng tại quầy sẽ xuất hiện tại đây khi Lễ tân chỉ định bạn.</p>
+                                    <h5 class="text-secondary fw-bold">Hiện không có phiếu chăm sóc nào</h5>
+                                    <p class="text-muted">Các phiếu tiếp nhận dịch vụ thú cưng tại quầy sẽ xuất hiện tại đây khi được phân công hoặc mới tiếp nhận.</p>
                                 </div>
 
                                 <div th:if="${not #lists.isEmpty(myCareTickets)}" class="table-responsive">
                                     <table class="table table-hover align-middle mb-0 table-tasks">
                                         <thead class="table-pink text-nowrap">
                                         <tr>
-                                            <th class="ps-3 col-ticket">Số Phiếu</th>
+                                            <th class="ps-3 col-ticket">Mã Dịch Vụ / Số Phiếu</th>
                                             <th class="col-pet">Thú Cưng</th>
                                             <th class="col-owner">Chủ Nuôi</th>
                                             <th class="col-time">Thời Gian</th>
@@ -93,19 +93,21 @@
                                         <tbody>
                                         <tr th:each="p : ${myCareTickets}">
                                             <td class="ps-3 col-ticket">
-                                                <strong class="text-danger fs-6 d-block" th:text="${p.soPhieu}"></strong>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6 px-3 py-1 rounded-pill d-inline-block" th:text="${p.soPhieu}"></span>
                                                 <div class="small text-muted mt-1">
-                                                    <i class="fas fa-user-tag me-1"></i>Phụ trách: <span class="fw-semibold text-dark" th:text="${p.nvThucHien != null ? p.nvThucHien.tenNV : 'Chưa phân công'}"></span>
+                                                    <i class="fas fa-user-tag me-1"></i>Phụ trách: 
+                                                    <span th:if="${p.nvThucHien != null}" class="fw-semibold text-dark" th:text="${p.nvThucHien.tenNV}"></span>
+                                                    <span th:if="${p.nvThucHien == null}" class="badge bg-warning text-dark font-normal">Chưa gán</span>
                                                 </div>
                                             </td>
                                             <td class="col-pet">
                                                 <div class="fw-bold text-dark fs-6" th:text="${p.thuCung != null ? p.thuCung.tenThuCung : 'N/A'}"></div>
                                                 <div class="small text-muted text-nowrap mt-1">
                                                     <span th:if="${p.thuCung != null and p.thuCung.loaiThuCung != null}" th:text="${p.thuCung.loaiThuCung}"></span>
-                                                    <span th:if="${p.thuCung != null and p.thuCung.giongLoai != null}" th:text="' - ' + ${p.thuCung.giongLoai}"></span>
+                                                    <span th:if="${p.thuCung != null and p.thuCung.giongLoai != null}" th:text="${' - ' + p.thuCung.giongLoai}"></span>
                                                 </div>
                                                 <div class="mt-1" th:if="${p.canNangTiepNhan != null}">
-                                                    <span class="badge bg-light text-secondary border fw-normal" th:text="${p.canNangTiepNhan} + ' kg'"></span>
+                                                    <span class="badge bg-light text-secondary border fw-normal" th:text="${p.canNangTiepNhan + ' kg'}"></span>
                                                 </div>
                                             </td>
                                             <td class="col-owner">
@@ -138,10 +140,10 @@
                                             <td class="pe-3 col-action">
                                                 <form th:action="@{/staff/my-tasks/updateCareTicket}" method="post" class="d-flex align-items-center justify-content-end gap-2">
                                                     <input type="hidden" name="id" th:value="${p.maPhieuDV}">
-                                                    <select name="trangThaiDichVu" class="form-select form-select-sm" style="min-width: 140px; width: 150px;">
+                                                    <select name="trangThaiDichVu" class="form-select form-select-sm" style="min-width: 170px; width: 180px;">
                                                         <option value="Chờ tiếp nhận" th:selected="${p.trangThaiDichVu == 'Chờ tiếp nhận'}">Chờ tiếp nhận</option>
                                                         <option value="Đang thực hiện" th:selected="${p.trangThaiDichVu == 'Đang thực hiện'}">Đang thực hiện</option>
-                                                        <option value="Hoàn thành chăm sóc" th:selected="${p.trangThaiDichVu == 'Hoàn thành chăm sóc'}">Hoàn thành</option>
+                                                        <option value="Hoàn thành chăm sóc" th:selected="${p.trangThaiDichVu == 'Hoàn thành chăm sóc'}">Hoàn thành (chuyển Thu ngân)</option>
                                                         <option value="Đã bàn giao thú cưng" th:selected="${p.trangThaiDichVu == 'Đã bàn giao thú cưng'}">Đã bàn giao</option>
                                                     </select>
                                                     <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm text-nowrap">
@@ -163,7 +165,7 @@
                             <div class="card-body p-0">
                                 <div th:if="${#lists.isEmpty(myBookings)}" class="text-center py-5">
                                     <i class="fas fa-calendar-check text-muted mb-3" style="font-size: 3rem;"></i>
-                                    <h5 class="text-secondary fw-bold">Chưa có lịch hẹn trực tuyến nào được phân công</h5>
+                                    <h5 class="text-secondary fw-bold">Chưa có lịch hẹn trực tuyến nào</h5>
                                     <p class="text-muted">Các lịch hẹn đặt trước online sẽ xuất hiện tại đây.</p>
                                 </div>
 
@@ -171,7 +173,7 @@
                                     <table class="table table-hover align-middle mb-0 table-tasks">
                                         <thead class="table-pink text-nowrap">
                                         <tr>
-                                            <th class="ps-3 col-b-id">Mã Lịch</th>
+                                            <th class="ps-3 col-b-id">Mã Dịch Vụ</th>
                                             <th class="col-b-customer">Khách Hàng</th>
                                             <th class="col-b-time">Thời Gian Hẹn</th>
                                             <th class="col-b-service">Dịch Vụ</th>
@@ -182,7 +184,9 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="b : ${myBookings}">
-                                            <td class="ps-3 col-b-id fw-bold text-danger fs-6" th:text="'#BK' + ${b.maDatLich}"></td>
+                                            <td class="ps-3 col-b-id">
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6 px-3 py-1 rounded-pill" th:text="${b.maDichVu != null ? b.maDichVu : ('#BK' + b.maDatLich)}">BK-0001</span>
+                                            </td>
                                             <td class="col-b-customer">
                                                 <strong class="d-block text-dark" th:text="${b.tenKhachHang}"></strong>
                                                 <div class="small text-muted mt-1"><i class="fas fa-phone-alt me-1 text-success"></i><span class="font-monospace" th:text="${b.soDienThoai}"></span></div>
@@ -194,7 +198,7 @@
                                                 </div>
                                             </td>
                                             <td class="col-b-service">
-                                                <span class="badge bg-info text-dark px-2 py-1" th:text="'DV #' + ${b.maDV}"></span>
+                                                <span class="badge bg-info text-dark px-2 py-1" th:text="${serviceNames != null and serviceNames.containsKey(b.maDV) ? serviceNames.get(b.maDV) : ('DV #' + b.maDV)}"></span>
                                             </td>
                                             <td class="col-b-status">
                                                 <span class="badge px-3 py-2 rounded-pill shadow-sm"
@@ -207,10 +211,11 @@
                                             <td class="pe-3 col-b-action">
                                                 <form th:action="@{/staff/my-tasks/updateProgress}" method="post" class="d-flex align-items-center justify-content-end gap-2">
                                                     <input type="hidden" name="id" th:value="${b.maDatLich}">
-                                                    <select name="trangThai" class="form-select form-select-sm" style="min-width: 140px; width: 150px;">
+                                                    <select name="trangThai" class="form-select form-select-sm" style="min-width: 170px; width: 180px;">
+                                                        <option value="Chờ xác nhận" th:selected="${b.trangThai == 'Chờ xác nhận'}">Chờ xác nhận</option>
                                                         <option value="Đã xác nhận" th:selected="${b.trangThai == 'Đã xác nhận'}">Đã xác nhận</option>
                                                         <option value="Đang thực hiện" th:selected="${b.trangThai == 'Đang thực hiện'}">Đang thực hiện</option>
-                                                        <option value="Hoàn thành" th:selected="${b.trangThai == 'Hoàn thành'}">Hoàn thành</option>
+                                                        <option value="Hoàn thành" th:selected="${b.trangThai == 'Hoàn thành'}">Hoàn thành (chuyển Thu ngân)</option>
                                                     </select>
                                                     <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm text-nowrap">
                                                         <i class="fas fa-save me-1"></i>Lưu

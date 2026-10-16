@@ -1,6 +1,7 @@
 package PetShop.demo.api;
 
 import PetShop.demo.model.dto.ChiTietDichVuItemDTO;
+import PetShop.demo.model.dto.DichVuChoThanhToanDTO;
 import PetShop.demo.model.dto.HoaDonRequestDTO;
 import PetShop.demo.model.dto.ThanhToanRequestDTO;
 import PetShop.demo.model.enity.ChiTietHoaDonDichVu;
@@ -44,7 +45,7 @@ public class HoaDonApiController {
 
     /**
      * 1. POST /api/hoa-don: Tạo một hóa đơn mới cho chức năng Thu ngân
-     * Nhận vào: MaKH, MaNV, TongTien, GhiChu, PhuongThucThanhToan, Items (danh sách dịch vụ)
+     * Nhận vào: MaKH, MaNV, TongTien, GhiChu, PhuongThucThanhToan, Items (danh sách dịch vụ), MaPhieuDV, MaDatLich
      * Trả về: Mã hóa đơn vừa tạo (maHDDV / maHoaDon)
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -61,13 +62,26 @@ public class HoaDonApiController {
                 ? request.getPhuongThucThanhToan().trim()
                 : "TienMat";
 
-        HoaDonDichVu hoaDon = hoaDonDichVuService.createHoaDon(
-                request.getMaKH(),
-                request.getMaNV(),
-                tongTien,
-                phuongThuc,
-                request.getGhiChu()
-        );
+        HoaDonDichVu hoaDon;
+        if (request.getMaPhieuDV() != null || request.getMaDatLich() != null) {
+            hoaDon = hoaDonDichVuService.createHoaDon(
+                    request.getMaKH(),
+                    request.getMaNV(),
+                    tongTien,
+                    phuongThuc,
+                    request.getGhiChu(),
+                    request.getMaPhieuDV(),
+                    request.getMaDatLich()
+            );
+        } else {
+            hoaDon = hoaDonDichVuService.createHoaDon(
+                    request.getMaKH(),
+                    request.getMaNV(),
+                    tongTien,
+                    phuongThuc,
+                    request.getGhiChu()
+            );
+        }
 
         // Lưu danh sách chi tiết dịch vụ vào tblChiTietHoaDonDichVu
         if (request.getItems() != null && !request.getItems().isEmpty()) {
@@ -93,6 +107,8 @@ public class HoaDonApiController {
         response.put("tongTien", hoaDon.getTongTien());
         response.put("phuongThucThanhToan", hoaDon.getPhuongThucThanhToan());
         response.put("ngaySuDung", hoaDon.getNgaySuDung() != null ? hoaDon.getNgaySuDung().toString() : "");
+        response.put("maPhieuDV", hoaDon.getMaPhieuDV());
+        response.put("maDatLich", hoaDon.getMaDatLich());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -142,6 +158,8 @@ public class HoaDonApiController {
         res.put("ghiChu", hd.getGhiChu());
         res.put("trangThai", hd.getTrangThai());
         res.put("phuongThucThanhToan", hd.getPhuongThucThanhToan());
+        res.put("maPhieuDV", hd.getMaPhieuDV());
+        res.put("maDatLich", hd.getMaDatLich());
 
         // Danh sách dịch vụ chi tiết (nếu có)
         List<ChiTietHoaDonDichVu> details = chiTietHoaDonDichVuRepository.findById_MaHDDV(hd.getMaHDDV());
@@ -169,7 +187,7 @@ public class HoaDonApiController {
 
     /**
      * 3. POST /api/hoa-don/{id}/thanh-toan: Xác nhận thanh toán (hỗ trợ cả Tiền mặt và VNPay)
-     * Cập nhật trạng thái thành 'DaThanhToan'.
+     * Cập nhật trạng thái thành 'DaThanhToan' và tự động đồng bộ sang Phiếu chăm sóc/Lịch đặt.
      */
     @PostMapping(value = "/{id}/thanh-toan")
     public ResponseEntity<?> xacNhanThanhToan(
@@ -214,6 +232,31 @@ public class HoaDonApiController {
     }
 
     /**
+     * 4. GET /api/hoa-don/cho-thanh-toan: Lấy danh sách dịch vụ đã hoàn thành chờ thu ngân thanh toán
+     */
+    @GetMapping("/cho-thanh-toan")
+    public ResponseEntity<?> getDanhSachChoThanhToan() {
+        List<DichVuChoThanhToanDTO> list = hoaDonDichVuService.getDanhSachDichVuChoThanhToan();
+        return ResponseEntity.ok(list);
+    }
+
+    /**
+     * 5. GET /api/hoa-don/tra-cuu?maDichVu=...: Tra cứu dịch vụ chờ thanh toán theo mã dịch vụ (PDV-..., BK-..., ID)
+     */
+    @GetMapping("/tra-cuu")
+    public ResponseEntity<?> traCuuDichVu(@RequestParam("maDichVu") String maDichVu) {
+        Optional<DichVuChoThanhToanDTO> opt = hoaDonDichVuService.traCuuDichVuTheoMa(maDichVu);
+        if (opt.isPresent()) {
+            return ResponseEntity.ok(Map.of("success", true, "data", opt.get()));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", "Không tìm thấy dịch vụ hoàn thành chờ thanh toán với mã: " + maDichVu
+            ));
+        }
+    }
+
+    /**
      * API hỗ trợ quầy Thu ngân: GET /api/hoa-don (Xem danh sách hóa đơn theo trạng thái)
      */
     @GetMapping
@@ -237,6 +280,8 @@ public class HoaDonApiController {
             m.put("phuongThucThanhToan", hd.getPhuongThucThanhToan());
             m.put("ngaySuDung", hd.getNgaySuDung() != null ? hd.getNgaySuDung().toString() : "");
             m.put("ghiChu", hd.getGhiChu());
+            m.put("maPhieuDV", hd.getMaPhieuDV());
+            m.put("maDatLich", hd.getMaDatLich());
             result.add(m);
         }
 

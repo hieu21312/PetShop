@@ -1,18 +1,17 @@
 package PetShop.demo.service;
 
-import PetShop.demo.model.enity.ChiTietHoaDonDichVu;
-import PetShop.demo.model.enity.ChiTietHoaDonDichVuId;
-import PetShop.demo.model.enity.HoaDonDichVu;
-import PetShop.demo.model.enity.PetService;
-import PetShop.demo.repository.ChiTietHoaDonDichVuRepository;
-import PetShop.demo.repository.HoaDonDichVuRepository;
-import PetShop.demo.repository.PetServiceRepository;
+import PetShop.demo.model.dto.ChiTietDichVuItemDTO;
+import PetShop.demo.model.dto.DichVuChoThanhToanDTO;
+import PetShop.demo.model.enity.*;
+import PetShop.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,11 +27,20 @@ public class HoaDonDichVuService {
     @Autowired
     private PetServiceRepository petServiceRepository;
 
+    @Autowired
+    private PhieuDichVuChamSocRepository phieuRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private ChiTietDichVuChamSocRepository chiTietDichVuChamSocRepository;
+
+    @Autowired
+    private MembershipService membershipService;
+
     /**
      * Logic 1: Tạo hóa đơn dịch vụ mới với trạng thái mặc định là 'ChuaThanhToan'
-     *
-     * @param hoaDon Đối tượng hóa đơn dịch vụ cần tạo
-     * @return Hóa đơn dịch vụ đã được lưu thành công
      */
     @Transactional
     public HoaDonDichVu createHoaDon(HoaDonDichVu hoaDon) {
@@ -40,15 +48,12 @@ public class HoaDonDichVuService {
             throw new IllegalArgumentException("Thông tin hóa đơn không được để trống!");
         }
 
-        // Đảm bảo thời gian sử dụng được gán
         if (hoaDon.getNgaySuDung() == null) {
             hoaDon.setNgaySuDung(LocalDateTime.now());
         }
 
-        // Luôn gán trạng thái khởi tạo là 'ChuaThanhToan'
         hoaDon.setTrangThai(HoaDonDichVu.TRANG_THAI_CHUA_THANH_TOAN);
 
-        // Đảm bảo tổng tiền không bị null
         if (hoaDon.getTongTien() == null) {
             hoaDon.setTongTien(BigDecimal.ZERO);
         }
@@ -58,23 +63,28 @@ public class HoaDonDichVuService {
 
     /**
      * Logic 1 (Overload tiện lợi): Tạo hóa đơn dịch vụ mới theo các tham số cơ bản
-     *
-     * @param maKH Mã khách hàng (có thể null nếu khách vãng lai)
-     * @param maNV Mã nhân viên lập hóa đơn/phục vụ
-     * @param tongTien Tổng tiền dịch vụ
-     * @param phuongThucThanhToan Phương thức thanh toán dự kiến (Tiền mặt, Chuyển khoản,...)
-     * @param ghiChu Ghi chú thêm
-     * @return Hóa đơn dịch vụ mới với trạng thái 'ChuaThanhToan'
      */
     @Transactional
     public HoaDonDichVu createHoaDon(Integer maKH, Integer maNV, BigDecimal tongTien,
                                      String phuongThucThanhToan, String ghiChu) {
+        return createHoaDon(maKH, maNV, tongTien, phuongThucThanhToan, ghiChu, null, null);
+    }
+
+    /**
+     * Logic 1 (Mở rộng): Tạo hóa đơn có liên kết trực tiếp tới Mã phiếu chăm sóc hoặc Mã đặt lịch
+     */
+    @Transactional
+    public HoaDonDichVu createHoaDon(Integer maKH, Integer maNV, BigDecimal tongTien,
+                                     String phuongThucThanhToan, String ghiChu,
+                                     Integer maPhieuDV, Integer maDatLich) {
         HoaDonDichVu hoaDon = new HoaDonDichVu();
         hoaDon.setMaKH(maKH);
         hoaDon.setMaNV(maNV);
         hoaDon.setTongTien(tongTien != null ? tongTien : BigDecimal.ZERO);
         hoaDon.setPhuongThucThanhToan(phuongThucThanhToan);
         hoaDon.setGhiChu(ghiChu);
+        hoaDon.setMaPhieuDV(maPhieuDV);
+        hoaDon.setMaDatLich(maDatLich);
         hoaDon.setNgaySuDung(LocalDateTime.now());
         hoaDon.setTrangThai(HoaDonDichVu.TRANG_THAI_CHUA_THANH_TOAN);
 
@@ -83,7 +93,6 @@ public class HoaDonDichVuService {
 
     /**
      * Logic 1 (Nâng cao): Tạo hóa đơn kèm theo danh sách chi tiết các dịch vụ sử dụng
-     * Tự động tính toán tổng tiền từ các dịch vụ con và gán trạng thái 'ChuaThanhToan'
      */
     @Transactional
     public HoaDonDichVu createHoaDonWithDetails(Integer maKH, Integer maNV, String phuongThucThanhToan,
@@ -124,29 +133,16 @@ public class HoaDonDichVuService {
 
     /**
      * Logic 2: Cập nhật trạng thái thành 'DaThanhToan' sau khi có xác nhận
-     *
-     * @param maHDDV Mã hóa đơn dịch vụ cần xác nhận thanh toán
-     * @return Hóa đơn dịch vụ đã được cập nhật trạng thái 'DaThanhToan'
+     * Tự động đồng bộ sang Phiếu dịch vụ hoặc Lịch đặt gốc!
      */
     @Transactional
     public HoaDonDichVu xacNhanThanhToan(Integer maHDDV) {
-        if (maHDDV == null) {
-            throw new IllegalArgumentException("Mã hóa đơn dịch vụ không được để trống!");
-        }
-
-        HoaDonDichVu hoaDon = hoaDonDichVuRepository.findById(maHDDV)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn dịch vụ với mã: " + maHDDV));
-
-        hoaDon.setTrangThai(HoaDonDichVu.TRANG_THAI_DA_THANH_TOAN);
-        return hoaDonDichVuRepository.save(hoaDon);
+        return xacNhanThanhToan(maHDDV, null);
     }
 
     /**
      * Logic 2 (Overload): Cập nhật trạng thái thành 'DaThanhToan' kèm cập nhật phương thức thanh toán
-     *
-     * @param maHDDV Mã hóa đơn dịch vụ
-     * @param phuongThucThanhToan Phương thức thanh toán được xác nhận (Tiền mặt, Chuyển khoản, VNPay,...)
-     * @return Hóa đơn dịch vụ đã được cập nhật
+     * Đồng thời tự động cập nhật phiếu chăm sóc / lịch đặt thành "Đã thanh toán" và cộng điểm thành viên.
      */
     @Transactional
     public HoaDonDichVu xacNhanThanhToan(Integer maHDDV, String phuongThucThanhToan) {
@@ -160,6 +156,27 @@ public class HoaDonDichVuService {
         hoaDon.setTrangThai(HoaDonDichVu.TRANG_THAI_DA_THANH_TOAN);
         if (phuongThucThanhToan != null && !phuongThucThanhToan.trim().isEmpty()) {
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan.trim());
+        }
+
+        // Tự động đồng bộ trạng thái sang Phiếu dịch vụ chăm sóc gốc nếu có
+        if (hoaDon.getMaPhieuDV() != null) {
+            phieuRepository.findById(hoaDon.getMaPhieuDV()).ifPresent(ticket -> {
+                ticket.setTrangThaiThanhToan("Đã thanh toán");
+                if (ticket.getHinhThucThanhToan() == null || ticket.getHinhThucThanhToan().isBlank()) {
+                    ticket.setHinhThucThanhToan(hoaDon.getPhuongThucThanhToan() != null ? hoaDon.getPhuongThucThanhToan() : "Tiền mặt");
+                }
+                membershipService.processCareTicketPoints(ticket);
+                phieuRepository.save(ticket);
+            });
+        }
+
+        // Tự động đồng bộ trạng thái sang Lịch đặt dịch vụ gốc nếu có
+        if (hoaDon.getMaDatLich() != null) {
+            bookingRepository.findById(hoaDon.getMaDatLich()).ifPresent(b -> {
+                b.setTrangThai("Đã thanh toán");
+                b.setTrangThaiThanhToan("Đã thanh toán");
+                bookingRepository.save(b);
+            });
         }
 
         return hoaDonDichVuRepository.save(hoaDon);
@@ -181,10 +198,18 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.save(hoaDon);
     }
 
-    // Các phương thức truy vấn hỗ trợ
+    /**
+     * Tra cứu hóa đơn theo ID
+     */
     public Optional<HoaDonDichVu> getHoaDonById(Integer maHDDV) {
-        if (maHDDV == null) return Optional.empty();
         return hoaDonDichVuRepository.findById(maHDDV);
+    }
+
+    /**
+     * Lấy toàn bộ danh sách hóa đơn theo thứ tự mới nhất
+     */
+    public List<HoaDonDichVu> getAllHoaDons() {
+        return hoaDonDichVuRepository.findAllByOrderByNgaySuDungDesc();
     }
 
     public List<HoaDonDichVu> getAllHoaDon() {
@@ -192,29 +217,291 @@ public class HoaDonDichVuService {
     }
 
     public List<HoaDonDichVu> getHoaDonByTrangThai(String trangThai) {
-        if (trangThai == null || trangThai.isBlank()) {
-            return getAllHoaDon();
+        return hoaDonDichVuRepository.findByTrangThaiOrderByNgaySuDungDesc(trangThai);
+    }
+
+    /**
+     * THÔNG SUỐT DỊCH VỤ: Lấy danh sách toàn bộ dịch vụ đã được Bác sĩ hoặc Nhân viên chăm sóc
+     * xác nhận hoàn thành nhưng chưa thanh toán, sẵn sàng chuyển qua cho Thu ngân thanh toán.
+     */
+    public List<DichVuChoThanhToanDTO> getDanhSachDichVuChoThanhToan() {
+        List<DichVuChoThanhToanDTO> list = new ArrayList<>();
+
+        // 1. Phiếu dịch vụ chăm sóc tại quầy đã hoàn thành nhưng chưa thanh toán
+        List<PhieuDichVuChamSoc> tickets = phieuRepository.findCompletedAwaitingPayment();
+        for (PhieuDichVuChamSoc t : tickets) {
+            DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+            dto.setLoaiDichVu("PHIEU_CHAM_SOC");
+            dto.setMaDichVu(t.getSoPhieu());
+            dto.setMaPhieuDV(t.getMaPhieuDV());
+
+            if (t.getChuNuoi() != null) {
+                dto.setTenKhachHang(t.getChuNuoi().getHoTenChuNuoi());
+                dto.setSoDienThoai(t.getChuNuoi().getSoDienThoai());
+                dto.setEmail(t.getChuNuoi().getEmail());
+                dto.setMaKH(t.getChuNuoi().getMaKH());
+            } else {
+                dto.setTenKhachHang("Khách lẻ");
+                dto.setSoDienThoai("");
+            }
+
+            if (t.getThuCung() != null) {
+                String petInfo = t.getThuCung().getTenThuCung();
+                if (t.getThuCung().getLoaiThuCung() != null && !t.getThuCung().getLoaiThuCung().isBlank()) {
+                    petInfo += " (" + t.getThuCung().getLoaiThuCung() + ")";
+                }
+                dto.setTenThuCung(petInfo);
+            } else {
+                dto.setTenThuCung("");
+            }
+
+            if (t.getNvThucHien() != null) {
+                dto.setTenNhanSu(t.getNvThucHien().getTenNV());
+                dto.setMaNV(t.getNvThucHien().getMaNV());
+            } else {
+                dto.setTenNhanSu("Chưa phân công");
+            }
+
+            dto.setTongTien(t.getTongTien() != null ? t.getTongTien() : BigDecimal.ZERO);
+            dto.setTienGiamGia(t.getTienGiamGia() != null ? t.getTienGiamGia() : BigDecimal.ZERO);
+            BigDecimal payAmount = (t.getThanhToan() != null && t.getThanhToan().compareTo(BigDecimal.ZERO) > 0)
+                    ? t.getThanhToan() : dto.getTongTien().subtract(dto.getTienGiamGia());
+            if (payAmount.compareTo(BigDecimal.ZERO) < 0) payAmount = BigDecimal.ZERO;
+            dto.setThanhToan(payAmount);
+
+            dto.setTenDichVu(t.getYeuCauCuaChuNuoi() != null && !t.getYeuCauCuaChuNuoi().isBlank()
+                    ? t.getYeuCauCuaChuNuoi() : "Dịch vụ chăm sóc thú cưng");
+            dto.setGhiChu(t.getGhiChu());
+            if (t.getNgayTiepNhan() != null) {
+                dto.setThoiGian(t.getNgayTiepNhan().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            }
+
+            // Chi tiết dịch vụ
+            List<ChiTietDichVuChamSoc> ctdvs = chiTietDichVuChamSocRepository.findByMaPhieuDV(t.getMaPhieuDV());
+            if (ctdvs != null && !ctdvs.isEmpty()) {
+                for (ChiTietDichVuChamSoc c : ctdvs) {
+                    ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+                    item.setMaDV(c.getMaDVCS() != null ? c.getMaDVCS() : 1);
+                    item.setTenDV(c.getDichVuChamSoc() != null ? c.getDichVuChamSoc().getTenDichVu() : ("Dịch vụ #" + c.getMaDVCS()));
+                    item.setSoLuong(c.getSoLuong() != null ? c.getSoLuong() : 1);
+                    item.setGiaDichVu(c.getThanhTien() != null ? c.getThanhTien() : (c.getDonGia() != null ? c.getDonGia() : BigDecimal.ZERO));
+                    dto.getItems().add(item);
+                }
+            } else {
+                ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+                item.setMaDV(1);
+                item.setTenDV(dto.getTenDichVu());
+                item.setSoLuong(1);
+                item.setGiaDichVu(dto.getThanhToan());
+                dto.getItems().add(item);
+            }
+
+            list.add(dto);
         }
-        return hoaDonDichVuRepository.findByTrangThaiOrderByNgaySuDungDesc(trangThai.trim());
-    }
 
-    public List<HoaDonDichVu> getHoaDonChuaThanhToan() {
-        return hoaDonDichVuRepository.findByTrangThaiOrderByNgaySuDungDesc(HoaDonDichVu.TRANG_THAI_CHUA_THANH_TOAN);
-    }
+        // 2. Lịch đặt dịch vụ online đã được bác sĩ / nhân viên xác nhận hoàn thành nhưng chưa thanh toán
+        List<Booking> bookings = bookingRepository.findCompletedAwaitingPayment();
+        for (Booking b : bookings) {
+            DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+            dto.setLoaiDichVu("DAT_LICH");
+            dto.setMaDichVu(b.getMaDichVu());
+            dto.setMaDatLich(b.getMaDatLich());
+            dto.setTenKhachHang(b.getTenKhachHang() != null ? b.getTenKhachHang() : "Khách online");
+            dto.setSoDienThoai(b.getSoDienThoai() != null ? b.getSoDienThoai() : "");
+            dto.setEmail(b.getEmail());
+            dto.setMaKH(b.getMaKH());
+            dto.setTenThuCung(b.getGhiChu() != null ? b.getGhiChu() : "");
 
-    public List<HoaDonDichVu> getHoaDonDaThanhToan() {
-        return hoaDonDichVuRepository.findByTrangThaiOrderByNgaySuDungDesc(HoaDonDichVu.TRANG_THAI_DA_THANH_TOAN);
-    }
+            String serviceName = (b.getPetService() != null && b.getPetService().getTenDV() != null)
+                    ? b.getPetService().getTenDV() : ("Dịch vụ #" + b.getMaDV());
+            BigDecimal servicePrice = (b.getPetService() != null && b.getPetService().getGiaDichVu() != null)
+                    ? b.getPetService().getGiaDichVu() : BigDecimal.ZERO;
 
-    public List<HoaDonDichVu> getHoaDonByKhachHang(Integer maKH) {
-        if (maKH == null) return List.of();
-        return hoaDonDichVuRepository.findByMaKHOrderByNgaySuDungDesc(maKH);
-    }
+            dto.setTenDichVu(serviceName);
+            dto.setTongTien(servicePrice);
+            dto.setTienGiamGia(BigDecimal.ZERO);
+            dto.setThanhToan(servicePrice);
 
-    @Transactional
-    public void deleteHoaDon(Integer maHDDV) {
-        if (maHDDV != null && hoaDonDichVuRepository.existsById(maHDDV)) {
-            hoaDonDichVuRepository.deleteById(maHDDV);
+            if (b.getEmployee() != null) {
+                dto.setTenNhanSu(b.getEmployee().getTenNV());
+                dto.setMaNV(b.getEmployee().getMaNV());
+            } else {
+                dto.setTenNhanSu("Chưa phân công");
+            }
+
+            String timeStr = "";
+            if (b.getNgayDat() != null) {
+                timeStr += b.getNgayDat().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+            if (b.getGioDat() != null) {
+                timeStr += " " + b.getGioDat().toString();
+            }
+            dto.setThoiGian(timeStr.trim());
+            dto.setGhiChu(b.getGhiChu());
+
+            ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+            item.setMaDV(b.getMaDV() != null ? b.getMaDV() : 1);
+            item.setTenDV(serviceName);
+            item.setSoLuong(1);
+            item.setGiaDichVu(servicePrice);
+            dto.getItems().add(item);
+
+            list.add(dto);
         }
+
+        return list;
+    }
+
+    /**
+     * THÔNG SUỐT DỊCH VỤ: Tra cứu nhanh một mã dịch vụ (theo số phiếu PDV-... hoặc mã đặt lịch BK-...)
+     * để thu ngân có thể quét/gõ mã và tải dữ liệu lên thanh toán tự động ngay tức thì.
+     */
+    public Optional<DichVuChoThanhToanDTO> traCuuDichVuTheoMa(String rawCode) {
+        if (rawCode == null || rawCode.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        String code = rawCode.trim();
+
+        // 1. Kiểm tra Phiếu dịch vụ chăm sóc theo số phiếu
+        Optional<PhieuDichVuChamSoc> ticketOpt = phieuRepository.findBySoPhieuIgnoreCase(code);
+        if (ticketOpt.isEmpty()) {
+            ticketOpt = phieuRepository.findBySoPhieu(code);
+        }
+        if (ticketOpt.isEmpty() && code.matches("\\d+")) {
+            ticketOpt = phieuRepository.findById(Integer.parseInt(code));
+        }
+
+        if (ticketOpt.isPresent()) {
+            PhieuDichVuChamSoc t = ticketOpt.get();
+            DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+            dto.setLoaiDichVu("PHIEU_CHAM_SOC");
+            dto.setMaDichVu(t.getSoPhieu());
+            dto.setMaPhieuDV(t.getMaPhieuDV());
+
+            if (t.getChuNuoi() != null) {
+                dto.setTenKhachHang(t.getChuNuoi().getHoTenChuNuoi());
+                dto.setSoDienThoai(t.getChuNuoi().getSoDienThoai());
+                dto.setEmail(t.getChuNuoi().getEmail());
+                dto.setMaKH(t.getChuNuoi().getMaKH());
+            } else {
+                dto.setTenKhachHang("Khách lẻ");
+                dto.setSoDienThoai("");
+            }
+
+            if (t.getThuCung() != null) {
+                String petInfo = t.getThuCung().getTenThuCung();
+                if (t.getThuCung().getLoaiThuCung() != null && !t.getThuCung().getLoaiThuCung().isBlank()) {
+                    petInfo += " (" + t.getThuCung().getLoaiThuCung() + ")";
+                }
+                dto.setTenThuCung(petInfo);
+            }
+
+            if (t.getNvThucHien() != null) {
+                dto.setTenNhanSu(t.getNvThucHien().getTenNV());
+                dto.setMaNV(t.getNvThucHien().getMaNV());
+            } else {
+                dto.setTenNhanSu("Chưa phân công");
+            }
+
+            dto.setTongTien(t.getTongTien() != null ? t.getTongTien() : BigDecimal.ZERO);
+            dto.setTienGiamGia(t.getTienGiamGia() != null ? t.getTienGiamGia() : BigDecimal.ZERO);
+            BigDecimal payAmount = (t.getThanhToan() != null && t.getThanhToan().compareTo(BigDecimal.ZERO) > 0)
+                    ? t.getThanhToan() : dto.getTongTien().subtract(dto.getTienGiamGia());
+            if (payAmount.compareTo(BigDecimal.ZERO) < 0) payAmount = BigDecimal.ZERO;
+            dto.setThanhToan(payAmount);
+
+            dto.setTenDichVu(t.getYeuCauCuaChuNuoi() != null && !t.getYeuCauCuaChuNuoi().isBlank()
+                    ? t.getYeuCauCuaChuNuoi() : "Dịch vụ chăm sóc thú cưng");
+            dto.setGhiChu(t.getGhiChu());
+            if (t.getNgayTiepNhan() != null) {
+                dto.setThoiGian(t.getNgayTiepNhan().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            }
+
+            List<ChiTietDichVuChamSoc> ctdvs = chiTietDichVuChamSocRepository.findByMaPhieuDV(t.getMaPhieuDV());
+            if (ctdvs != null && !ctdvs.isEmpty()) {
+                for (ChiTietDichVuChamSoc c : ctdvs) {
+                    ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+                    item.setMaDV(c.getMaDVCS() != null ? c.getMaDVCS() : 1);
+                    item.setTenDV(c.getDichVuChamSoc() != null ? c.getDichVuChamSoc().getTenDichVu() : ("Dịch vụ #" + c.getMaDVCS()));
+                    item.setSoLuong(c.getSoLuong() != null ? c.getSoLuong() : 1);
+                    item.setGiaDichVu(c.getThanhTien() != null ? c.getThanhTien() : (c.getDonGia() != null ? c.getDonGia() : BigDecimal.ZERO));
+                    dto.getItems().add(item);
+                }
+            } else {
+                ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+                item.setMaDV(1);
+                item.setTenDV(dto.getTenDichVu());
+                item.setSoLuong(1);
+                item.setGiaDichVu(dto.getThanhToan());
+                dto.getItems().add(item);
+            }
+            return Optional.of(dto);
+        }
+
+        // 2. Kiểm tra Booking theo mã
+        Integer bookingId = null;
+        if (code.toUpperCase().startsWith("BK-")) {
+            try { bookingId = Integer.parseInt(code.substring(3)); } catch (Exception ignored) {}
+        } else if (code.toUpperCase().startsWith("BK")) {
+            try { bookingId = Integer.parseInt(code.substring(2)); } catch (Exception ignored) {}
+        } else if (code.toUpperCase().startsWith("DL-")) {
+            try { bookingId = Integer.parseInt(code.substring(3)); } catch (Exception ignored) {}
+        } else if (code.matches("\\d+")) {
+            try { bookingId = Integer.parseInt(code); } catch (Exception ignored) {}
+        }
+
+        if (bookingId != null) {
+            Optional<Booking> bOpt = bookingRepository.findById(bookingId);
+            if (bOpt.isPresent()) {
+                Booking b = bOpt.get();
+                DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
+                dto.setLoaiDichVu("DAT_LICH");
+                dto.setMaDichVu(b.getMaDichVu());
+                dto.setMaDatLich(b.getMaDatLich());
+                dto.setTenKhachHang(b.getTenKhachHang() != null ? b.getTenKhachHang() : "Khách online");
+                dto.setSoDienThoai(b.getSoDienThoai() != null ? b.getSoDienThoai() : "");
+                dto.setEmail(b.getEmail());
+                dto.setMaKH(b.getMaKH());
+                dto.setTenThuCung(b.getGhiChu() != null ? b.getGhiChu() : "");
+
+                String serviceName = (b.getPetService() != null && b.getPetService().getTenDV() != null)
+                        ? b.getPetService().getTenDV() : ("Dịch vụ #" + b.getMaDV());
+                BigDecimal servicePrice = (b.getPetService() != null && b.getPetService().getGiaDichVu() != null)
+                        ? b.getPetService().getGiaDichVu() : BigDecimal.ZERO;
+
+                dto.setTenDichVu(serviceName);
+                dto.setTongTien(servicePrice);
+                dto.setTienGiamGia(BigDecimal.ZERO);
+                dto.setThanhToan(servicePrice);
+
+                if (b.getEmployee() != null) {
+                    dto.setTenNhanSu(b.getEmployee().getTenNV());
+                    dto.setMaNV(b.getEmployee().getMaNV());
+                } else {
+                    dto.setTenNhanSu("Chưa phân công");
+                }
+
+                String timeStr = "";
+                if (b.getNgayDat() != null) {
+                    timeStr += b.getNgayDat().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                }
+                if (b.getGioDat() != null) {
+                    timeStr += " " + b.getGioDat().toString();
+                }
+                dto.setThoiGian(timeStr.trim());
+                dto.setGhiChu(b.getGhiChu());
+
+                ChiTietDichVuItemDTO item = new ChiTietDichVuItemDTO();
+                item.setMaDV(b.getMaDV() != null ? b.getMaDV() : 1);
+                item.setTenDV(serviceName);
+                item.setSoLuong(1);
+                item.setGiaDichVu(servicePrice);
+                dto.getItems().add(item);
+
+                return Optional.of(dto);
+            }
+        }
+
+        return Optional.empty();
     }
 }
