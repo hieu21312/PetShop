@@ -2,6 +2,7 @@ package PetShop.demo.api;
 
 import PetShop.demo.model.enity.ThongBao;
 import PetShop.demo.service.ThongBaoService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,14 @@ public class NotificationApiController {
 
     // Lấy danh sách thông báo của khách hàng
     @GetMapping
-    public ResponseEntity<?> getNotifications(@RequestParam Integer maKH) {
+    public ResponseEntity<?> getNotifications(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        if (maKH == null && session != null) {
+            maKH = (Integer) session.getAttribute("maKH");
+        }
+        if (maKH == null) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
         List<ThongBao> list = thongBaoService.getThongBaoByCustomer(maKH);
 
         // Nếu khách chưa có thông báo nào, tự động tạo 1 thông báo chào mừng & ưu đãi
@@ -57,25 +65,55 @@ public class NotificationApiController {
 
     // Đếm số thông báo chưa đọc
     @GetMapping("/unread-count")
-    public ResponseEntity<?> getUnreadCount(@RequestParam Integer maKH) {
-        long count = thongBaoService.demThongBaoChuaDoc(maKH);
+    public ResponseEntity<?> getUnreadCount(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        if (maKH == null && session != null) {
+            maKH = (Integer) session.getAttribute("maKH");
+        }
+        long count = maKH != null ? thongBaoService.demThongBaoChuaDoc(maKH) : 0;
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
 
     // Đánh dấu 1 thông báo đã đọc
-    @PostMapping("/{id}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable Integer id) {
-        thongBaoService.dánhDauDaDoc(id);
-        return ResponseEntity.ok(Map.of("success", true, "message", "Đã đánh dấu đã đọc"));
+    @RequestMapping(value = "/{id}/read", method = {RequestMethod.POST, RequestMethod.GET})
+    public ResponseEntity<?> markAsRead(@PathVariable Integer id, HttpSession session) {
+        thongBaoService.danhDauDaDoc(id);
+
+        long unreadCount = 0;
+        if (session != null) {
+            Integer customerId = (Integer) session.getAttribute("maKH");
+            if (customerId != null) {
+                unreadCount = thongBaoService.demThongBaoChuaDoc(customerId);
+                session.setAttribute("unreadNotifications", unreadCount);
+                session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(customerId));
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã đánh dấu đã đọc",
+                "unreadCount", unreadCount
+        ));
     }
 
     // Đánh dấu tất cả đã đọc
     @PostMapping("/read-all")
-    public ResponseEntity<?> markAllAsRead(@RequestParam Integer maKH) {
-        List<ThongBao> unread = thongBaoService.getThongBaoChuaDoc(maKH);
-        for (ThongBao tb : unread) {
-            thongBaoService.dánhDauDaDoc(tb.getMaThongBao());
+    public ResponseEntity<?> markAllAsRead(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        if (maKH == null && session != null) {
+            maKH = (Integer) session.getAttribute("maKH");
         }
-        return ResponseEntity.ok(Map.of("success", true, "message", "Đã đánh dấu tất cả đã đọc"));
+
+        if (maKH != null) {
+            thongBaoService.danhDauTatCaDaDoc(maKH);
+            if (session != null) {
+                session.setAttribute("unreadNotifications", 0L);
+                session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(maKH));
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã đánh dấu tất cả đã đọc",
+                "unreadCount", 0
+        ));
     }
 }

@@ -87,6 +87,22 @@
             display: inline-block;
             vertical-align: middle;
         }
+        .notification-unread {
+            background-color: #fff5f7 !important;
+            border-left: 4px solid #e91e63 !important;
+            border-color: #ffd6e0 !important;
+        }
+        .notification-unread:hover {
+            background-color: #ffe8ee !important;
+        }
+        .notification-read {
+            background-color: #ffffff !important;
+            border-left: 3px solid #dee2e6 !important;
+            opacity: 0.88;
+        }
+        .notification-read:hover {
+            background-color: #f8f9fa !important;
+        }
     </style>
     <nav class="navbar navbar-expand-lg custom-navbar shadow-sm">
         <div class="container-fluid px-3 px-xl-4">
@@ -191,14 +207,16 @@
                             style="width: 40px; height: 40px; background-color: #fff0f3; color: #e91e63; border: 1px solid #ffccd5; border-radius: 50%; transition: all 0.2s ease-in-out;">
                             <i class="fas fa-bell fs-6"></i>
                             <span
+                                id="notificationBadge"
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                 style="font-size: 0.7rem; padding: 0.35em 0.55em;"
+                                th:styleappend="${session.unreadNotifications == null or session.unreadNotifications <= 0} ? 'display: none !important;' : ''"
                                 th:text="${session.unreadNotifications != null ? session.unreadNotifications : 0}">
                                 0
                             </span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end border-0 p-0 overflow-hidden shadow-lg"
-                            style="min-width: 340px; max-width: 380px; border-radius: 18px;">
+                            style="min-width: 350px; max-width: 390px; border-radius: 18px;">
                             <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center"
@@ -207,35 +225,57 @@
                                     </div>
                                     <span class="fw-bold text-dark" style="font-size: 0.95rem;">Thông báo</span>
                                 </div>
-                                <a th:href="@{/GioHang?tab=services}" class="small text-decoration-none fw-semibold"
-                                    style="color: #e91e63; font-size: 0.8rem;">
-                                    Lịch hẹn <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
-                                </a>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button th:if="${session.role != null and session.unreadNotifications != null and session.unreadNotifications > 0}"
+                                            type="button" id="btnMarkAllRead"
+                                            class="btn btn-sm btn-link text-decoration-none p-0 text-muted"
+                                            style="font-size: 0.75rem;" title="Đánh dấu tất cả là đã đọc">
+                                        <i class="fas fa-check-double me-1 text-success"></i>Đã đọc tất cả
+                                    </button>
+                                    <a th:href="@{/GioHang?tab=services}" class="small text-decoration-none fw-semibold"
+                                        style="color: #e91e63; font-size: 0.8rem;">
+                                        Lịch hẹn <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                </div>
                             </div>
 
                             <div th:if="${session.role == null}" class="text-center py-4 px-3 bg-white">
                                 <i class="fas fa-user-lock text-muted opacity-50 fa-2x mb-2 d-block"></i>
-                                <p class="small text-muted mb-3">Vui lòng đăng nhập để xem các nhắc lịch tái khám & chăm
-                                    sóc</p>
+                                <p class="small text-muted mb-3">Vui lòng đăng nhập để xem các nhắc lịch tái khám & chăm sóc</p>
                                 <a th:href="@{/DangNhap}" class="btn btn-sm text-white rounded-pill px-4 fw-semibold"
                                     style="background-color: #e91e63; font-size: 0.85rem;">Đăng nhập</a>
                             </div>
 
                             <div th:if="${session.role != null}" class="bg-white">
                                 <div th:if="${session.notificationList == null or #lists.isEmpty(session.notificationList)}"
+                                    id="emptyNotificationNotice"
                                     class="text-center py-4 px-3 text-muted small">
                                     <i class="fas fa-bell-slash text-secondary opacity-50 fa-2x mb-2 d-block"></i>
                                     Bạn chưa có thông báo nhắc lịch mới nào.
                                 </div>
                                 <div th:unless="${session.notificationList == null or #lists.isEmpty(session.notificationList)}"
-                                    class="p-2" style="max-height: 320px; overflow-y: auto;">
-                                    <a th:each="tb : ${session.notificationList}"
-                                       th:href="@{/GioHang?tab=services}"
-                                       class="d-block text-decoration-none p-3 mb-2 rounded-3 transition-all border"
-                                       style="background-color: #fafafa; transition: background-color 0.15s ease;">
+                                    id="notificationItemsContainer"
+                                    class="p-2" style="max-height: 350px; overflow-y: auto;">
+                                    <div th:each="tb : ${session.notificationList}"
+                                         class="notification-item d-block p-3 mb-2 rounded-3 transition-all border position-relative"
+                                         th:classappend="${tb.trangThai != 'Đã đọc'} ? 'notification-unread' : 'notification-read'"
+                                         th:attr="data-id=${tb.maThongBao},
+                                                  data-unread=${tb.trangThai != 'Đã đọc'},
+                                                  data-title=${tb.tieuDe},
+                                                  data-content=${tb.noiDung},
+                                                  data-type=${tb.loaiThongBao != null ? tb.loaiThongBao : 'Thông báo'},
+                                                  data-date=${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')},
+                                                  data-hen=${tb.ngayHen != null ? #temporals.format(tb.ngayHen, 'dd/MM/yyyy HH:mm') : ''},
+                                                  data-redirect=@{/GioHang?tab=services}"
+                                         style="cursor: pointer; transition: all 0.2s ease;">
                                         <div class="fw-bold text-dark mb-1 d-flex justify-content-between align-items-start"
                                              style="font-size: 0.88rem; line-height: 1.3;">
-                                            <span th:text="${tb.tieuDe}">Lịch hẹn</span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <span class="notification-dot bg-danger rounded-circle d-inline-block"
+                                                      th:styleappend="${tb.trangThai == 'Đã đọc'} ? 'display: none !important;' : ''"
+                                                      style="width: 8px; height: 8px; min-width: 8px;"></span>
+                                                <span th:text="${tb.tieuDe}">Lịch hẹn</span>
+                                            </div>
                                             <i class="fas fa-chevron-right text-muted small ms-2 mt-1" style="font-size: 0.7rem;"></i>
                                         </div>
                                         <div class="text-secondary mb-2"
@@ -243,13 +283,19 @@
                                              th:text="${tb.noiDung}">Nội dung thông báo nhắc lịch...</div>
                                         <div class="d-flex align-items-center justify-content-between pt-1 border-top">
                                             <span class="badge bg-light text-muted fw-normal" style="font-size: 0.7rem;"
-                                                th:text="${tb.loaiThongBao != null ? tb.loaiThongBao : 'Nhắc lịch'}">Nhắc
-                                                lịch</span>
-                                            <span class="text-muted" style="font-size: 0.72rem;"
-                                                th:text="${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')}">04/10/2026
-                                                08:00</span>
+                                                th:text="${tb.loaiThongBao != null ? tb.loaiThongBao : 'Nhắc lịch'}">Nhắc lịch</span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="text-muted" style="font-size: 0.72rem;"
+                                                    th:text="${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')}">04/10/2026 08:00</span>
+                                                <a th:href="@{/ThongBao/xem/{id}(id=${tb.maThongBao})}"
+                                                   class="small text-decoration-none fw-semibold notification-direct-link"
+                                                   style="color: #e91e63; font-size: 0.75rem;"
+                                                   title="Xem chi tiết trên trang lịch hẹn">
+                                                    Chi tiết <i class="fas fa-arrow-right ms-1" style="font-size: 0.65rem;"></i>
+                                                </a>
+                                            </div>
                                         </div>
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -368,4 +414,186 @@
             </div>
         </div>
     </nav>
+
+    <!-- MODAL CHI TIẾT THÔNG BÁO -->
+    <div class="modal fade" id="modalThongBaoChiTiet" tabindex="-1" aria-labelledby="modalThongBaoLabel" aria-hidden="true" style="z-index: 10600;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4 align-items-start">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px; background-color: #fff0f3; color: #e91e63; font-size: 1.1rem;">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0" id="modalThongBaoLabel">Chi tiết thông báo</h6>
+                            <small class="text-muted" id="modalThongBaoDate"></small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3 d-flex align-items-center gap-2">
+                        <span id="modalThongBaoType" class="badge bg-light text-secondary border fw-normal px-2 py-1" style="font-size: 0.75rem;">Thông báo</span>
+                        <span id="modalThongBaoStatus" class="badge bg-success-subtle text-success border border-success-subtle fw-normal px-2 py-1" style="font-size: 0.75rem;">Đã xem</span>
+                    </div>
+
+                    <h5 id="modalThongBaoTitle" class="fw-bold text-dark mb-3" style="line-height: 1.4; font-size: 1.05rem;">Tiêu đề</h5>
+
+                    <div id="modalThongBaoHenBox" class="alert alert-info py-2 px-3 small rounded-3 mb-3 d-none" style="background-color: #e8f4fd; border: 1px solid #b6e0fe; color: #055160;">
+                        <i class="fas fa-calendar-check me-2 text-primary"></i>
+                        <strong>Thời gian hẹn:</strong> <span id="modalThongBaoHen"></span>
+                    </div>
+
+                    <div id="modalThongBaoContent" class="text-secondary bg-light p-3 rounded-3" style="font-size: 0.92rem; line-height: 1.6; white-space: pre-line; color: #374151 !important;">
+                        Nội dung thông báo
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4 gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-3 fw-medium text-secondary" data-bs-dismiss="modal" style="font-size: 0.88rem;">Đóng</button>
+                    <a id="modalThongBaoActionBtn" href="/GioHang?tab=services" class="btn text-white rounded-pill px-4 fw-semibold shadow-sm"
+                       style="background: linear-gradient(45deg, #ff4d6d, #ff758f); font-size: 0.88rem;">
+                        <i class="fas fa-calendar-alt me-1"></i> Xem lịch hẹn & Dịch vụ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT XỬ LÝ SỐ THÔNG BÁO VÀ ĐÁNH DẤU ĐÃ ĐỌC -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cập nhật số thông báo hiển thị trên Badge
+        function updateBadgeCount(newCount) {
+            var badge = document.getElementById('notificationBadge');
+            if (!badge) return;
+            var count = parseInt(newCount, 10);
+            if (isNaN(count) || count <= 0) {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+                var markAllBtn = document.getElementById('btnMarkAllRead');
+                if (markAllBtn) markAllBtn.style.display = 'none';
+            } else {
+                badge.textContent = count;
+                badge.style.display = 'inline-block';
+            }
+        }
+
+        // Sự kiện click vào 1 thông báo
+        document.querySelectorAll('.notification-item').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                // Nếu click trực tiếp vào nút direct-link thì cho chạy chuyển trang tự nhiên
+                if (e.target.closest('.notification-direct-link')) {
+                    return;
+                }
+
+                var tbId = this.getAttribute('data-id');
+                var isUnread = this.getAttribute('data-unread') === 'true';
+                var title = this.getAttribute('data-title') || 'Thông báo';
+                var content = this.getAttribute('data-content') || '';
+                var type = this.getAttribute('data-type') || 'Thông báo';
+                var date = this.getAttribute('data-date') || '';
+                var ngayHen = this.getAttribute('data-hen') || '';
+                var redirectUrl = this.getAttribute('data-redirect') || '/GioHang?tab=services';
+
+                // Nạp thông tin vào Modal chi tiết
+                var modalTitle = document.getElementById('modalThongBaoTitle');
+                var modalContent = document.getElementById('modalThongBaoContent');
+                var modalType = document.getElementById('modalThongBaoType');
+                var modalDate = document.getElementById('modalThongBaoDate');
+                var modalHenBox = document.getElementById('modalThongBaoHenBox');
+                var modalHen = document.getElementById('modalThongBaoHen');
+                var modalActionBtn = document.getElementById('modalThongBaoActionBtn');
+
+                if (modalTitle) modalTitle.textContent = title;
+                if (modalContent) modalContent.textContent = content;
+                if (modalType) modalType.textContent = type;
+                if (modalDate) modalDate.textContent = date ? date : '';
+                if (modalActionBtn) modalActionBtn.href = redirectUrl;
+
+                if (ngayHen && ngayHen.trim() !== '') {
+                    if (modalHen) modalHen.textContent = ngayHen;
+                    if (modalHenBox) modalHenBox.classList.remove('d-none');
+                } else {
+                    if (modalHenBox) modalHenBox.classList.add('d-none');
+                }
+
+                // Nếu thông báo đang chưa đọc -> Tự động trừ số thông báo và đánh dấu đã đọc
+                if (isUnread && tbId) {
+                    // Cập nhật giao diện ngay lập tức
+                    this.setAttribute('data-unread', 'false');
+                    this.classList.remove('notification-unread');
+                    this.classList.add('notification-read');
+                    var dot = this.querySelector('.notification-dot');
+                    if (dot) dot.style.display = 'none';
+
+                    var badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        var currentCount = parseInt(badge.textContent.trim(), 10) || 0;
+                        var newCount = Math.max(0, currentCount - 1);
+                        updateBadgeCount(newCount);
+                    }
+
+                    // Gọi API cập nhật Database và Session
+                    fetch('/api/notifications/' + tbId + '/read', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (data && typeof data.unreadCount !== 'undefined') {
+                            updateBadgeCount(data.unreadCount);
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error('Lỗi khi đánh dấu thông báo đã đọc:', err);
+                    });
+                }
+
+                // Mở Modal chi tiết thông báo
+                var modalEl = document.getElementById('modalThongBaoChiTiet');
+                if (modalEl && typeof bootstrap !== 'undefined') {
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
+            });
+        });
+
+        // Sự kiện "Đánh dấu tất cả là đã đọc"
+        var btnMarkAll = document.getElementById('btnMarkAllRead');
+        if (btnMarkAll) {
+            btnMarkAll.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Cập nhật giao diện ngay lập tức
+                updateBadgeCount(0);
+                document.querySelectorAll('.notification-item').forEach(function (item) {
+                    item.setAttribute('data-unread', 'false');
+                    item.classList.remove('notification-unread');
+                    item.classList.add('notification-read');
+                    var dot = item.querySelector('.notification-dot');
+                    if (dot) dot.style.display = 'none';
+                });
+
+                // Gọi API backend
+                fetch('/api/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function (res) { return res.json(); })
+                .then(function () {
+                    updateBadgeCount(0);
+                })
+                .catch(function (err) {
+                    console.error('Lỗi khi đánh dấu tất cả đã đọc:', err);
+                });
+            });
+        }
+    });
+    </script>
 </header>
