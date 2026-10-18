@@ -78,6 +78,13 @@
             padding: 7px 12px;
             font-size: 0.9rem;
             white-space: nowrap;
+            cursor: pointer;
+        }
+        .custom-navbar .user-btn * {
+            pointer-events: none;
+        }
+        #userDropdownContainer .dropdown-menu.show {
+            display: block !important;
         }
         .custom-navbar .user-name-text {
             max-width: 120px;
@@ -309,9 +316,13 @@
                     </div>
 
                     <!-- USER -->
-                    <div th:unless="${session.role == null}" class="dropdown">
-                        <button class="btn user-btn dropdown-toggle d-flex align-items-center gap-1"
-                                data-bs-toggle="dropdown">
+                    <div th:unless="${session.role == null}" class="dropdown" id="userDropdownContainer">
+                        <button type="button"
+                                class="btn user-btn dropdown-toggle d-flex align-items-center gap-1"
+                                id="userMenuDropdown"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                data-bs-auto-close="true">
 
                             <i class="fas fa-user-circle"></i>
 
@@ -326,45 +337,65 @@
                             </span>
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3" style="min-width: 240px;">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3" id="userMenuDropdownList" style="min-width: 250px;">
 
                             <li th:if="${session.role == 'KhachHang'}" class="px-3 py-2 bg-light border-bottom rounded-top-3">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small text-muted">Hạng thành viên:</span>
-                                    <span class="badge fw-bold"
+                                    <span class="small text-muted text-nowrap">Hạng thành viên:</span>
+                                    <span class="badge fw-bold text-nowrap"
                                           th:classappend="${session.hangThanhVien == 'VVIP' ? 'bg-danger' : (session.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (session.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
                                           th:text="${session.hangThanhVien ?: 'Tiêu chuẩn'}">
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center small">
-                                    <span class="text-muted"><i class="fas fa-star text-warning me-1"></i>Điểm tích lũy:</span>
-                                    <strong class="text-primary" th:text="${(session.diemTichLuy ?: 0) + ' điểm'}"></strong>
+                                    <span class="text-muted text-nowrap"><i class="fas fa-star text-warning me-1"></i>Điểm tích lũy:</span>
+                                    <strong class="text-primary text-nowrap" th:text="${(session.diemTichLuy ?: 0) + ' điểm'}"></strong>
                                 </div>
                                 <div class="small text-danger fw-semibold mt-1" th:if="${session.phanTramGiamHang != null and session.phanTramGiamHang > 0}">
                                     <i class="fas fa-tag me-1"></i>Ưu đãi giảm: <span th:text="${session.phanTramGiamHang}"></span>%
                                 </div>
                             </li>
 
-                            <!-- Thông tin nhân sự (Nếu là Nhân viên/Bác sĩ/Admin) -->
+                            <!-- Thông tin nhân sự (Nếu là Nhân viên/Bác sĩ/Admin/Quản lý) -->
                             <li th:if="${session.maNV != null}" class="px-3 py-2 bg-light border-bottom rounded-top-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small text-muted">Vai trò:</span>
-                                    <span class="badge bg-secondary fw-semibold" th:text="${session.role}">Nhân viên</span>
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                                    <span class="small text-muted text-nowrap fw-medium">Vai trò:</span>
+                                    <span class="badge fw-semibold text-nowrap px-2 py-1 shadow-none"
+                                          th:classappend="${session.role == 'Admin' ? 'bg-danger' : (session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' ? 'bg-primary' : (session.role == 'Bác sĩ thú y' ? 'bg-success' : (session.role == 'Thu ngân' ? 'text-white' : (session.role == 'Thủ kho' ? 'bg-warning text-dark' : 'text-white'))))}"
+                                          th:style="${session.role == 'Thu ngân' ? 'background-color: #0d9488;' : (session.role == 'Nhân viên chăm sóc' or session.role == 'Chăm sóc thú cưng' ? 'background-color: #e91e63;' : '')}"
+                                          th:text="${session.role}">Nhân viên</span>
                                 </div>
-                                <div class="small text-muted mt-1">
-                                    <i class="fas fa-id-badge me-1"></i>Mã NV: <strong th:text="${session.maNV}"></strong>
+                                <div class="small text-muted d-flex justify-content-between align-items-center">
+                                    <span class="text-nowrap"><i class="fas fa-id-badge me-1 text-secondary"></i>Mã NV:</span>
+                                    <strong class="text-dark fw-bold" th:text="${session.maNV}"></strong>
                                 </div>
                             </li>
 
-                            <li th:if="${session.role == 'Admin'}">
-                                <a class="dropdown-item py-2"
-                                   th:href="@{/admin/index}">
+                            <!-- Nút Trang Quản trị: CHỈ HIỂN THỊ VỚI ADMIN HOẶC QUẢN LÝ CỬA HÀNG -->
+                            <li th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}">
+                                <a class="dropdown-item py-2" th:href="@{/admin}">
                                     <i class="fas fa-cog me-2 text-primary"></i>
                                     Trang Quản trị
                                 </a>
                             </li>
 
-                            <!-- Nút Lịch làm việc cho Nhân viên -->
+                            <!-- Nút Quầy Thu ngân (Dành riêng cho Thu ngân) -->
+                            <li th:if="${session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân'}">
+                                <a class="dropdown-item py-2" th:href="@{/admin/thu-ngan}">
+                                    <i class="fas fa-cash-register me-2 text-success"></i>
+                                    Quầy Thu ngân
+                                </a>
+                            </li>
+
+                            <!-- Nút Hồ sơ Bệnh án & Điều trị (Dành riêng cho Bác sĩ thú y) -->
+                            <li th:if="${session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ'}">
+                                <a class="dropdown-item py-2" th:href="@{/admin/doctor/treatment}">
+                                    <i class="fas fa-user-md me-2 text-info"></i>
+                                    Hồ sơ Bệnh án &amp; Điều trị
+                                </a>
+                            </li>
+
+                            <!-- Nút Lịch làm việc cho toàn bộ nhân viên -->
                             <li th:if="${session.maNV != null}">
                                 <a class="dropdown-item py-2"
                                    th:href="@{/staff/my-tasks}">

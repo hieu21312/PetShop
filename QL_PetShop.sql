@@ -246,39 +246,27 @@ INSERT INTO [dbo].[tblNhaCungCap] ([TenNCC], [DiaChi], [DienThoai]) VALUES
 GO
 
 INSERT INTO [dbo].[tblVaiTro] ([TenVaiTro], [MoTa]) VALUES
-(N'Admin', N'Quản trị hệ thống'),
-(N'Nhân viên bán hàng', N'Xử lý đơn hàng và chăm sóc khách hàng'),
-(N'Bác sĩ thú y', N'Thực hiện các dịch vụ y tế và đưa ra hướng giải quyết cho sức khỏe của thú cưng'),
-(N'Quản lý kho', N'Kiểm tra, nhập và xuất hàng'),
-(N'Nhân viên marketing', N'Quảng bá sản phẩm và chương trình khuyến mãi'),
-(N'Kế toán', N'Theo dõi doanh thu và chi phí'),
-(N'Tư vấn viên', N'Hỗ trợ khách hàng chọn sản phẩm'),
-(N'Chăm sóc thú cưng', N'Thực hiện tắm, cắt tỉa, trông giữ'),
-(N'Nhân viên giao hàng', N'Vận chuyển đơn hàng đến khách'),
-(N'Thử việc', N'Nhân viên mới đang được đào tạo'),
-(N'Quản lý cửa hàng', N'Giám sát hoạt động kinh doanh và nhân sự tại cửa hàng'),
-(N'Chuyên gia dinh dưỡng', N'Tư vấn chế độ ăn uống phù hợp cho từng loại thú cưng'),
-(N'Kỹ thuật viên thú y', N'Hỗ trợ bác sĩ trong việc khám, tiêm, xét nghiệm'),
-(N'Chuyên viên chăm sóc khách hàng', N'Giải đáp thắc mắc và xử lý khiếu nại'),
-(N'Nhân viên vệ sinh', N'Dọn dẹp, khử khuẩn khu vực nuôi và chăm sóc thú cưng')
+(N'Admin', N'Quản trị toàn bộ hệ thống PetShop'),
+(N'Quản lý cửa hàng', N'Giám sát hoạt động kinh doanh, điều phối nhân sự và vận hành cửa hàng'),
+(N'Bác sĩ thú y', N'Khám chữa bệnh, tiêm phòng, phẫu thuật và chăm sóc y tế thú cưng'),
+(N'Nhân viên chăm sóc', N'Tắm spa, cắt tỉa lông (grooming), vệ sinh móng tai và chăm sóc lưu trú'),
+(N'Thu ngân', N'Thu ngân quầy POS, tiếp nhận phiếu dịch vụ, áp dụng voucher & xuất hóa đơn'),
+(N'Thủ kho', N'Quản lý kho hàng, nhập xuất vật tư, kiểm kê sản phẩm & thuốc thú y');
 GO
 
-INSERT INTO [dbo].[tblNhanVien] ([MatKhau], [TenNV], [GioiTinh], [NamSinh], [VaiTro]) VALUES
-(N'123456', N'Phan Thị Thắng', N'Nam', 1999, 1),
-(N'123456', N'Nguyễn Khánh Quỳnh Hoa', N'Nữ', 2000, 2),
-(N'123456', N'Phạm An Thành', N'Nam', 1998, 3),
-(N'123456', N'Nguyễn Thị Huệ', N'Nữ', 1997, 4),
-(N'123456', N'Hoàng Nam Quang', N'Nam', 1996, 5),
-(N'123456', N'Huỳnh Thị Ngọc Tú', N'Nữ', 2001, 6),
-(N'123456', N'Trương Minh Tuấn', N'Nam', 1995, 7),
-(N'123456', N'Bùi Ngọc Thúy', N'Nữ', 1998, 8),
-(N'123456', N'Lê Văn Minh', N'Nam', 1999, 9),
-(N'123456', N'Nguyễn Hồng Ngân', N'Nữ', 2000, 10),
-(N'123456', N'Đặng Văn Hòa', N'Nam', 1994, 11),
-(N'123456', N'Trần Thị Mỹ Duyên', N'Nữ', 2002, 12),
-(N'123456', N'Ngô Minh Nhật', N'Nam', 2003, 13),
-(N'123456', N'Lê Thị Thanh Trúc', N'Nữ', 2003, 14),
-(N'123456', N'Phạm Văn Tài', N'Nam', 2002, 15)
+INSERT INTO [dbo].[tblNhanVien] ([MatKhau], [TenNV], [GioiTinh], [NamSinh], [VaiTro], [DienThoai], [Email], [ChuyenMon]) VALUES
+(N'123456', N'Phan Thị Thắng', N'Nam', 1990, 1, N'0901234001', N'thang.pt@petshop.vn', N'Quản trị toàn diện hệ thống & Điều hành PetShop'),
+(N'123456', N'Nguyễn Khánh Quỳnh Hoa', N'Nữ', 1998, 5, N'0901234002', N'hoa.nkq@petshop.vn', N'Thu ngân trưởng quầy POS, Tiếp nhận phiếu dịch vụ & Xuất hóa đơn'),
+(N'123456', N'Phạm An Thành', N'Nam', 1988, 3, N'0901234003', N'thanh.pa@petshop.vn', N'Bác sĩ thú y trưởng, Khám chẩn đoán, Triệt sản & Phẫu thuật mô mềm'),
+(N'123456', N'Nguyễn Thị Huệ', N'Nữ', 1996, 5, N'0901234004', N'hue.nt@petshop.vn', N'Thu ngân quầy POS ca chiều, Tiếp nhận khách & Thanh toán hóa đơn'),
+(N'123456', N'Hoàng Nam Quang', N'Nam', 1997, 6, N'0901234005', N'quang.hn@petshop.vn', N'Thủ kho chính, Quản lý xuất nhập tồn & Kiểm soát hạn dùng sản phẩm'),
+(N'123456', N'Huỳnh Thị Ngọc Tú', N'Nữ', 1999, 6, N'0901234006', N'tu.htn@petshop.vn', N'Thủ kho, Quản lý kho thức ăn hạt, Pate & Phụ kiện thú cưng'),
+(N'123456', N'Bùi Ngọc Thúy', N'Nữ', 1995, 4, N'0901234007', N'thuy.bn@petshop.vn', N'Chuyên viên Spa, Cắt tỉa tạo kiểu lông nghệ thuật & Grooming thú cưng'),
+(N'123456', N'Lê Văn Minh', N'Nam', 1998, 4, N'0901234008', N'minh.lv@petshop.vn', N'Nhân viên chăm sóc, Tắm sấy khử mùi, Cạo lông móng & Vệ sinh tai'),
+(N'123456', N'Trần Thị Mỹ Duyên', N'Nữ', 1997, 4, N'0901234009', N'duyen.ttm@petshop.vn', N'Nhân viên chăm sóc, Quản lý phòng lưu trú & Chế độ ăn uống thú cưng'),
+(N'123456', N'Nguyễn Hồng Ngân', N'Nữ', 1992, 2, N'0901234010', N'ngan.nh@petshop.vn', N'Quản lý cửa hàng, Điều phối ca trực, Quản lý doanh thu & Nhân sự'),
+(N'123456', N'Ngô Minh Nhật', N'Nam', 1999, 3, N'0901234011', N'nhat.nm@petshop.vn', N'Bác sĩ thú y, Khám tổng quát, Tiêm phòng vắc xin, Tẩy giun & Cấp cứu'),
+(N'123456', N'Phạm Văn Tài', N'Nam', 2001, 4, N'0901234012', N'tai.pv@petshop.vn', N'Nhân viên chăm sóc, Hỗ trợ tắm rửa, Vệ sinh khử khuẩn khu lưu trú');
 GO
 
 INSERT INTO [dbo].[tblKhachHang] ([TenKH], [MatKhau], [GioiTinh], [NamSinh], [Avarta], [DienThoai], [Email], [DiaChi]) VALUES

@@ -19,27 +19,47 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4">
+                <style>
+                    .table-treatment th, 
+                    .table-treatment td {
+                        vertical-align: middle !important;
+                        padding: 13px 14px !important;
+                    }
+                    .table-treatment thead th {
+                        font-size: 0.88rem;
+                        font-weight: 600;
+                        white-space: nowrap;
+                    }
+                    .col-id { width: 65px; text-align: center; }
+                    .col-pet { min-width: 190px; text-align: left; }
+                    .col-breed { min-width: 150px; text-align: left; white-space: nowrap; }
+                    .col-gender { width: 85px; text-align: center; white-space: nowrap; }
+                    .col-weight { width: 100px; text-align: center; white-space: nowrap; }
+                    .col-health { min-width: 140px; text-align: center; white-space: nowrap; }
+                    .col-action { width: 180px; text-align: center; white-space: nowrap; }
+                </style>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0 table-treatment">
                                 <thead class="table-pink">
                                     <tr>
-                                        <th width="70">Mã</th>
-                                        <th>Thú cưng</th>
-                                        <th>Loài & Giống</th>
-                                        <th>Giới tính</th>
-                                        <th>Cân nặng</th>
-                                        <th>Tình trạng sức khỏe</th>
-                                        <th width="180" class="text-center">Thao tác</th>
+                                        <th class="col-id">Mã</th>
+                                        <th class="col-pet">Thú cưng</th>
+                                        <th class="col-breed">Loài & Giống</th>
+                                        <th class="col-gender">Giới tính</th>
+                                        <th class="col-weight">Cân nặng</th>
+                                        <th class="col-health">Tình trạng sức khỏe</th>
+                                        <th class="col-action">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="pet : ${pets}">
-                                        <td><span class="fw-bold text-muted" th:text="'#' + ${pet.maThuCung}">#1</span></td>
-                                        <td>
+                                        <td class="col-id"><span class="fw-bold text-muted" th:text="'#' + ${pet.maThuCung}">#1</span></td>
+                                        <td class="col-pet">
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 42px; height: 42px;">
+                                                <div class="avatar-sm bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 42px; height: 42px;">
                                                     <i th:class="${pet.loaiThuCung == 'Mèo' ? 'fas fa-cat text-info fs-5' : 'fas fa-dog text-warning fs-5'}"></i>
                                                 </div>
                                                 <div>
@@ -48,18 +68,22 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-info text-dark me-1" th:text="${pet.loaiThuCung}">Mèo</span>
-                                            <span class="text-muted small" th:text="${pet.giongLoai}">Anh Lông Ngắn</span>
+                                        <td class="col-breed">
+                                            <div class="d-inline-flex align-items-center">
+                                                <span class="badge bg-info text-dark me-2" th:text="${pet.loaiThuCung}">Mèo</span>
+                                                <span class="text-muted small fw-semibold" th:text="${pet.giongLoai}">Anh Lông Ngắn</span>
+                                            </div>
                                         </td>
-                                        <td th:text="${pet.gioiTinh}">Cái</td>
-                                        <td th:text="${pet.canNang != null ? pet.canNang + ' kg' : 'N/A'}">3.5 kg</td>
-                                        <td>
-                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2" th:text="${pet.tinhTrangSucKhoeHienTai != null ? pet.tinhTrangSucKhoeHienTai : 'Đang điều trị'}">Đang điều trị</span>
+                                        <td class="col-gender" th:text="${pet.gioiTinh}">Cái</td>
+                                        <td class="col-weight text-nowrap">
+                                            <span class="fw-semibold" th:text="${pet.canNang != null ? pet.canNang + ' kg' : 'N/A'}">3.5 kg</span>
                                         </td>
-                                        <td class="text-center">
-                                            <a th:href="@{/admin/doctor/treatment/{id}(id=${pet.maThuCung})}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                                                <i class="fas fa-stethoscope me-1"></i> Hồ sơ & Nhật ký
+                                        <td class="col-health">
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 text-nowrap" th:text="${pet.tinhTrangSucKhoeHienTai != null ? pet.tinhTrangSucKhoeHienTai : 'Đang điều trị'}">Đang điều trị</span>
+                                        </td>
+                                        <td class="col-action">
+                                            <a th:href="@{/admin/doctor/treatment/{id}(id=${pet.maThuCung})}" class="btn btn-sm btn-primary rounded-pill px-3 py-2 text-nowrap shadow-sm d-inline-flex align-items-center gap-1">
+                                                <i class="fas fa-stethoscope"></i> Hồ sơ &amp; Nhật ký
                                             </a>
                                         </td>
                                     </tr>

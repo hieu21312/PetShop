@@ -155,7 +155,7 @@ public class BookingController {
     @GetMapping("/admin/bookings")
     public String listBookings(@RequestParam(value = "status", required = false, defaultValue = "all") String status,
                                Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Booking> bookings = bookingService.getBookingsByStatus(status);
         long pendingCount = bookingService.countPendingBookings();
 
@@ -169,7 +169,7 @@ public class BookingController {
     // ADMIN: Cập nhật trạng thái lịch đặt
     @PostMapping("/admin/bookings/updateStatus")
     public String updateStatus(@RequestParam Integer id, @RequestParam String status, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         bookingService.updateStatus(id, status);
         ra.addFlashAttribute("success", "Cập nhật trạng thái thành công.");
         return "redirect:/admin/bookings";
@@ -178,7 +178,7 @@ public class BookingController {
     // ADMIN: Gán Bác sĩ / Nhân viên phụ trách
     @PostMapping("/admin/bookings/assignStaff")
     public String assignStaff(@RequestParam Integer id, @RequestParam(required = false) Integer maNV, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         Booking b = bookingService.getBookingById(id);
         if (b != null && maNV != null) {
@@ -198,7 +198,7 @@ public class BookingController {
     // ADMIN: Xóa lịch đặt
     @GetMapping("/admin/bookings/delete/{id}")
     public String deleteBooking(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         bookingService.deleteBooking(id);
         ra.addFlashAttribute("success", "Xóa lịch đặt thành công.");
         return "redirect:/admin/bookings";

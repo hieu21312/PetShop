@@ -53,7 +53,7 @@ public class AuthController {
                     return "redirect:/admin/doctor/treatment";
                 }
                 if (authService.isCashier(session)) {
-                    return "redirect:/admin/care-tickets";
+                    return "redirect:/admin/thu-ngan";
                 }
                 return "redirect:/staff/my-tasks";
             }

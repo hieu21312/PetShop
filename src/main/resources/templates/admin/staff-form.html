@@ -5,11 +5,10 @@
                 <div th:replace="~{admin/admin-sidebar :: sidebar}"></div>
             </div>
             <div class="col-md-9">
-                <div class="card shadow border-0 rounded-4">
+                <div class="card shadow-sm border-0 rounded-4 mb-5">
                     <div class="card-header text-white py-3 rounded-top-4" style="background: linear-gradient(45deg, #ff4d6d, #ff758f);">
                         <h4 class="mb-0 fw-bold">
-                            <i class="fas fa-user-edit me-2"></i>
-                            <span th:text="${employee.maNV != null ? 'Cập nhật hồ sơ nhân sự' : 'Thêm nhân sự mới'}"></span>
+                            <span th:text="${employee.maNV != null ? 'Cập nhật hồ sơ nhân sự & Chuyên môn' : 'Thêm nhân sự & Thiết lập chuyên môn'}"></span>
                         </h4>
                     </div>
                     <div class="card-body p-4">
@@ -19,62 +18,81 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Họ và Tên *</label>
-                                    <input type="text" th:field="*{tenNV}" class="form-control" placeholder="Ví dụ: ThS. BS Nguyễn Văn A" required>
+                                    <input type="text" th:field="*{tenNV}" class="form-control rounded-3" placeholder="Ví dụ: BS. Nguyễn Văn An" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Vai trò / Chức danh *</label>
-                                    <select th:field="*{vaiTro}" class="form-select" required>
+                                    <select th:field="*{vaiTro}" class="form-select rounded-3" id="vaiTroSelect" required onchange="onRoleChanged()">
                                         <option value="" disabled selected>-- Chọn vai trò --</option>
-                                        <option th:each="r : ${roles}" th:value="${r.idVaiTro}" th:text="${r.tenVaiTro}"></option>
+                                        <option th:each="r : ${roles}" th:value="${r.idVaiTro}" th:text="${r.tenVaiTro}" th:data-name="${r.tenVaiTro}"></option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Số điện thoại</label>
-                                    <input type="tel" th:field="*{dienThoai}" class="form-control" placeholder="0901234567">
+                                    <input type="tel" th:field="*{dienThoai}" class="form-control rounded-3" placeholder="0901234567">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Email</label>
-                                    <input type="email" th:field="*{email}" class="form-control" placeholder="doctor@petshop.com">
+                                    <input type="email" th:field="*{email}" class="form-control rounded-3" placeholder="doctor@petshop.com">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Giới tính</label>
-                                    <select th:field="*{gioiTinh}" class="form-select">
+                                    <select th:field="*{gioiTinh}" class="form-select rounded-3">
                                         <option value="Nam">Nam</option>
                                         <option value="Nữ">Nữ</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Năm sinh</label>
-                                    <input type="number" th:field="*{namSinh}" class="form-control" placeholder="1992">
+                                    <input type="number" th:field="*{namSinh}" class="form-control rounded-3" placeholder="1995">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Trạng thái làm việc</label>
-                                    <select th:field="*{trangThai}" class="form-select">
+                                    <select th:field="*{trangThai}" class="form-select rounded-3">
                                         <option value="Đang làm việc">Đang làm việc</option>
                                         <option value="Tạm nghỉ">Tạm nghỉ</option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-12">
-                                    <label class="form-label fw-semibold">Chuyên môn / Kỹ năng chuyên sâu</label>
-                                    <input type="text" th:field="*{chuyenMon}" class="form-control" placeholder="Ví dụ: Phẫu thuật ngoại khoa, Tiêm phòng & Tiêu hóa, Cắt tỉa Poodle Spa...">
-                                    <small class="text-muted">Mô tả ngắn gọn bằng cấp hoặc kỹ năng nổi bật của Bác sĩ / Nhân viên</small>
+                                    <label class="form-label fw-semibold">Chuyên môn / Kỹ năng chuyên sâu theo vị trí *</label>
+                                    <input type="text" th:field="*{chuyenMon}" id="chuyenMonInput" list="chuyenMonSuggestions" class="form-control rounded-3" placeholder="Nhập hoặc chọn chuyên môn tương ứng..." required>
+                                    <datalist id="chuyenMonSuggestions">
+                                        <option value="Quản trị toàn diện hệ thống & Điều hành PetShop">
+                                        <option value="Quản lý cửa hàng, Điều phối ca trực, Quản lý doanh thu & Nhân sự">
+                                        <option value="Bác sĩ thú y trưởng, Khám chẩn đoán, Triệt sản & Phẫu thuật">
+                                        <option value="Bác sĩ thú y, Khám tổng quát, Tiêm phòng vắc xin & Kê đơn">
+                                        <option value="Chuyên viên Spa, Cắt tỉa tạo kiểu lông nghệ thuật & Grooming">
+                                        <option value="Nhân viên chăm sóc, Tắm sấy khử mùi, Cạo lông móng & Vệ sinh tai">
+                                        <option value="Nhân viên chăm sóc, Quản lý phòng lưu trú & Chế độ ăn uống thú cưng">
+                                        <option value="Thu ngân trưởng quầy POS, Tiếp nhận phiếu dịch vụ & Xuất hóa đơn">
+                                        <option value="Thu ngân quầy POS, Tiếp nhận khách & Thu ngân thanh toán">
+                                        <option value="Thủ kho chính, Quản lý xuất nhập tồn & Kiểm soát hàng hóa">
+                                        <option value="Thủ kho, Quản lý kho thức ăn hạt, Pate & Phụ kiện thú cưng">
+                                    </datalist>
+
+                                    <!-- Khung thông báo quyền hạn dịch vụ tương ứng với vai trò đã chọn -->
+                                    <div id="rolePermissionNote" class="mt-2 p-3 rounded-3 bg-light border small">
+                                        <div id="roleNoteText" class="text-muted">
+                                            Vui lòng chọn vai trò để xem quy định phân quyền nghiệp vụ.
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-12" th:if="${employee.maNV == null}">
                                     <label class="form-label fw-semibold">Mật khẩu đăng nhập ban đầu</label>
-                                    <input type="password" th:field="*{matKhau}" class="form-control" placeholder="Mặc định là 123456 nếu bỏ trống">
+                                    <input type="password" th:field="*{matKhau}" class="form-control rounded-3" placeholder="Mặc định là 123456 nếu bỏ trống">
                                 </div>
                             </div>
 
                             <div class="mt-4 d-flex justify-content-between">
                                 <a th:href="@{/admin/staff}" class="btn btn-outline-secondary rounded-pill px-4">
-                                    <i class="fas fa-arrow-left me-1"></i> Hủy
+                                    Quay lại danh sách
                                 </a>
                                 <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm">
-                                    <i class="fas fa-save me-1"></i> Lưu thông tin
+                                    Lưu thông tin nhân sự
                                 </button>
                             </div>
                         </form>
@@ -84,3 +102,50 @@
         </div>
     </section>
 </div>
+
+<script>
+    function onRoleChanged() {
+        const select = document.getElementById('vaiTroSelect');
+        if (!select) return;
+        const selectedOption = select.options[select.selectedIndex];
+        const roleName = selectedOption ? selectedOption.getAttribute('data-name') : '';
+        const noteEl = document.getElementById('roleNoteText');
+        const chuyenMonInput = document.getElementById('chuyenMonInput');
+        if (!noteEl || !chuyenMonInput) return;
+
+        if (roleName === 'Admin') {
+            noteEl.innerHTML = '<strong class="text-danger">Admin (Quản trị viên):</strong> Toàn quyền quản trị hệ thống, nhân sự, dịch vụ, kho hàng và báo cáo doanh thu.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Quản trị toàn diện hệ thống & Điều hành PetShop';
+            }
+        } else if (roleName === 'Quản lý cửa hàng') {
+            noteEl.innerHTML = '<strong class="text-indigo" style="color: #6366f1 !important;">Quản lý cửa hàng:</strong> Giám sát điều hành, xếp ca trực, quản lý doanh số và tiếp nhận giải quyết khiếu nại.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Quản lý cửa hàng, Điều phối ca trực, Quản lý doanh thu & Nhân sự';
+            }
+        } else if (roleName === 'Bác sĩ thú y') {
+            noteEl.innerHTML = '<strong class="text-success">Bác sĩ thú y (Quyền hạn Y tế độc quyền):</strong> Khám chữa bệnh, chẩn đoán, triệt sản, phẫu thuật, tiêm vắc xin và kê đơn thuốc cho thú cưng.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Bác sĩ thú y, Khám tổng quát, Tiêm phòng vắc xin & Kê đơn';
+            }
+        } else if (roleName === 'Nhân viên chăm sóc' || roleName === 'Chăm sóc thú cưng') {
+            noteEl.innerHTML = '<strong class="text-danger" style="color: #e91e63 !important;">Nhân viên chăm sóc (Spa/Grooming):</strong> Tắm sấy, cắt tỉa lông tạo kiểu, cạo lông, vệ sinh tai móng và chăm sóc lưu trú. <span class="text-danger fw-bold">(Không được thực hiện khám bệnh y tế &amp; kê thuốc)</span>.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Chuyên viên Spa, Cắt tỉa tạo kiểu lông nghệ thuật & Grooming';
+            }
+        } else if (roleName === 'Thu ngân' || roleName === 'Nhân viên thu ngân') {
+            noteEl.innerHTML = '<strong class="text-success" style="color: #0d9488 !important;">Thu ngân:</strong> Trực quầy POS, tiếp nhận phiếu dịch vụ chăm sóc, áp dụng voucher giảm giá và xuất hóa đơn thanh toán.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Thu ngân trưởng quầy POS, Tiếp nhận phiếu dịch vụ & Xuất hóa đơn';
+            }
+        } else if (roleName === 'Thủ kho' || roleName === 'Quản lý kho') {
+            noteEl.innerHTML = '<strong class="text-warning" style="color: #d97706 !important;">Thủ kho:</strong> Quản lý xuất nhập tồn, kiểm đếm số lượng hàng hóa thức ăn, phụ kiện, vật tư và thuốc thú y.';
+            if (!chuyenMonInput.value || chuyenMonInput.value === 'Chăm sóc chung') {
+                chuyenMonInput.value = 'Thủ kho chính, Quản lý xuất nhập tồn & Kiểm soát hàng hóa';
+            }
+        } else {
+            noteEl.innerHTML = 'Vui lòng thiết lập chuyên môn và kỹ năng phù hợp với vị trí công tác của nhân sự.';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', onRoleChanged);
+</script>

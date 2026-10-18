@@ -29,8 +29,13 @@
                             </div>
                         </div>
 
-                        <!-- Thanh chọn chế độ: Theo tuần / Theo tháng / Theo năm / Tùy chỉnh -->
+                        <!-- Thanh chọn chế độ: Theo ngày / Theo tuần / Theo tháng / Theo năm / Tùy chỉnh -->
                         <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a th:href="@{/admin/reports(type='day')}"
+                               class="btn btn-sm rounded-pill px-3 fw-bold"
+                               th:classappend="${report.filterType == 'day' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
+                                Theo ngày
+                            </a>
                             <a th:href="@{/admin/reports(type='week')}"
                                class="btn btn-sm rounded-pill px-3 fw-bold"
                                th:classappend="${report.filterType == 'week' ? 'btn-primary text-white' : 'btn-light text-secondary'}">
@@ -55,6 +60,23 @@
 
                         <!-- Form chọn bộ lọc tương ứng -->
                         <div class="p-3 bg-light rounded-3">
+                            <!-- 0. Bộ lọc Theo ngày -->
+                            <form th:if="${report.filterType == 'day'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
+                                <input type="hidden" name="type" value="day">
+                                <div class="col-auto">
+                                    <label class="col-form-label fw-semibold small">Chọn ngày:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="date" name="date" th:value="${report.selectedDate}" class="form-control form-control-sm rounded-3">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Xem báo cáo</button>
+                                </div>
+                                <div class="col-auto">
+                                    <a th:href="@{/admin/reports(type='day')}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Hôm nay</a>
+                                </div>
+                            </form>
+
                             <!-- 1. Bộ lọc Theo tuần -->
                             <form th:if="${report.filterType == 'week'}" th:action="@{/admin/reports}" method="get" class="row g-2 align-items-center">
                                 <input type="hidden" name="type" value="week">
@@ -166,6 +188,7 @@
                         <div class="small text-muted">
                             <span class="badge" style="background-color: #4f46e5;">&nbsp;</span> Sản phẩm
                             <span class="badge ms-2" style="background-color: #10b981;">&nbsp;</span> Dịch vụ
+                            <span class="badge ms-2" style="background-color: #f59e0b;">&nbsp;</span> Tổng doanh thu
                         </div>
                     </div>
                     <div class="card-body p-4 pt-0">
@@ -327,6 +350,7 @@
                     const labels = /*[[${report.chartLabels}]]*/ [];
                     const productData = /*[[${report.productRevenues}]]*/ [];
                     const serviceData = /*[[${report.serviceRevenues}]]*/ [];
+                    const totalData = /*[[${report.totalRevenues}]]*/ [];
 
                     const ctx = document.getElementById('revenueReportChart');
                     if (ctx) {
@@ -345,6 +369,12 @@
                                         label: 'Doanh thu Dịch vụ (VND)',
                                         data: serviceData,
                                         backgroundColor: '#10b981',
+                                        borderRadius: 6
+                                    },
+                                    {
+                                        label: 'Tổng doanh thu (VND)',
+                                        data: totalData,
+                                        backgroundColor: '#f59e0b',
                                         borderRadius: 6
                                     }
                                 ]
@@ -365,8 +395,12 @@
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
+                                            precision: 0,
                                             callback: function(value) {
-                                                return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                                if (Math.floor(value) === value) {
+                                                    return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                                }
+                                                return '';
                                             }
                                         }
                                     }

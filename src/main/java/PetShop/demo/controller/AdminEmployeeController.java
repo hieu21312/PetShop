@@ -28,7 +28,7 @@ public class AdminEmployeeController {
     // Danh sách nhân viên
     @GetMapping
     public String listEmployees(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Employee> employees = employeeRepository.findAll();
         model.addAttribute("employees", employees);
         return "admin/employees";
@@ -37,7 +37,7 @@ public class AdminEmployeeController {
     // Form thêm nhân viên
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("employee", new Employee());
         model.addAttribute("roles", roleRepository.findAll());
         return "admin/employee-form";
@@ -48,7 +48,7 @@ public class AdminEmployeeController {
     public String createEmployee(@ModelAttribute Employee employee,
                                  @RequestParam String password,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         employee.setMatKhau(password); // plain text
         employeeRepository.save(employee);
         return "redirect:/admin/employees";
@@ -57,7 +57,7 @@ public class AdminEmployeeController {
     // Form sửa nhân viên (chỉ sửa vai trò, tên, giới tính,...)
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Employee employee = employeeRepository.findById(id).orElse(null);
         if (employee == null) return "redirect:/admin/employees";
         model.addAttribute("employee", employee);
@@ -71,7 +71,7 @@ public class AdminEmployeeController {
                                  @ModelAttribute Employee updatedEmployee,
                                  @RequestParam(required = false) String password,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Employee existing = employeeRepository.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/employees";
         existing.setTenNV(updatedEmployee.getTenNV());
@@ -88,7 +88,7 @@ public class AdminEmployeeController {
     // Xóa nhân viên
     @GetMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable Integer id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         employeeRepository.deleteById(id);
         return "redirect:/admin/employees";
     }

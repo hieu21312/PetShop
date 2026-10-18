@@ -88,20 +88,20 @@
                                             <input type="hidden" name="id" th:value="${b.maDatLich}">
                                             <select name="maNV" class="form-select form-select-sm rounded-pill shadow-sm d-inline-block w-auto px-3 py-1 border-1" onchange="this.form.submit()">
                                                 <option value="">-- Chưa phân công --</option>
-                                                <optgroup label="👨‍⚕️ Bác sĩ thú y">
+                                                <optgroup label="Bác sĩ thú y">
                                                     <option th:each="e : ${employees}"
-                                                            th:if="${e.role != null and e.role.tenVaiTro == 'Bác sĩ thú y'}"
+                                                            th:if="${e.role != null and (e.role.tenVaiTro == 'Bác sĩ thú y' or e.role.tenVaiTro == 'Bác sĩ')}"
                                                             th:value="${e.maNV}"
                                                             th:selected="${b.maNV == e.maNV}"
                                                             th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : '')">
                                                     </option>
                                                 </optgroup>
-                                                <optgroup label="✂️ Staff Spa / Chăm sóc">
+                                                <optgroup label="Nhân viên chăm sóc (Spa / Grooming)">
                                                     <option th:each="e : ${employees}"
-                                                            th:if="${e.role == null or e.role.tenVaiTro != 'Bác sĩ thú y'}"
+                                                            th:if="${e.role != null and (e.role.tenVaiTro == 'Nhân viên chăm sóc' or e.role.tenVaiTro == 'Chăm sóc thú cưng')}"
                                                             th:value="${e.maNV}"
                                                             th:selected="${b.maNV == e.maNV}"
-                                                            th:text="${e.tenNV} + (${e.role != null} ? ' (' + ${e.role.tenVaiTro} + ')' : '')">
+                                                            th:text="${e.tenNV} + (${e.chuyenMon != null and !e.chuyenMon.isEmpty()} ? ' (' + ${e.chuyenMon} + ')' : '')">
                                                     </option>
                                                 </optgroup>
                                             </select>

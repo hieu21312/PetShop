@@ -23,7 +23,7 @@ public class AdminCategoryController {
     // Danh sách danh mục
     @GetMapping
     public String listCategories(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("categories", categoryRepository.findAll());
         return "admin/categories";
     }
@@ -31,7 +31,7 @@ public class AdminCategoryController {
     // Form thêm mới
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("category", new Category());
         return "admin/category-form";
     }
@@ -41,7 +41,7 @@ public class AdminCategoryController {
     public String createCategory(@ModelAttribute Category category,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         categoryRepository.save(category);
         ra.addFlashAttribute("success", "Thêm danh mục thành công!");
         return "redirect:/admin/categories";
@@ -50,7 +50,7 @@ public class AdminCategoryController {
     // Form sửa
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Category category = categoryRepository.findById(id).orElse(null);
         if (category == null) return "redirect:/admin/categories";
         model.addAttribute("category", category);
@@ -63,7 +63,7 @@ public class AdminCategoryController {
                                  @ModelAttribute Category category,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Category existing = categoryRepository.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/categories";
         existing.setTenDanhMuc(category.getTenDanhMuc());
@@ -78,7 +78,7 @@ public class AdminCategoryController {
     public String deleteCategory(@PathVariable Integer id,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         // Kiểm tra xem danh mục có sản phẩm nào không? Nếu có, không cho xóa
         Category cat = categoryRepository.findById(id).orElse(null);
         if (cat != null && !cat.getProducts().isEmpty()) {

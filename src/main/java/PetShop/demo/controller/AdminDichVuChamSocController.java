@@ -25,7 +25,7 @@ public class AdminDichVuChamSocController {
     @GetMapping
     public String listCareServices(@RequestParam(value = "nhom", required = false) String nhom,
                                    Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         List<DichVuChamSoc> services;
         if (nhom != null && !nhom.trim().isEmpty() && !nhom.equals("All")) {
@@ -42,7 +42,7 @@ public class AdminDichVuChamSocController {
     // 2. Form thêm mới
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("service", new DichVuChamSoc());
         return "admin/care-service-form";
     }
@@ -50,7 +50,7 @@ public class AdminDichVuChamSocController {
     // 3. Xử lý thêm mới
     @PostMapping("/create")
     public String createCareService(@ModelAttribute("service") DichVuChamSoc service, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         dichVuChamSocRepository.save(service);
         return "redirect:/admin/care-services";
     }
@@ -58,7 +58,7 @@ public class AdminDichVuChamSocController {
     // 4. Form sửa
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         DichVuChamSoc service = dichVuChamSocRepository.findById(id).orElse(null);
         if (service == null) return "redirect:/admin/care-services";
         model.addAttribute("service", service);
@@ -68,7 +68,7 @@ public class AdminDichVuChamSocController {
     // 5. Xử lý cập nhật
     @PostMapping("/edit/{id}")
     public String updateCareService(@PathVariable("id") Integer id, @ModelAttribute("service") DichVuChamSoc serviceForm, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         DichVuChamSoc service = dichVuChamSocRepository.findById(id).orElse(null);
         if (service != null) {
             service.setTenDichVu(serviceForm.getTenDichVu());
@@ -86,7 +86,7 @@ public class AdminDichVuChamSocController {
     // 6. Xóa dịch vụ
     @GetMapping("/delete/{id}")
     public String deleteCareService(@PathVariable("id") Integer id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         dichVuChamSocRepository.deleteById(id);
         return "redirect:/admin/care-services";
     }

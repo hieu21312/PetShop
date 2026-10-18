@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Cấu hình để phục vụ ảnh từ thư mục ngoài (src/main/webapp/Content/HinhAnh)
-        registry.addResourceHandler("/Content/HinhAnh/**")
+        registry.addResourceHandler("/Content/HinhAnh/**", "/content/hinhanh/**", "/content/HinhAnh/**", "/Content/hinhanh/**")
                 .addResourceLocations("file:src/main/webapp/Content/HinhAnh/");
 
         // Cấu hình cho static resources (CSS, JS, images trong classpath)

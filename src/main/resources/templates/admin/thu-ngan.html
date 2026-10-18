@@ -18,9 +18,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-3 no-print">
                     <div>
                         <h3 class="fw-bold mb-0 text-primary">
-                            <i class="fas fa-cash-register me-2"></i>Quầy Thu Ngân & Điểm Bán (POS)
+                            <i class="fas fa-cash-register me-2"></i>Quầy Thu Ngân
                         </h3>
-                        <small class="text-muted">Thông suốt dịch vụ: Nạp mã hoàn thành từ Bác sĩ/KTV, thanh toán Tiền mặt & VNPay, in hóa đơn tự động</small>
                     </div>
                     <div class="text-end">
                         <span class="badge bg-light text-dark border px-3 py-2 shadow-sm rounded-pill">
@@ -79,9 +78,6 @@
                                                 <i class="fas fa-arrow-down me-1"></i>Nạp Ngay
                                             </button>
                                         </div>
-                                        <small class="text-muted mt-2 d-block">
-                                            <i class="fas fa-info-circle text-primary me-1"></i>Khi Bác sĩ hoặc KTV bấm <strong>"Hoàn thành chăm sóc"</strong>, mã dịch vụ sẽ thông suốt xuất hiện tại đây kèm số tiền chính xác đã đăng ký.
-                                        </small>
                                     </div>
 
                                     <div class="card-body p-3 overflow-auto" style="max-height: 600px;" id="pendingServicesList">
@@ -89,7 +85,6 @@
                                         <div class="text-center py-5 text-muted" id="pendingServicesEmpty">
                                             <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-50"></i>
                                             <h6 class="fw-bold text-dark">Hiện không có dịch vụ nào đang chờ thanh toán</h6>
-                                            <small class="text-muted">Các dịch vụ vừa hoàn thành từ Bác sĩ/KTV sẽ tự động xuất hiện tại đây.</small>
                                         </div>
                                     </div>
                                 </div>
@@ -227,7 +222,7 @@
                                     </div>
 
                                     <!-- Ghi chú hóa đơn -->
-                                    <input type="text" id="inputGhiChu" class="form-control form-control-sm rounded-3 mt-2" placeholder="Ghi chú đơn (tự động điền theo mã dịch vụ)">
+                                    <input type="text" id="inputGhiChu" class="form-control form-control-sm rounded-3 mt-2" placeholder="Ghi chú đơn hàng">
                                 </div>
 
                                 <!-- 2. BẢNG DỊCH VỤ ĐÃ CHỌN -->
@@ -256,7 +251,7 @@
                                                 <!-- Dòng rỗng mặc định -->
                                                 <tr id="emptyCartRow">
                                                     <td colspan="5" class="text-center py-4 text-muted small">
-                                                        <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào. Hãy nạp mã dịch vụ chờ hoặc chọn từ danh sách bên trái.
+                                                        <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào.
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -682,7 +677,7 @@
                     tbody.innerHTML = `
                         <tr id="emptyCartRow">
                             <td colspan="5" class="text-center py-4 text-muted small">
-                                <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào. Hãy nạp mã dịch vụ chờ hoặc chọn từ danh sách bên trái.
+                                <i class="fas fa-mouse-pointer me-1"></i>Chưa chọn dịch vụ nào.
                             </td>
                         </tr>
                     `;
@@ -911,7 +906,6 @@
                             <div class="text-center py-5 text-muted">
                                 <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-50"></i>
                                 <h6 class="fw-bold text-dark">Hiện không có dịch vụ nào đang chờ thanh toán</h6>
-                                <small class="text-muted">Các dịch vụ vừa hoàn thành từ Bác sĩ/KTV sẽ tự động xuất hiện tại đây.</small>
                             </div>
                         `;
                         return;
@@ -952,7 +946,7 @@
 
                                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                                     <div>
-                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Số tiền đúng đăng ký:</small>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">Tổng tiền:</small>
                                         <span class="fw-bold fs-5 text-danger">${formatVND(item.thanhToan)}</span>
                                     </div>
                                     <button type="button" class="btn btn-primary rounded-pill px-3 py-1 fw-bold shadow-sm"

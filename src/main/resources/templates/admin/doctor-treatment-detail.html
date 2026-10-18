@@ -116,27 +116,40 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4">
+                <style>
+                    .table-treatment th, 
+                    .table-treatment td {
+                        vertical-align: middle !important;
+                        padding: 12px 14px !important;
+                    }
+                    .table-treatment thead th {
+                        font-size: 0.88rem;
+                        font-weight: 600;
+                        white-space: nowrap;
+                    }
+                </style>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-5">
                     <div class="card-header py-3 px-4 rounded-top-4 border-0 fw-bold" style="background-color: #fff0f3; color: #e91e63;">
                         <i class="fas fa-history me-2" style="color: #e91e63;"></i>Lịch sử nhật ký điều trị
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle mb-0 table-treatment">
                                 <thead class="table-pink">
                                     <tr>
-                                        <th>Thời gian khám</th>
-                                        <th>Chẩn đoán</th>
-                                        <th>Điều trị & Thuốc</th>
-                                        <th>Nhiệt độ / Cân nặng</th>
-                                        <th>Trạng thái</th>
-                                        <th>Tái khám?</th>
-                                        <th>Bác sĩ trực</th>
+                                        <th class="text-nowrap" style="width: 140px;">Thời gian khám</th>
+                                        <th style="min-width: 150px;">Chẩn đoán</th>
+                                        <th style="min-width: 180px;">Điều trị &amp; Thuốc</th>
+                                        <th class="text-center text-nowrap" style="width: 140px;">Nhiệt độ / Cân nặng</th>
+                                        <th class="text-center text-nowrap" style="width: 120px;">Trạng thái</th>
+                                        <th class="text-center text-nowrap" style="width: 150px;">Tái khám?</th>
+                                        <th class="text-center text-nowrap" style="width: 130px;">Bác sĩ trực</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="log : ${treatmentLogs}">
-                                        <td class="fw-bold" th:text="${#temporals.format(log.ngayKham, 'dd/MM/yyyy HH:mm')}">03/10/2026 14:00</td>
+                                        <td class="fw-bold text-nowrap" th:text="${#temporals.format(log.ngayKham, 'dd/MM/yyyy HH:mm')}">03/10/2026 14:00</td>
                                         <td class="fw-bold text-primary" th:text="${log.chuanDoan}">Viêm phổi nhẹ</td>
                                         <td>
                                             <small>
@@ -144,21 +157,21 @@
                                                 <strong>Thuốc:</strong> <span th:text="${log.thuocSuDung != null ? log.thuocSuDung : '-'}"></span>
                                             </small>
                                         </td>
-                                        <td>
+                                        <td class="text-center text-nowrap">
                                             <span th:text="${log.nhietDo != null ? log.nhietDo + ' °C' : 'N/A'}"></span> / 
                                             <span th:text="${log.canNang != null ? log.canNang + ' kg' : 'N/A'}"></span>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-warning text-dark rounded-pill" th:text="${log.trangThaiSucKhoe}"></span>
+                                        <td class="text-center text-nowrap">
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2" th:text="${log.trangThaiSucKhoe}"></span>
                                         </td>
-                                        <td>
-                                            <span th:if="${log.canTaiKham}" class="badge bg-danger rounded-pill px-3">
+                                        <td class="text-center text-nowrap">
+                                            <span th:if="${log.canTaiKham}" class="badge bg-danger rounded-pill px-3 py-2">
                                                 <i class="fas fa-calendar-alt me-1"></i> Có (<span th:text="${#temporals.format(log.ngayTaiKham, 'dd/MM/yyyy HH:mm')}"></span>)
                                             </span>
-                                            <span th:unless="${log.canTaiKham}" class="badge bg-secondary rounded-pill px-3">Không</span>
+                                            <span th:unless="${log.canTaiKham}" class="badge bg-secondary rounded-pill px-3 py-2">Không</span>
                                         </td>
-                                        <td>
-                                            <span th:text="${log.bacSi != null ? log.bacSi.tenNV : 'Bác sĩ thú y'}"></span>
+                                        <td class="text-center text-nowrap">
+                                            <span class="fw-semibold" th:text="${log.bacSi != null ? log.bacSi.tenNV : 'Bác sĩ thú y'}"></span>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(treatmentLogs)}">

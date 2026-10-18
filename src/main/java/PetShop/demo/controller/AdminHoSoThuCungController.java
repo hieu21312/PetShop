@@ -31,7 +31,7 @@ public class AdminHoSoThuCungController {
     public String listPets(@RequestParam(value = "keyword", required = false) String keyword,
                            @RequestParam(value = "loai", required = false) String loai,
                            Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         List<HoSoThuCung> pets;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -51,7 +51,7 @@ public class AdminHoSoThuCungController {
     // 2. Form thêm mới thú cưng
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("pet", new HoSoThuCung());
         model.addAttribute("owners", chuNuoiRepository.findAll());
         return "admin/pet-form";
@@ -60,7 +60,7 @@ public class AdminHoSoThuCungController {
     // 3. Xử lý thêm mới thú cưng
     @PostMapping("/create")
     public String createPet(@ModelAttribute("pet") HoSoThuCung pet, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         hoSoThuCungRepository.save(pet);
         return "redirect:/admin/pets";
     }
@@ -68,7 +68,7 @@ public class AdminHoSoThuCungController {
     // 4. Form sửa thú cưng
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         HoSoThuCung pet = hoSoThuCungRepository.findById(id).orElse(null);
         if (pet == null) return "redirect:/admin/pets";
         model.addAttribute("pet", pet);
@@ -79,7 +79,7 @@ public class AdminHoSoThuCungController {
     // 5. Xử lý cập nhật thú cưng
     @PostMapping("/edit/{id}")
     public String updatePet(@PathVariable("id") Integer id, @ModelAttribute("pet") HoSoThuCung petForm, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         HoSoThuCung pet = hoSoThuCungRepository.findById(id).orElse(null);
         if (pet != null) {
             pet.setMaChuNuoi(petForm.getMaChuNuoi());
@@ -108,7 +108,7 @@ public class AdminHoSoThuCungController {
     // 6. Xóa hồ sơ thú cưng
     @GetMapping("/delete/{id}")
     public String deletePet(@PathVariable("id") Integer id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         hoSoThuCungRepository.deleteById(id);
         return "redirect:/admin/pets";
     }

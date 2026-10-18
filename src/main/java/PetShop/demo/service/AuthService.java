@@ -106,7 +106,9 @@ public class AuthService {
 
     public boolean isAdmin(HttpSession session) {
         Object role = session.getAttribute("role");
-        return role != null && role.toString().equals("Admin");
+        if (role == null) return false;
+        String r = role.toString().trim();
+        return r.equalsIgnoreCase("Admin") || r.equalsIgnoreCase("Quản lý cửa hàng") || r.equalsIgnoreCase("Quản lý");
     }
 
     public boolean isDoctor(HttpSession session) {
@@ -136,5 +138,12 @@ public class AuthService {
 
     public boolean isLoggedIn(HttpSession session) {
         return session.getAttribute("role") != null;
+    }
+
+    public String redirectUnauthorized(HttpSession session) {
+        if (!isLoggedIn(session)) {
+            return "redirect:/DangNhap";
+        }
+        return "redirect:/admin";
     }
 }

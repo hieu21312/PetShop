@@ -33,7 +33,7 @@ public class AdminChuNuoiController {
     @GetMapping
     public String listOwners(@RequestParam(value = "keyword", required = false) String keyword,
                              Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         List<ChuNuoi> owners;
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -49,7 +49,7 @@ public class AdminChuNuoiController {
     // 2. Form thêm mới chủ nuôi
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("owner", new ChuNuoi());
         return "admin/owner-form";
     }
@@ -57,7 +57,7 @@ public class AdminChuNuoiController {
     // 3. Xử lý thêm mới (Tự động liên kết tài khoản Khách hàng nếu khớp SĐT hoặc Email)
     @PostMapping("/create")
     public String createOwner(@ModelAttribute("owner") ChuNuoi owner, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         if (owner.getMaKH() == null) {
             customerRepository.findFirstByDienThoaiOrEmail(owner.getSoDienThoai(), owner.getEmail())
@@ -71,7 +71,7 @@ public class AdminChuNuoiController {
     // 4. Form sửa chủ nuôi
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         ChuNuoi owner = chuNuoiRepository.findById(id).orElse(null);
         if (owner == null) return "redirect:/admin/owners";
         model.addAttribute("owner", owner);
@@ -81,7 +81,7 @@ public class AdminChuNuoiController {
     // 5. Xử lý cập nhật (Tự động cập nhật liên kết MaKH)
     @PostMapping("/edit/{id}")
     public String updateOwner(@PathVariable("id") Integer id, @ModelAttribute("owner") ChuNuoi ownerForm, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         ChuNuoi owner = chuNuoiRepository.findById(id).orElse(null);
         if (owner != null) {
             owner.setHoTenChuNuoi(ownerForm.getHoTenChuNuoi());
@@ -110,7 +110,7 @@ public class AdminChuNuoiController {
     // 6. Xóa chủ nuôi
     @GetMapping("/delete/{id}")
     public String deleteOwner(@PathVariable("id") Integer id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         chuNuoiRepository.deleteById(id);
         return "redirect:/admin/owners";
     }
@@ -118,7 +118,7 @@ public class AdminChuNuoiController {
     // 7. Xem danh sách thú cưng của chủ nuôi
     @GetMapping("/{id}/pets")
     public String viewOwnerPets(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         ChuNuoi owner = chuNuoiRepository.findById(id).orElse(null);
         if (owner == null) return "redirect:/admin/owners";
         List<HoSoThuCung> pets = hoSoThuCungRepository.findByMaChuNuoi(id);

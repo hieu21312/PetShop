@@ -24,7 +24,7 @@ public class AdminVoucherController {
     // Danh sách mã giảm giá
     @GetMapping
     public String listVouchers(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Voucher> vouchers = voucherRepository.findAll();
         model.addAttribute("vouchers", vouchers);
         return "admin/vouchers";
@@ -33,7 +33,7 @@ public class AdminVoucherController {
     // Form thêm mới
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("voucher", new Voucher());
         return "admin/voucher-form";
     }
@@ -41,7 +41,7 @@ public class AdminVoucherController {
     // Xử lý thêm mới
     @PostMapping("/create")
     public String createVoucher(@ModelAttribute Voucher voucher, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         if (voucherRepository.existsById(voucher.getMaGiamGia())) {
             // Xử lý lỗi trùng mã (có thể dùng flash attribute)
             return "redirect:/admin/vouchers/create?error=duplicate";
@@ -53,7 +53,7 @@ public class AdminVoucherController {
     // Form sửa
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable String id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Voucher voucher = voucherRepository.findById(id).orElse(null);
         if (voucher == null) return "redirect:/admin/vouchers";
         model.addAttribute("voucher", voucher);
@@ -63,7 +63,7 @@ public class AdminVoucherController {
     // Xử lý cập nhật
     @PostMapping("/edit/{id}")
     public String updateVoucher(@PathVariable String id, @ModelAttribute Voucher voucher, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Voucher existing = voucherRepository.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/vouchers";
         existing.setPhanTramGiam(voucher.getPhanTramGiam());
@@ -78,7 +78,7 @@ public class AdminVoucherController {
     // Xóa
     @GetMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable String id, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         voucherRepository.deleteById(id);
         return "redirect:/admin/vouchers";
     }

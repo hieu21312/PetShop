@@ -29,7 +29,7 @@ public class RevenueReportService {
 
     public RevenueReportDTO generateReport(String type, String dateStr, String monthStr, Integer yearVal, LocalDate fromDate, LocalDate toDate) {
         if (type == null || type.isBlank()) {
-            type = "week";
+            type = "day";
         }
 
         RevenueReportDTO report = new RevenueReportDTO();

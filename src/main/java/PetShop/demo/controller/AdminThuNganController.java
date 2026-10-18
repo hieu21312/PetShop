@@ -54,7 +54,7 @@ public class AdminThuNganController {
     public String showCashierScreen(Model model, HttpSession session) {
         // Kiểm tra quyền: Admin hoặc Thu ngân / Nhân viên bán hàng
         if (!authService.isLoggedIn(session) || (!authService.isAdmin(session) && !authService.isCashier(session))) {
-            return "redirect:/DangNhap";
+            return authService.redirectUnauthorized(session);
         }
 
         // Lấy danh sách dịch vụ đang cung cấp
@@ -97,7 +97,7 @@ public class AdminThuNganController {
     @GetMapping("/hoa-don/{id}")
     public String viewInvoiceDetail(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isLoggedIn(session) || (!authService.isAdmin(session) && !authService.isCashier(session))) {
-            return "redirect:/DangNhap";
+            return authService.redirectUnauthorized(session);
         }
 
         Optional<HoaDonDichVu> hdOpt = hoaDonDichVuRepository.findById(id);
@@ -137,7 +137,7 @@ public class AdminThuNganController {
                                            @RequestParam(name = "phuongThuc", required = false, defaultValue = "TienMat") String phuongThuc,
                                            HttpSession session) {
         if (!authService.isLoggedIn(session) || (!authService.isAdmin(session) && !authService.isCashier(session))) {
-            return "redirect:/DangNhap";
+            return authService.redirectUnauthorized(session);
         }
 
         hoaDonDichVuService.xacNhanThanhToan(id, phuongThuc);

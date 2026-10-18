@@ -31,7 +31,7 @@ public class AdminInventoryController {
     // Danh sách sản phẩm Accessory và tồn kho
     @GetMapping
     public String listInventory(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Product> accessories = productRepository.findByLoaiSanPham("Accessory");
         // Lấy tồn kho cho từng sản phẩm
         for (Product p : accessories) {
@@ -55,7 +55,7 @@ public class AdminInventoryController {
                                   @RequestParam Integer soLuongTon,
                                   RedirectAttributes ra,
                                   HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Inventory inv = inventoryRepository.findById(maSP).orElse(null);
         if (inv != null) {
             inv.setSoLuongTon(soLuongTon);

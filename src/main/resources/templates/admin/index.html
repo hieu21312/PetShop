@@ -12,10 +12,10 @@
                             <h4 class="fw-bold mb-1 text-dark">
                                 Dashboard Thống Kê
                             </h4>
-                            <div class="text-muted small">
-                                <span>Tổng doanh thu toàn bộ: </span>
-                                <span class="badge bg-primary-subtle text-primary fw-bold fs-6"
-                                      th:text="${dashboard.tongDoanhThuTongCong != null ? #numbers.formatDecimal(dashboard.tongDoanhThuTongCong, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</span>
+                            <div class="text-muted small d-flex flex-wrap align-items-center gap-2">
+                                <span>Doanh thu hôm nay (Theo ngày): </span>
+                                <span class="badge bg-success-subtle text-success fw-bold fs-6"
+                                      th:text="${dashboard.tongDoanhThuHomNay != null ? #numbers.formatDecimal(dashboard.tongDoanhThuHomNay, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</span>
                             </div>
                         </div>
 
@@ -34,9 +34,9 @@
                                 </button>
                             </div>
 
-                            <a th:href="@{/admin/reports}" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-semibold text-white shadow-sm"
+                            <a th:href="@{/admin/reports(type='day')}" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-semibold text-white shadow-sm"
                                style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
-                                Xem Báo Cáo Doanh Thu
+                                <i class="fas fa-file-invoice-dollar me-1"></i> Xem Báo Cáo Doanh Thu
                             </a>
                         </div>
                     </div>
@@ -73,9 +73,9 @@
                         <div class="col-md-3">
                             <div class="card stat-card revenue-card text-white p-3">
                                 <div class="mb-2">
-                                    <span class="fw-bold">Doanh thu SP</span>
+                                    <span class="fw-bold">Doanh thu SP hôm nay</span>
                                 </div>
-                                <h4 class="revenue-text mb-0" th:text="${dashboard.tongDoanhThu != null ? #numbers.formatDecimal(dashboard.tongDoanhThu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                                <h4 class="revenue-text mb-0" th:text="${dashboard.doanhThuHomNay != null ? #numbers.formatDecimal(dashboard.doanhThuHomNay, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
                             </div>
                         </div>
                     </div>
@@ -148,9 +148,9 @@
                         <div class="col-md-3">
                             <div class="card stat-card text-white p-3" style="background: linear-gradient(135deg, #10b981, #059669);">
                                 <div class="mb-2">
-                                    <span class="fw-bold">Doanh thu Dịch vụ</span>
+                                    <span class="fw-bold">Doanh thu Dịch vụ hôm nay</span>
                                 </div>
-                                <h4 class="revenue-text mb-0" th:text="${dashboard.tongDoanhThuDichVu != null ? #numbers.formatDecimal(dashboard.tongDoanhThuDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
+                                <h4 class="revenue-text mb-0" th:text="${dashboard.doanhThuDichVuHomNay != null ? #numbers.formatDecimal(dashboard.doanhThuDichVuHomNay, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">0VND</h4>
                             </div>
                         </div>
                     </div>
@@ -240,8 +240,12 @@
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
+                                            precision: 0,
                                             callback: function(value) {
-                                                return value.toLocaleString('vi-VN') + 'VND';
+                                                if (Math.floor(value) === value) {
+                                                    return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                                }
+                                                return '';
                                             }
                                         }
                                     }
@@ -286,8 +290,12 @@
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
+                                            precision: 0,
                                             callback: function(value) {
-                                                return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                                if (Math.floor(value) === value) {
+                                                    return (value || 0).toLocaleString('vi-VN') + 'VND';
+                                                }
+                                                return '';
                                             }
                                         }
                                     }

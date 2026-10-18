@@ -50,8 +50,7 @@
             .admin-sidebar-wrapper.collapsed .sidebar-title-text,
             .admin-sidebar-wrapper.collapsed .submenu-arrow,
             .admin-sidebar-wrapper.collapsed .badge-pill-counter,
-            .admin-sidebar-wrapper.collapsed #petCareSubmenu,
-            .admin-sidebar-wrapper.collapsed #staffSubmenu {
+            .admin-sidebar-wrapper.collapsed #petCareSubmenu {
                 display: none !important;
             }
             .admin-sidebar-wrapper.collapsed .sidebar-header-bar {
@@ -91,88 +90,72 @@
         </div>
 
         <div class="list-group mb-4 admin-sidebar shadow-sm rounded-4 overflow-hidden" id="adminSidebarList">
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/index}" class="list-group-item list-group-item-action" title="Dashboard">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/index}" class="list-group-item list-group-item-action" title="Dashboard">
                 <i class="fas fa-chart-line me-2"></i><span class="menu-text"> Dashboard</span>
             </a>
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/reports}" class="list-group-item list-group-item-action" title="Báo cáo doanh thu">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/reports}" class="list-group-item list-group-item-action" title="Báo cáo doanh thu">
                 <i class="fas fa-chart-bar me-2"></i><span class="menu-text"> Báo cáo doanh thu</span>
             </a>
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/products}" class="list-group-item list-group-item-action" title="Quản Lý sản phẩm">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/products}" class="list-group-item list-group-item-action" title="Quản Lý sản phẩm">
                 <i class="fas fa-shopping-bag me-2"></i><span class="menu-text"> Quản Lý sản phẩm</span>
             </a>
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/categories}" class="list-group-item list-group-item-action" title="Quản Lý danh mục">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/categories}" class="list-group-item list-group-item-action" title="Quản Lý danh mục">
                 <i class="fas fa-tag me-2"></i><span class="menu-text"> Quản Lý danh mục</span>
             </a>
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/suppliers}" class="list-group-item list-group-item-action" title="Quản Lý nhà cung cấp">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/suppliers}" class="list-group-item list-group-item-action" title="Quản Lý nhà cung cấp">
                 <i class="fas fa-truck me-2"></i><span class="menu-text"> Quản Lý nhà cung cấp</span>
             </a>
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/inventory}" class="list-group-item list-group-item-action" title="Quản Lý tồn kho">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/inventory}" class="list-group-item list-group-item-action" title="Quản Lý tồn kho">
                 <i class="fas fa-boxes me-2"></i><span class="menu-text"> Quản Lý tồn kho</span>
             </a>
-            <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
                th:href="@{/admin/orders}" class="list-group-item list-group-item-action" title="Quản Lý đơn hàng">
                 <i class="fas fa-file-alt me-2"></i><span class="menu-text"> Quản Lý đơn hàng</span>
             </a>
-            <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
                th:href="@{/admin/customers}" class="list-group-item list-group-item-action" title="Quản Lý khách hàng">
                 <i class="fas fa-user-friends me-2"></i><span class="menu-text"> Quản Lý khách hàng</span>
             </a>
 
             <!-- Submenu Pet & Dịch vụ -->
-            <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#petCareSubmenu" role="button" aria-expanded="true" title="Quản Lý Pet & Dịch Vụ">
                 <span><i class="fas fa-paw me-2"></i><span class="menu-text"> Quản Lý Pet & Dịch Vụ</span></span>
                 <i class="fas fa-chevron-down small text-muted submenu-arrow"></i>
             </a>
-            <div th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+            <div th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ' or session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
                  class="collapse show ps-3 my-1" id="petCareSubmenu">
-                <a th:if="${session.role == 'Admin'}" th:href="@{/admin/owners}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Hồ sơ chủ nuôi">
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/owners}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Hồ sơ chủ nuôi">
                     <i class="fas fa-id-card me-2 text-primary"></i><span class="menu-text"> Hồ sơ chủ nuôi</span>
                 </a>
-                <a th:if="${session.role == 'Admin'}" th:href="@{/admin/pets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Hồ sơ thú cưng">
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/pets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Hồ sơ thú cưng">
                     <i class="fas fa-dog me-2 text-warning"></i><span class="menu-text"> Hồ sơ thú cưng</span>
                 </a>
-                <a th:if="${session.role == 'Admin'}" th:href="@{/admin/care-services}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Dịch vụ chăm sóc">
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/care-services}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Dịch vụ chăm sóc">
                     <i class="fas fa-spa me-2 text-success"></i><span class="menu-text"> Dịch vụ chăm sóc</span>
                 </a>
-                <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
-                   th:href="@{/admin/care-tickets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Phiếu chăm sóc (Thu ngân)">
-                    <i class="fas fa-clipboard-list me-2 text-danger"></i><span class="menu-text"> Phiếu chăm sóc (Thu ngân)</span>
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
+                   th:href="@{/admin/care-tickets}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Phiếu chăm sóc">
+                    <i class="fas fa-clipboard-list me-2 text-danger"></i><span class="menu-text"> Phiếu chăm sóc</span>
                 </a>
-                <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
-                   th:href="@{/admin/thu-ngan}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Quầy Thu ngân (POS)">
-                    <i class="fas fa-cash-register me-2 text-primary"></i><span class="menu-text"> Quầy Thu ngân (POS)</span>
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+                   th:href="@{/admin/thu-ngan}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Quầy Thu ngân">
+                    <i class="fas fa-cash-register me-2 text-primary"></i><span class="menu-text"> Quầy Thu ngân</span>
                 </a>
-                <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ'))}" 
-                   th:href="@{/admin/doctor/treatment}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Nhật ký điều trị (Bác sĩ)">
-                    <i class="fas fa-user-md me-2 text-info"></i><span class="menu-text"> Nhật ký điều trị (Bác sĩ)</span>
+                <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' or (session.role != null and (session.role == 'Bác sĩ thú y' or session.role == 'Bác sĩ'))}" 
+                   th:href="@{/admin/doctor/treatment}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Nhật ký điều trị">
+                    <i class="fas fa-user-md me-2 text-info"></i><span class="menu-text"> Nhật ký điều trị</span>
                 </a>
             </div>
 
-            <!-- Submenu Quản lý Nhân sự -->
-            <a th:if="${session.role == 'Admin'}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#staffSubmenu" role="button" aria-expanded="false" title="Quản Lý Nhân sự">
-                <span><i class="fas fa-user-tie me-2"></i><span class="menu-text"> Quản Lý Nhân sự</span></span>
-                <i class="fas fa-chevron-down small text-muted submenu-arrow"></i>
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/staff}" class="list-group-item list-group-item-action" title="Quản Lý Nhân sự">
+                <i class="fas fa-user-tie me-2"></i><span class="menu-text"> Quản Lý Nhân sự</span>
             </a>
-            <div th:if="${session.role == 'Admin'}" class="collapse ps-3 my-1" id="staffSubmenu">
-                <a th:href="@{/admin/staff?roleFilter=vet}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Bác sĩ thú y">
-                    <i class="fas fa-stethoscope me-2 text-primary"></i><span class="menu-text"> Bác sĩ thú y</span>
-                </a>
-                <a th:href="@{/admin/staff?roleFilter=consultant}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Nhân viên tư vấn">
-                    <i class="fas fa-headset me-2 text-warning"></i><span class="menu-text"> Nhân viên tư vấn</span>
-                </a>
-                <a th:href="@{/admin/staff?roleFilter=care}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Nhân viên Spa / Care">
-                    <i class="fas fa-cut me-2 text-danger"></i><span class="menu-text"> Nhân viên Spa / Care</span>
-                </a>
-                <a th:href="@{/admin/staff}" class="list-group-item list-group-item-action border-0 py-2 small" style="border-radius: 10px; margin-bottom: 4px;" title="Tất cả nhân sự">
-                    <i class="fas fa-users me-2 text-secondary"></i><span class="menu-text"> Tất cả nhân sự</span>
-                </a>
-            </div>
 
-            <a th:if="${session.role == 'Admin'}" th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action" title="Quản Lý mã giảm giá">
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/vouchers}" class="list-group-item list-group-item-action" title="Quản Lý mã giảm giá">
                 <i class="fas fa-ticket-alt me-2"></i><span class="menu-text"> Quản Lý mã giảm giá</span>
             </a>
-            <a th:if="${session.role == 'Admin' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
                th:href="@{/admin/bookings}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" title="Quản Lý đặt lịch">
                 <span><i class="fas fa-calendar-alt me-2"></i><span class="menu-text"> Quản Lý đặt lịch</span></span>
                 <span th:if="${pendingBookingCount != null and pendingBookingCount > 0}" 
@@ -235,6 +218,22 @@
                         applySidebarState(willCollapse);
                     });
                 }
+
+                highlightActiveMenu();
+            }
+
+            function highlightActiveMenu() {
+                const currentPath = window.location.pathname.toLowerCase();
+                const links = document.querySelectorAll('#adminSidebarList a.list-group-item');
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href) {
+                        const linkPath = href.split('?')[0].toLowerCase();
+                        if (currentPath === linkPath) {
+                            link.classList.add('active');
+                        }
+                    }
+                });
             }
 
             if (document.readyState === 'loading') {

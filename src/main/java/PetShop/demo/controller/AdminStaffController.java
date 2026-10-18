@@ -34,7 +34,7 @@ public class AdminStaffController {
             @RequestParam(required = false) String roleFilter,
             @RequestParam(required = false) String statusFilter,
             Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         List<Employee> allStaff = employeeService.getAllEmployees();
 
@@ -55,26 +55,47 @@ public class AdminStaffController {
                     .filter(e -> e.getRole() != null && "Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()))
                     .toList();
             roleFilter = "admin";
-        } else if ("vet".equalsIgnoreCase(roleFilter)) {
-            filteredList = filteredList.stream()
-                    .filter(e -> e.getRole() != null && "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()))
-                    .toList();
-            roleFilter = "vet";
-        } else if ("consultant".equalsIgnoreCase(roleFilter)) {
+        } else if ("manager".equalsIgnoreCase(roleFilter) || "quan-ly".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getRole() != null && (
-                            "Tư vấn viên".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Nhân viên tư vấn".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
-                            "Tư vấn viên".contains(e.getRole().getTenVaiTro())
+                            "Quản lý cửa hàng".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Quản lý".equalsIgnoreCase(e.getRole().getTenVaiTro())
                     ))
                     .toList();
-            roleFilter = "consultant";
-        } else if ("care".equalsIgnoreCase(roleFilter)) {
+            roleFilter = "manager";
+        } else if ("vet".equalsIgnoreCase(roleFilter) || "bac-si".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
-                    .filter(e -> e.getRole() == null || (!"Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()) && !"Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro())))
+                    .filter(e -> e.getRole() != null && (
+                            "Bác sĩ thú y".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Bác sĩ".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Kỹ thuật viên thú y".equalsIgnoreCase(e.getRole().getTenVaiTro())
+                    ))
+                    .toList();
+            roleFilter = "vet";
+        } else if ("care".equalsIgnoreCase(roleFilter) || "cham-soc".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() != null && (
+                            "Nhân viên chăm sóc".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Chăm sóc thú cưng".equalsIgnoreCase(e.getRole().getTenVaiTro())
+                    ))
                     .toList();
             roleFilter = "care";
+        } else if ("cashier".equalsIgnoreCase(roleFilter) || "thu-ngan".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() != null && (
+                            "Thu ngân".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Nhân viên thu ngân".equalsIgnoreCase(e.getRole().getTenVaiTro())
+                    ))
+                    .toList();
+            roleFilter = "cashier";
+        } else if ("warehouse".equalsIgnoreCase(roleFilter) || "thu-kho".equalsIgnoreCase(roleFilter) || "kho".equalsIgnoreCase(roleFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(e -> e.getRole() != null && (
+                            "Thủ kho".equalsIgnoreCase(e.getRole().getTenVaiTro()) ||
+                            "Quản lý kho".equalsIgnoreCase(e.getRole().getTenVaiTro())
+                    ))
+                    .toList();
+            roleFilter = "warehouse";
         } else {
             roleFilter = "all";
         }
@@ -112,7 +133,7 @@ public class AdminStaffController {
     // Trang form thêm mới nhân sự
     @GetMapping("/add")
     public String showAddForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         model.addAttribute("employee", new Employee());
         model.addAttribute("roles", roleRepository.findAll());
@@ -122,7 +143,7 @@ public class AdminStaffController {
     // Trang form sửa thông tin nhân sự
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         Optional<Employee> empOpt = employeeService.getEmployeeById(id);
         if (empOpt.isEmpty()) return "redirect:/admin/staff";
@@ -135,7 +156,7 @@ public class AdminStaffController {
     // Xử lý lưu thông tin nhân sự (thêm/sửa)
     @PostMapping("/save")
     public String saveStaff(@ModelAttribute Employee employee, RedirectAttributes ra, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         // Nếu sửa, giữ nguyên mật khẩu cũ nếu không nhập mật khẩu mới
         if (employee.getMaNV() != null) {
@@ -157,7 +178,7 @@ public class AdminStaffController {
             @RequestParam(required = false) String roleFilter,
             @RequestParam(required = false) String statusFilter,
             RedirectAttributes ra, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         employeeService.toggleStatus(id);
         ra.addFlashAttribute("success", "Cập nhật trạng thái làm việc thành công!");
@@ -179,7 +200,7 @@ public class AdminStaffController {
     // Reset mật khẩu nhân sự về mặc định 123456
     @PostMapping("/resetPassword/{id}")
     public String resetPassword(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         employeeService.resetPassword(id, "123456");
         ra.addFlashAttribute("success", "Đã reset mật khẩu nhân sự về mặc định (123456).");
@@ -189,7 +210,7 @@ public class AdminStaffController {
     // Xóa hồ sơ nhân sự
     @GetMapping("/delete/{id}")
     public String deleteStaff(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
         employeeService.deleteEmployee(id);
         ra.addFlashAttribute("success", "Đã xóa hồ sơ nhân sự.");

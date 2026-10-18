@@ -6,203 +6,321 @@
 
 <div class="container mt-4 mb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-9">
+        <div class="col-lg-10">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-header bg-white py-3 border-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold mb-0 text-gradient">
-                            <i class="fas fa-clipboard-list text-danger me-2"></i> Lập phiếu tiếp nhận chăm sóc thú cưng
-                        </h4>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark">
+                                Lập phiếu tiếp nhận chăm sóc thú cưng
+                            </h4>
+                        </div>
                         <a th:href="@{/admin/care-tickets}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            Danh sách phiếu
                         </a>
                     </div>
                 </div>
-                <div class="card-body p-4">
+
+                <div class="card-body p-4 pt-2">
                     <form th:action="@{/admin/care-tickets/create}" method="post" th:object="${ticket}" id="careTicketForm">
 
-                        <div class="alert alert-info py-2 rounded-3 mb-4">
-                            <i class="fas fa-info-circle me-1"></i> Mã số phiếu tự động: <strong th:text="*{soPhieu}"></strong>
-                            <input type="hidden" th:field="*{soPhieu}">
+                        <!-- THÔNG TIN PHIẾU VÀ BẮT LỖI -->
+                        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mb-4 flex-wrap gap-2">
+                            <div>
+                                <span class="text-muted small d-block">Mã số phiếu tiếp nhận:</span>
+                                <strong class="fs-5 text-dark font-monospace" th:text="*{soPhieu}"></strong>
+                                <input type="hidden" th:field="*{soPhieu}">
+                            </div>
+                            <div>
+                                <span class="text-muted small d-block">Thời điểm tiếp nhận:</span>
+                                <span class="fw-semibold text-primary">
+                                    <span th:text="${#temporals.format(ticket.ngayTiepNhan, 'HH:mm dd/MM/yyyy')}"></span>
+                                </span>
+                            </div>
                         </div>
 
-                        <!-- CẢNH BÁO / BẮT LỖI NGÀY GIỜ & TRÙNG LỊCH -->
                         <div th:if="${errorMessage != null}" class="alert alert-danger py-2 rounded-3 mb-4 d-flex align-items-center shadow-sm">
-                            <i class="fas fa-exclamation-triangle fs-5 me-2 text-danger"></i>
                             <span th:text="${errorMessage}"></span>
                         </div>
                         <div id="dynamicErrorAlert" class="alert alert-danger py-2 rounded-3 mb-4 d-none align-items-center shadow-sm">
-                            <i class="fas fa-exclamation-triangle fs-5 me-2 text-danger"></i>
                             <span id="dynamicErrorMessage"></span>
                         </div>
 
-                        <!-- 1. ĐỐI TƯỢNG TIẾP NHẬN & NHÂN SỰ PHỤ TRÁCH -->
-                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-paw me-2"></i>1. Đối tượng tiếp nhận & Nhân sự phụ trách</h6>
-                        <div class="row g-3 mb-4">
-                            <!-- CHỌN THÚ CƯNG DẠNG NHẬP LIỆU CÓ GỢI Ý & CHỌN TRONG DANH SÁCH -->
-                            <div class="col-md-6 position-relative">
-                                <label class="form-label fw-semibold">Chọn thú cưng <span class="text-danger">*</span></label>
-                                <div class="position-relative">
-                                    <input type="text" id="petSearchInput" class="form-control rounded-3 pe-5" 
-                                           placeholder="Nhập tên thú cưng hoặc tên chủ nuôi/SĐT" autocomplete="off">
-                                    <i class="fas fa-chevron-down position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
-                                       style="pointer-events: none; font-size: 0.85rem;"></i>
-                                </div>
-                                <input type="hidden" th:field="*{maThuCung}" id="maThuCungHidden" required>
+                        <!-- ==================== KHỐI 1: TIẾP NHẬN & KIỂM TRA SƠ BỘ ==================== -->
+                        <div class="card border border-light-subtle rounded-4 mb-4 shadow-none bg-white">
+                            <div class="card-header bg-primary-subtle py-2 px-3 border-0 rounded-top-4">
+                                <h6 class="fw-bold text-primary mb-0">
+                                    1. Khách hàng, Thú cưng &amp; Khám sàng lọc ban đầu
+                                </h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-3 mb-3">
+                                    <!-- CHỌN THÚ CƯNG CÓ AUTOCOMPLETE HOẶC THÊM TẠI CHỖ -->
+                                    <div class="col-md-6 position-relative">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label fw-semibold mb-0">Thú cưng tiếp nhận <span class="text-danger">*</span></label>
+                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 fw-semibold text-nowrap" 
+                                                    id="btnOpenQuickPetModal" data-bs-toggle="modal" data-bs-target="#quickCreatePetModal" style="font-size: 0.8rem;">
+                                                + Thêm khách hàng &amp; thú cưng mới
+                                            </button>
+                                        </div>
+                                        <div class="position-relative">
+                                            <input type="text" id="petSearchInput" class="form-control rounded-3 pe-3" 
+                                                   placeholder="Nhập tên bé, số điện thoại hoặc tên chủ nuôi để tìm kiếm..." autocomplete="off">
+                                        </div>
+                                        <input type="hidden" th:field="*{maThuCung}" id="maThuCungHidden" required>
 
-                                <!-- Dropdown danh sách gợi ý khi gõ hoặc chọn -->
-                                <div id="petSuggestionsDropdown" class="list-group shadow-lg position-absolute w-100 rounded-3 mt-1 overflow-auto" 
-                                     style="max-height: 260px; z-index: 1050; display: none; background: white; border: 1px solid #cbd5e1; left: 0;">
-                                    <!-- JS render danh sách tại đây -->
-                                </div>
+                                        <!-- Dropdown danh sách gợi ý khi gõ hoặc click -->
+                                        <div id="petSuggestionsDropdown" class="list-group shadow-lg position-absolute w-100 rounded-3 mt-1 overflow-auto" 
+                                             style="max-height: 260px; z-index: 1050; display: none; background: white; border: 1px solid #cbd5e1; left: 0;">
+                                        </div>
 
-                                <!-- Thẻ hiển thị thú cưng & chủ nuôi đã chọn -->
-                                <div id="selectedPetCard" class="card mt-2 border-0 bg-light rounded-3 p-2 d-none">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold text-dark">
-                                                <i class="fas fa-paw text-primary me-1"></i>
-                                                <span id="displayPetName"></span>
-                                                <span class="badge bg-primary-subtle text-primary ms-1" id="displayPetBreed"></span>
-                                            </div>
-                                            <div class="small text-muted mt-1">
-                                                Chủ: <strong id="displayOwnerName" class="text-dark"></strong>
-                                                <span id="displayOwnerPhoneWrapper"> | SĐT: <span id="displayOwnerPhone"></span></span>
-                                                | Hạng: <span class="badge bg-warning text-dark fw-bold" id="displayOwnerTier"></span>
-                                                <span class="badge bg-success-subtle text-success fw-bold ms-1" id="displayTierDiscount"></span>
+                                        <!-- Thẻ hiển thị thú cưng đã chọn -->
+                                        <div id="selectedPetCard" class="card mt-2 border-0 bg-light rounded-3 p-3 d-none">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="fw-bold fs-6 text-dark">
+                                                        <span id="displayPetName"></span>
+                                                        <span class="badge bg-primary-subtle text-primary ms-1" id="displayPetBreed"></span>
+                                                        <span class="badge bg-secondary-subtle text-secondary ms-1" id="displayPetGender"></span>
+                                                    </div>
+                                                    <div class="small text-muted mt-1">
+                                                        Chủ nuôi: <strong id="displayOwnerName" class="text-dark"></strong>
+                                                        <span id="displayOwnerPhoneWrapper"> | SĐT: <strong class="text-dark" id="displayOwnerPhone"></strong></span>
+                                                    </div>
+                                                    <div class="small mt-1">
+                                                        Hạng thành viên: <span class="badge bg-warning text-dark fw-bold" id="displayOwnerTier"></span>
+                                                        <span class="badge bg-success-subtle text-success fw-bold ms-1" id="displayTierDiscount"></span>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-circle" id="btnClearPet" title="Chọn bé khác">
+                                                    ✕
+                                                </button>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary border-0 rounded-circle" id="btnClearPet" title="Chọn lại bé khác">
-                                            <i class="fas fa-times"></i>
+                                        <div id="petValidationMsg" class="text-danger small mt-1 d-none">Vui lòng chọn thú cưng tiếp nhận từ danh sách.</div>
+                                    </div>
+
+                                    <!-- CHỈ SỐ SINH TỒN TIẾP NHẬN -->
+                                    <div class="col-md-6">
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold mb-1">Cân nặng khi nhận (kg) <span class="text-danger">*</span></label>
+                                                <input type="number" step="0.1" th:field="*{canNangTiepNhan}" id="canNangInput" 
+                                                       class="form-control rounded-3" placeholder="Ví dụ: 4.5" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-semibold mb-1">Thân nhiệt (°C)</label>
+                                                <input type="number" step="0.1" name="thanNhiet" id="thanNhietInput" 
+                                                       class="form-control rounded-3" placeholder="Ví dụ: 38.5">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- KIỂM TRA LÂM SÀNG BAN ĐẦU & PHỤ KIỆN GỬI KÈM -->
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Hiện trạng ban đầu quan sát được</label>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Bình thường, ngoan">Bình thường</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Lông bết rối">Lông bết rối</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Có ve rận">Có ve rận</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Da mẩn đỏ / Nấm">Da mẩn đỏ/Nấm</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Viêm tai / Rỉ mắt">Viêm tai/Rỉ mắt</button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill condition-tag" data-val="Có vết thương cũ">Vết thương cũ</button>
+                                        </div>
+                                        <textarea th:field="*{tinhTrangBanDau}" id="tinhTrangBanDauInput" class="form-control rounded-3" rows="2" 
+                                                  placeholder="Chi tiết tình trạng ban đầu của thú cưng..."></textarea>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Đồ đạc &amp; Yêu cầu cụ thể của chủ nuôi</label>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <div class="form-check form-check-inline me-2">
+                                                <input class="form-check-input" type="checkbox" name="doDacGuiKem" value="Chuồng xách" id="chkChuong">
+                                                <label class="form-check-label small" for="chkChuong">Chuồng xách</label>
+                                            </div>
+                                            <div class="form-check form-check-inline me-2">
+                                                <input class="form-check-input" type="checkbox" name="doDacGuiKem" value="Dây dắt" id="chkDayDat">
+                                                <label class="form-check-label small" for="chkDayDat">Dây dắt</label>
+                                            </div>
+                                            <div class="form-check form-check-inline me-2">
+                                                <input class="form-check-input" type="checkbox" name="doDacGuiKem" value="Thức ăn riêng" id="chkThucAn">
+                                                <label class="form-check-label small" for="chkThucAn">Thức ăn riêng</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="doDacGuiKem" value="Thuốc mang theo" id="chkThuoc">
+                                                <label class="form-check-label small" for="chkThuoc">Thuốc điều trị</label>
+                                            </div>
+                                        </div>
+                                        <textarea th:field="*{yeuCauCuaChuNuoi}" class="form-control rounded-3" rows="2" 
+                                                  placeholder="Ví dụ: Tỉa mặt tròn, không cạo sát đuôi, dùng dầu tắm dịu nhẹ..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==================== KHỐI 2: CHỈ ĐỊNH DỊCH VỤ & PHÂN CÔNG CHUYÊN MÔN ==================== -->
+                        <div class="card border border-light-subtle rounded-4 mb-4 shadow-none bg-white">
+                            <div class="card-header bg-danger-subtle py-2 px-3 border-0 rounded-top-4 d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold text-danger mb-0">
+                                    2. Chỉ định gói dịch vụ &amp; Phân công nhân sự thực hiện
+                                </h6>
+                                <span class="badge bg-danger rounded-pill px-3" id="selectedServiceCountBadge">0 dịch vụ đã chọn</span>
+                            </div>
+
+                            <div class="card-body p-3">
+                                <!-- Bộ lọc danh mục dịch vụ dạng Tabs/Pills KHÔNG CÓ ICON/EMOJI -->
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 service-category-tab active" data-cat="all">
+                                        Tất cả dịch vụ
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 service-category-tab" data-cat="spa">
+                                        Spa &amp; Grooming
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 service-category-tab" data-cat="medical">
+                                        Khám &amp; Y tế thú y
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 service-category-tab" data-cat="hotel">
+                                        Khách sạn lưu trú
+                                    </button>
+                                </div>
+
+                                <!-- Thanh chọn nhanh dịch vụ -->
+                                <div class="row g-2 align-items-center mb-3">
+                                    <div class="col-md-9 col-sm-8">
+                                        <select id="servicePickerSelect" class="form-select rounded-3">
+                                            <option value="" disabled selected>-- Chọn dịch vụ để thêm vào phiếu tiếp nhận --</option>
+                                            <option th:each="s : ${services}" 
+                                                    th:value="${s.maDVCS}" 
+                                                    th:data-price="${s.giaDichVu}"
+                                                    th:data-name="${s.tenDichVu}"
+                                                    th:data-nhom="${s.nhomDichVu}"
+                                                    th:data-duration="${s.thoiGianThucHien != null ? s.thoiGianThucHien : 45}"
+                                                    th:text="${s.tenDichVu} + ' (' + (${s.giaDichVu != null ? #numbers.formatDecimal(s.giaDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}) + ') - ' + (${s.thoiGianThucHien != null ? s.thoiGianThucHien : 45}) + 'p'">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 col-sm-4">
+                                        <button type="button" class="btn btn-danger w-100 rounded-3 fw-semibold text-nowrap" id="btnAddServiceDirect">
+                                            Thêm dịch vụ
                                         </button>
                                     </div>
                                 </div>
-                                <div id="petValidationMsg" class="text-danger small mt-1 d-none">Vui lòng chọn thú cưng từ danh sách gợi ý.</div>
-                            </div>
 
-                            <!-- GÓI DỊCH VỤ CHĂM SÓC THỰC HIỆN (HỖ TRỢ CHỌN NHIỀU DỊCH VỤ) -->
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label class="form-label fw-semibold mb-0">Dịch vụ chăm sóc thực hiện <span class="text-danger">*</span></label>
-                                    <span class="badge bg-primary-subtle text-primary" id="selectedServiceCountBadge">0 dịch vụ đã chọn</span>
+                                <!-- Bảng danh sách các dịch vụ được chọn kèm người thực hiện tương ứng -->
+                                <div id="selectedServicesContainer" class="border rounded-4 p-3 bg-light mb-3 d-none">
+                                    <h6 class="fw-bold text-dark mb-2 small text-uppercase" style="letter-spacing: 0.5px;">
+                                        Danh sách dịch vụ chỉ định &amp; Chuyên viên phụ trách:
+                                    </h6>
+                                    <div id="selectedServicesList" class="d-flex flex-column gap-2"></div>
+
+                                    <!-- Tóm tắt thời lượng thực hiện -->
+                                    <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top small text-muted">
+                                        <span>Tổng thời lượng ước tính: <strong id="totalEstimatedDuration" class="text-dark">0</strong> phút</span>
+                                        <span>Giờ hẹn trả khuyến nghị: <strong id="suggestedReturnTime" class="text-primary">--:--</strong></span>
+                                    </div>
                                 </div>
-                                <select id="servicePickerSelect" class="form-select rounded-3">
-                                    <option value="" disabled selected>-- Chọn dịch vụ chăm sóc --</option>
-                                    <option th:each="s : ${services}" 
-                                            th:value="${s.maDVCS}" 
-                                            th:data-price="${s.giaDichVu}"
-                                            th:data-name="${s.tenDichVu}"
-                                            th:text="${s.tenDichVu} + ' (' + (${s.giaDichVu != null ? #numbers.formatDecimal(s.giaDichVu, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}) + ')'">
-                                    </option>
-                                </select>
-
-                                <!-- Danh sách các dịch vụ đã chọn (chỉ hiện khi có dịch vụ) -->
-                                <div id="selectedServicesContainer" class="border rounded-3 p-2 bg-light mt-2 overflow-auto d-none" style="max-height: 140px;">
-                                    <div id="selectedServicesBadges" class="d-flex flex-wrap gap-1"></div>
+                                <div id="serviceValidationMsg" class="text-danger small mt-1 d-none fw-semibold">
+                                    Vui lòng chọn ít nhất 1 dịch vụ chăm sóc thú cưng!
                                 </div>
-                                <div id="serviceValidationMsg" class="text-danger small mt-1 d-none">Vui lòng chọn ít nhất 1 dịch vụ chăm sóc.</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Kỹ thuật viên / Bác sĩ trực tiếp thực hiện</label>
-                                <select th:field="*{maNVThucHien}" id="maNVSelect" class="form-select rounded-3">
-                                    <option value="" selected>-- Chọn nhân sự (Đã sắp xếp theo thứ tự tối ưu) --</option>
-                                    <option th:each="e : ${employees}" 
-                                            th:value="${e.maNV}" 
-                                            th:text="${e.displayText != null ? e.displayText : (e.tenNV + (e.chuyenMon != null ? ' - ' + e.chuyenMon : ''))}">
-                                    </option>
-                                </select>
-                                <div id="employeeConflictMsg" class="text-danger small mt-1 d-none fw-semibold"></div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Cân nặng khi nhận (kg)</label>
-                                <input type="number" step="0.1" th:field="*{canNangTiepNhan}" id="canNangInput" class="form-control rounded-3" placeholder="Ví dụ: 4.2">
-                            </div>
-
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Ngày hẹn trả</label>
-                                <input type="datetime-local" th:field="*{ngayHenTra}" id="ngayHenTraInput" class="form-control rounded-3">
-                                <div id="ngayHenTraValidationMsg" class="text-danger small mt-1 d-none fw-semibold"></div>
                             </div>
                         </div>
 
-                        <!-- 2. GHI NHẬN TÌNH TRẠNG BAN ĐẦU & YÊU CẦU -->
-                        <h6 class="fw-bold text-danger mb-3"><i class="fas fa-stethoscope me-2"></i>2. Ghi nhận tình trạng ban đầu & Yêu cầu</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Tình trạng ban đầu khi tiếp nhận thú cưng</label>
-                                <textarea th:field="*{tinhTrangBanDau}" class="form-control rounded-3" rows="3" placeholder="Lông rối, da mẩn đỏ, rỉ mắt, móng dài..."></textarea>
+                        <!-- ==================== KHỐI 3: ĐIỀU PHỐI, HẸN TRẢ & THANH TOÁN ==================== -->
+                        <div class="card border border-light-subtle rounded-4 mb-4 shadow-none bg-white">
+                            <div class="card-header bg-success-subtle py-2 px-3 border-0 rounded-top-4">
+                                <h6 class="fw-bold text-success mb-0">
+                                    3. Lịch hẹn trả &amp; Thanh toán
+                                </h6>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Yêu cầu cụ thể từ chủ nuôi</label>
-                                <textarea th:field="*{yeuCauCuaChuNuoi}" class="form-control rounded-3" rows="3" placeholder="Cắt tỉa mặt tròn gấu bông, tắm thơm lâu, không cạo sát..."></textarea>
-                            </div>
-                        </div>
+                            <div class="card-body p-3">
+                                <div class="row g-3 mb-3">
+                                    <!-- NHÂN VIÊN TIẾP NHẬN -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Nhân viên tiếp nhận</label>
+                                        <select th:field="*{maNVTiepNhan}" id="maNVTiepNhanSelect" class="form-select rounded-3">
+                                            <option value="" selected>-- Chọn nhân viên tiếp nhận --</option>
+                                            <option th:each="e : ${receptionStaff}" 
+                                                    th:value="${e.maNV}" 
+                                                    th:text="${e.tenNV + (e.chuyenMon != null ? ' (' + e.chuyenMon + ')' : '')}">
+                                            </option>
+                                        </select>
+                                    </div>
 
-                        <!-- 3. THANH TOÁN -->
-                        <h6 class="fw-bold text-success mb-3"><i class="fas fa-money-bill-wave me-2"></i>3. Thanh toán</h6>
-                        <div class="row g-3 mb-3">
-                            <!-- PHẦN NHẬP VOUCHER -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Nhập mã Voucher</label>
-                                <div class="input-group">
-                                    <input type="text" id="voucherCodeInput" name="voucherCode" class="form-control rounded-start-3 text-uppercase">
-                                    <button type="button" class="btn btn-outline-danger px-3" id="btnApplyVoucher">
-                                        <i class="fas fa-tag me-1"></i> Áp dụng
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary d-none px-2" id="btnRemoveVoucher" title="Hủy voucher">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                    <!-- NGÀY GIỜ HẸN TRẢ THÚ CƯNG -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Ngày giờ hẹn trả <span class="text-danger">*</span></label>
+                                        <input type="datetime-local" th:field="*{ngayHenTra}" id="ngayHenTraInput" class="form-control rounded-3" required>
+                                        <div id="ngayHenTraValidationMsg" class="text-danger small mt-1 d-none fw-semibold"></div>
+                                    </div>
                                 </div>
-                                <div id="voucherMsg" class="small mt-1"></div>
-                            </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Trạng thái dịch vụ ban đầu</label>
-                                <select th:field="*{trangThaiDichVu}" class="form-select rounded-3">
-                                    <option value="Chờ tiếp nhận">Chờ tiếp nhận</option>
-                                    <option value="Đang thực hiện">Đang thực hiện</option>
-                                </select>
-                            </div>
-                        </div>
+                                <div class="row g-3 mb-3">
+                                    <!-- MÃ VOUCHER -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Mã Voucher</label>
+                                        <div class="input-group">
+                                            <input type="text" id="voucherCodeInput" name="voucherCode" class="form-control rounded-start-3 text-uppercase" placeholder="Nhập mã ưu đãi (nếu có)">
+                                            <button type="button" class="btn btn-outline-danger px-3 fw-semibold text-nowrap" id="btnApplyVoucher">
+                                                Áp dụng
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary d-none px-2" id="btnRemoveVoucher" title="Hủy voucher">
+                                                ✕
+                                            </button>
+                                        </div>
+                                        <div id="voucherMsg" class="small mt-1"></div>
+                                    </div>
 
-                        <!-- CÁC Ô TỔNG TIỀN VÀ GIẢM GIÁ (TỰ ĐỘNG ĐỐI CHIẾU & ĐIỀN) -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Tổng tiền dịch vụ (VNĐ)</label>
-                                <input type="number" th:field="*{tongTien}" id="tongTienInput" class="form-control rounded-3 bg-light" placeholder="0" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Giảm giá (VNĐ)</label>
-                                <input type="number" th:field="*{tienGiamGia}" id="tienGiamGiaInput" class="form-control rounded-3 bg-light" placeholder="0" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold text-danger">Tạm tính thanh toán (VNĐ)</label>
-                                <input type="number" th:field="*{thanhToan}" id="thanhToanInput" class="form-control rounded-3 bg-light fw-bold text-danger fs-5" placeholder="0" readonly>
-                            </div>
+                                    <!-- TIỀN ĐẶT CỌC (NẾU CÓ) -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold mb-1">Tiền đặt cọc ban đầu (VND)</label>
+                                        <input type="number" step="10000" name="tienDatCoc" id="tienDatCocInput" class="form-control rounded-3" placeholder="0 VND" value="0">
+                                    </div>
+                                </div>
 
-                            <!-- BẢNG ĐỐI CHIẾU TRỰC QUAN -->
-                            <div class="col-12">
-                                <div class="p-3 bg-light rounded-4 border d-flex flex-wrap justify-content-between align-items-center gap-3">
-                                    <div>
-                                        <span class="text-muted small fw-bold text-uppercase">Tạm tính:</span>
-                                        <div class="fw-semibold text-dark mt-1" id="summaryBreakdown">
-                                            Vui lòng chọn thú cưng và gói dịch vụ để xem tính toán chi tiết.
+                                <!-- GHI CHÚ BỔ SUNG -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold mb-1">Ghi chú tiếp nhận</label>
+                                    <input type="text" th:field="*{ghiChu}" class="form-control rounded-3" placeholder="Ghi chú thêm từ nhân viên tiếp nhận...">
+                                </div>
+
+                                <!-- TÓM TẮT DỰ TOÁN CHI PHÍ -->
+                                <div class="bg-light p-3 rounded-3 border">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-7">
+                                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                                <span>Tổng tiền dịch vụ:</span>
+                                                <strong id="summaryServiceTotal" class="text-dark">0 VND</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                                <span>Ưu đãi thành viên (tạm tính):</span>
+                                                <span id="summaryTierDiscount" class="text-success fw-semibold">0 VND</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small text-muted mb-1">
+                                                <span>Ưu đãi Voucher:</span>
+                                                <span id="summaryVoucherDiscount" class="text-success fw-semibold">0 VND</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between small text-muted">
+                                                <span>Tiền đặt cọc (nếu có):</span>
+                                                <span id="summaryDeposit" class="text-primary fw-semibold">0 VND</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-md-end border-start-md pt-2 pt-md-0">
+                                            <span class="text-muted small d-block">Tạm tính cần thanh toán khi bàn giao:</span>
+                                            <span class="fs-4 fw-bold text-danger" id="summaryFinalEstimate">0 VND</span>
                                         </div>
                                     </div>
-                                    <div class="text-end">
-                                        <span class="text-muted small d-block">Tổng tiền tạm tính:</span>
-                                        <span class="fs-4 fw-bold text-danger" id="summaryBigTotal">0VND</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2">
+                        <!-- NÚT ĐIỀU HƯỚNG & SUBMIT -->
+                        <div class="d-flex justify-content-end align-items-center gap-2">
                             <a th:href="@{/admin/care-tickets}" class="btn btn-light px-4 rounded-pill">Hủy bỏ</a>
-                            <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm">
-                                <i class="fas fa-check-circle me-1"></i> Lưu & Khởi tạo phiếu tiếp nhận
+                            <button type="submit" class="btn btn-danger px-5 py-2 rounded-pill shadow-sm fw-bold">
+                                Lưu &amp; Khởi tạo phiếu tiếp nhận
                             </button>
                         </div>
                     </form>
@@ -212,19 +330,98 @@
     </div>
 </div>
 
+<!-- ==================== MODAL THÊM KHÁCH HÀNG & THÚ CƯNG MỚI ==================== -->
+<div class="modal fade" id="quickCreatePetModal" tabindex="-1" aria-labelledby="quickCreatePetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="quickCreatePetModalLabel">
+                    Thêm khách hàng &amp; thú cưng mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 pt-3">
+                <div id="quickModalAlert" class="alert alert-danger py-2 small rounded-3 d-none"></div>
+
+                <div class="row g-3">
+                    <!-- Cột 1: Thông tin chủ nuôi -->
+                    <div class="col-md-6 border-end">
+                        <h6 class="fw-bold text-primary small text-uppercase mb-2">Thông tin chủ nuôi</h6>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Họ tên chủ nuôi <span class="text-danger">*</span></label>
+                            <input type="text" id="quickOwnerName" class="form-control form-control-sm rounded-3" placeholder="Ví dụ: Nguyễn Văn A">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="tel" id="quickOwnerPhone" class="form-control form-control-sm rounded-3" placeholder="Ví dụ: 0912345678">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Địa chỉ</label>
+                            <input type="text" id="quickOwnerAddress" class="form-control form-control-sm rounded-3" placeholder="Số nhà, đường, quận/huyện...">
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Thông tin thú cưng -->
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-danger small text-uppercase mb-2">Thông tin thú cưng</h6>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Tên thú cưng <span class="text-danger">*</span></label>
+                            <input type="text" id="quickPetName" class="form-control form-control-sm rounded-3" placeholder="Ví dụ: Bé Bông">
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Loài <span class="text-danger">*</span></label>
+                                <select id="quickPetType" class="form-select form-select-sm rounded-3">
+                                    <option value="Chó">Chó</option>
+                                    <option value="Mèo">Mèo</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Giới tính</label>
+                                <select id="quickPetGender" class="form-select form-select-sm rounded-3">
+                                    <option value="Đực">Đực</option>
+                                    <option value="Cái">Cái</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Giống loài</label>
+                                <input type="text" id="quickPetBreed" class="form-control form-control-sm rounded-3" placeholder="Ví dụ: Poodle, Corgi, Ta...">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Cân nặng (kg)</label>
+                                <input type="number" step="0.1" id="quickPetWeight" class="form-control form-control-sm rounded-3" placeholder="Ví dụ: 4.2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3 btn-sm" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 btn-sm fw-bold" id="btnSubmitQuickPet">
+                    Lưu &amp; Điền vào phiếu ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-<!-- JAVASCRIPT XỬ LÝ GỢI Ý THÚ CƯNG & TỰ ĐỘNG ĐỐI CHIẾU GIÁ -->
+<!-- JAVASCRIPT XỬ LÝ QUY TRÌNH CHECK-IN TIẾP NHẬN MỚI -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    // 1. Danh sách dữ liệu thú cưng từ server
-    const petsData = [
+    // 1. Danh sách thú cưng từ server
+    let petsData = [
         /*[# th:each="p : ${pets}"]*/
         {
             id: /*[[${p.maThuCung}]]*/ 0,
             petName: /*[[${p.tenThuCung}]]*/ '',
             petType: /*[[${p.loaiThuCung}]]*/ '',
             breed: /*[[${p.giongLoai}]]*/ '',
+            gender: /*[[${p.gioiTinh}]]*/ '',
             weight: /*[[${p.canNang}]]*/ null,
             ownerId: /*[[${p.maChuNuoi}]]*/ 0,
             ownerName: /*[[${p.chuNuoi != null ? p.chuNuoi.hoTenChuNuoi : 'N/A'}]]*/ '',
@@ -234,243 +431,316 @@
         /*[/]*/
     ];
 
+    // 1.1 Danh sách nhân sự chuyên môn từ server
+    let staffData = [
+        /*[# th:each="e : ${employees}"]*/
+        {
+            maNV: /*[[${e.maNV}]]*/ 0,
+            tenNV: /*[[${e.tenNV}]]*/ '',
+            roleId: /*[[${e.roleId}]]*/ 0,
+            roleName: /*[[${e.roleName}]]*/ '',
+            chuyenMon: /*[[${e.chuyenMon}]]*/ '',
+            isDoctor: /*[[${e.isDoctor}]]*/ false,
+            isMedical: /*[[${e.isMedical}]]*/ false,
+            canDoDoctorOnly: /*[[${e.canDoDoctorOnly}]]*/ false,
+            canDoMedical: /*[[${e.canDoMedical}]]*/ false,
+            canDoSpa: /*[[${e.canDoSpa}]]*/ false,
+            canDoHotel: /*[[${e.canDoHotel}]]*/ false,
+            displayText: /*[[${e.displayText}]]*/ ''
+        },
+        /*[/]*/
+    ];
+
     let selectedPet = null;
-    let appliedVoucher = null;
+    let selectedServices = []; // [{id, name, price, duration, nhom, isMedical, staffId}]
 
     // DOM Elements
     const petSearchInput = document.getElementById('petSearchInput');
     const petSuggestionsDropdown = document.getElementById('petSuggestionsDropdown');
-    const maThuCungHidden = document.getElementById('maThuCungHidden');
     const selectedPetCard = document.getElementById('selectedPetCard');
-    const displayPetName = document.getElementById('displayPetName');
-    const displayPetBreed = document.getElementById('displayPetBreed');
-    const displayOwnerName = document.getElementById('displayOwnerName');
-    const displayOwnerPhone = document.getElementById('displayOwnerPhone');
-    const displayOwnerPhoneWrapper = document.getElementById('displayOwnerPhoneWrapper');
-    const displayOwnerTier = document.getElementById('displayOwnerTier');
-    const displayTierDiscount = document.getElementById('displayTierDiscount');
+    const maThuCungHidden = document.getElementById('maThuCungHidden');
+    const canNangInput = document.getElementById('canNangInput');
     const btnClearPet = document.getElementById('btnClearPet');
     const petValidationMsg = document.getElementById('petValidationMsg');
-    const canNangInput = document.getElementById('canNangInput');
-
-    let selectedServices = []; // Danh sách dịch vụ được chọn: [{ id, name, price }]
 
     const servicePickerSelect = document.getElementById('servicePickerSelect');
+    const btnAddServiceDirect = document.getElementById('btnAddServiceDirect');
     const selectedServicesContainer = document.getElementById('selectedServicesContainer');
-    const selectedServicesBadges = document.getElementById('selectedServicesBadges');
+    const selectedServicesList = document.getElementById('selectedServicesList');
     const selectedServiceCountBadge = document.getElementById('selectedServiceCountBadge');
     const serviceValidationMsg = document.getElementById('serviceValidationMsg');
 
+    const totalEstimatedDurationElem = document.getElementById('totalEstimatedDuration');
+    const suggestedReturnTimeElem = document.getElementById('suggestedReturnTime');
+    const ngayHenTraInput = document.getElementById('ngayHenTraInput');
+    const tienDatCocInput = document.getElementById('tienDatCocInput');
+
+    const summaryServiceTotal = document.getElementById('summaryServiceTotal');
+    const summaryTierDiscount = document.getElementById('summaryTierDiscount');
+    const summaryVoucherDiscount = document.getElementById('summaryVoucherDiscount');
+    const summaryDeposit = document.getElementById('summaryDeposit');
+    const summaryFinalEstimate = document.getElementById('summaryFinalEstimate');
+
+    let appliedVoucher = null;
     const voucherCodeInput = document.getElementById('voucherCodeInput');
     const btnApplyVoucher = document.getElementById('btnApplyVoucher');
     const btnRemoveVoucher = document.getElementById('btnRemoveVoucher');
     const voucherMsg = document.getElementById('voucherMsg');
 
-    const tongTienInput = document.getElementById('tongTienInput');
-    const tienGiamGiaInput = document.getElementById('tienGiamGiaInput');
-    const thanhToanInput = document.getElementById('thanhToanInput');
-    const giamGiaDetailText = document.getElementById('giamGiaDetailText');
-    const summaryBreakdown = document.getElementById('summaryBreakdown');
-    const summaryBigTotal = document.getElementById('summaryBigTotal');
-
-    const ngayHenTraInput = document.getElementById('ngayHenTraInput');
-    const ngayHenTraValidationMsg = document.getElementById('ngayHenTraValidationMsg');
-    const maNVSelect = document.getElementById('maNVSelect');
-    const employeeConflictMsg = document.getElementById('employeeConflictMsg');
-    const dynamicErrorAlert = document.getElementById('dynamicErrorAlert');
-    const dynamicErrorMessage = document.getElementById('dynamicErrorMessage');
-
-    // Hàm lấy % ưu đãi theo hạng thành viên
-    function getTierDiscountPercentage(tier) {
-        if (!tier) return 0;
-        const t = tier.trim().toUpperCase();
-        if (t.includes('VVIP')) return 15;
-        if (t.includes('VIP')) return 10;
-        if (t.includes('THÂN THIẾT') || t.includes('THAN THIET')) return 5;
-        return 0;
+    // Khởi tạo ngày hẹn trả mặc định = hiện tại + 1.5 giờ
+    function initDefaultReturnTime() {
+        if (!ngayHenTraInput.value) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 90);
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            ngayHenTraInput.value = now.toISOString().slice(0, 16);
+        }
     }
+    initDefaultReturnTime();
 
-    // Định dạng tiền tệ VND (10.000.000VND)
-    function formatVND(amount) {
-        const num = Math.round(Number(amount) || 0);
-        return num.toLocaleString('vi-VN') + 'VND';
-    }
+    // 2. Gợi ý tìm kiếm Thú cưng & Chủ nuôi
+    function filterPetSuggestions(keyword) {
+        const query = (keyword || '').toLowerCase().trim();
+        petSuggestionsDropdown.innerHTML = '';
 
+        const matched = petsData.filter(p => {
+            if (!query) return true;
+            return (p.petName && p.petName.toLowerCase().includes(query)) ||
+                   (p.ownerName && p.ownerName.toLowerCase().includes(query)) ||
+                   (p.ownerPhone && p.ownerPhone.includes(query)) ||
+                   (p.breed && p.breed.toLowerCase().includes(query));
+        });
 
-    // 2. Tìm kiếm và hiển thị danh sách gợi ý thú cưng khi gõ hoặc click
-    function renderSuggestions(keyword) {
-        const term = keyword ? keyword.trim().toLowerCase() : '';
-
-        // Nếu chưa nhập: Hiển thị toàn bộ danh sách để người dùng cuộn chọn; Nếu đã nhập: Lọc theo từ khóa
-        const matches = term 
-            ? petsData.filter(p => {
-                const petStr = (p.petName + ' ' + p.petType + ' ' + p.breed).toLowerCase();
-                const ownerStr = (p.ownerName + ' ' + p.ownerPhone).toLowerCase();
-                return petStr.includes(term) || ownerStr.includes(term);
-              })
-            : petsData;
-
-        if (matches.length === 0) {
+        if (matched.length === 0) {
             petSuggestionsDropdown.innerHTML = `
-                <div class="list-group-item text-muted text-center py-3 small">
-                    Không tìm thấy thú cưng phù hợp với "<strong>${keyword}</strong>"
+                <div class="p-3 text-center text-muted small">
+                    Không tìm thấy thú cưng phù hợp.
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickCreatePetModal">
+                            + Thêm nhanh khách &amp; thú cưng mới
+                        </button>
+                    </div>
                 </div>`;
             petSuggestionsDropdown.style.display = 'block';
             return;
         }
 
-        let html = '';
-
-        matches.forEach(p => {
-            const tierPct = getTierDiscountPercentage(p.ownerTier);
-            html += `
-                <a href="javascript:void(0)" class="list-group-item list-group-item-action py-2 px-3 border-bottom" data-id="${p.id}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong class="text-primary">${p.petName}</strong>
-                        <span class="badge bg-light text-secondary border">${p.petType} - ${p.breed}</span>
+        matched.slice(0, 15).forEach(p => {
+            const item = document.createElement('a');
+            item.href = 'javascript:void(0);';
+            item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3';
+            item.innerHTML = `
+                <div>
+                    <div class="fw-bold text-dark">
+                        ${p.petName}
+                        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.75rem;">${p.breed || p.petType || 'Thú cưng'}</span>
+                        <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 0.7rem;">${p.gender || ''}</span>
                     </div>
                     <div class="small text-muted mt-1">
-                        Chủ: <span class="fw-semibold text-dark">${p.ownerName}</span>
-                        ${p.ownerPhone ? ` | SĐT: ${p.ownerPhone}` : ''}
-                        | Hạng: <span class="badge bg-warning text-dark">${p.ownerTier}</span>
-                        ${tierPct > 0 ? `<span class="badge bg-success-subtle text-success ms-1">-${tierPct}%</span>` : ''}
+                        Chủ: <strong class="text-dark">${p.ownerName}</strong> (${p.ownerPhone || 'Chưa có SĐT'})
                     </div>
-                </a>`;
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-warning text-dark fw-bold">${p.ownerTier || 'Tiêu chuẩn'}</span>
+                    ${p.weight ? `<div class="small text-muted mt-1">${p.weight} kg</div>` : ''}
+                </div>
+            `;
+            item.onclick = function() {
+                selectPet(p);
+            };
+            petSuggestionsDropdown.appendChild(item);
         });
 
-        petSuggestionsDropdown.innerHTML = html;
         petSuggestionsDropdown.style.display = 'block';
-
-        // Gán sự kiện click cho các item gợi ý
-        petSuggestionsDropdown.querySelectorAll('a[data-id]').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const petId = parseInt(this.getAttribute('data-id'));
-                selectPetById(petId);
-            });
-        });
     }
 
-    function selectPetById(petId) {
-        const pet = petsData.find(p => p.id === petId);
-        if (!pet) return;
-
-        selectedPet = pet;
-        maThuCungHidden.value = pet.id;
-        petSearchInput.value = `${pet.petName} (${pet.petType} - ${pet.breed}) - Chủ: ${pet.ownerName}`;
-        petSuggestionsDropdown.style.display = 'none';
-        petValidationMsg.classList.add('d-none');
-
-        // Hiển thị thẻ tóm tắt
-        displayPetName.textContent = pet.petName;
-        displayPetBreed.textContent = `${pet.petType} - ${pet.breed}`;
-        displayOwnerName.textContent = pet.ownerName;
-        if (pet.ownerPhone) {
-            displayOwnerPhone.textContent = pet.ownerPhone;
-            displayOwnerPhoneWrapper.style.display = 'inline';
-        } else {
-            displayOwnerPhoneWrapper.style.display = 'none';
-        }
-        displayOwnerTier.textContent = pet.ownerTier;
-
-        const tierPct = getTierDiscountPercentage(pet.ownerTier);
-        if (tierPct > 0) {
-            displayTierDiscount.textContent = `Ưu đãi -${tierPct}%`;
-            displayTierDiscount.classList.remove('d-none');
-        } else {
-            displayTierDiscount.classList.add('d-none');
-        }
-        selectedPetCard.classList.remove('d-none');
-
-        // Tự điền cân nặng nếu có
-        if (pet.weight && !canNangInput.value) {
-            canNangInput.value = pet.weight;
-        }
-
-        recalculateFinancials();
-        checkScheduleConflict();
-    }
-
-    function clearSelectedPet() {
-        selectedPet = null;
-        maThuCungHidden.value = '';
-        petSearchInput.value = '';
-        selectedPetCard.classList.add('d-none');
-        petSuggestionsDropdown.style.display = 'none';
-        recalculateFinancials();
-        checkScheduleConflict();
-    }
-
-    petSearchInput.addEventListener('input', function() {
-        if (selectedPet && this.value !== `${selectedPet.petName} (${selectedPet.petType} - ${selectedPet.breed}) - Chủ: ${selectedPet.ownerName}`) {
-            selectedPet = null;
-            maThuCungHidden.value = '';
-            selectedPetCard.classList.add('d-none');
-            recalculateFinancials();
-        }
-        renderSuggestions(this.value);
-    });
-
-    // Cho phép vừa nhập vừa chọn: click hoặc focus vào là mở danh sách ngay
-    petSearchInput.addEventListener('focus', function() {
-        if (!selectedPet) {
-            renderSuggestions(this.value || '');
-        }
-    });
-
-    petSearchInput.addEventListener('click', function() {
-        if (petSuggestionsDropdown.style.display === 'block' && selectedPet) {
-            petSuggestionsDropdown.style.display = 'none';
-        } else {
-            renderSuggestions(selectedPet ? '' : (this.value || ''));
-        }
-    });
-
-    btnClearPet.addEventListener('click', clearSelectedPet);
-
-    // Đóng dropdown khi click ra ngoài
-    document.addEventListener('click', function(e) {
+    petSearchInput.addEventListener('focus', () => filterPetSuggestions(petSearchInput.value));
+    petSearchInput.addEventListener('input', () => filterPetSuggestions(petSearchInput.value));
+    document.addEventListener('click', (e) => {
         if (!petSearchInput.contains(e.target) && !petSuggestionsDropdown.contains(e.target)) {
             petSuggestionsDropdown.style.display = 'none';
         }
     });
 
-    // 3. Xử lý Thêm / Bớt nhiều dịch vụ chăm sóc
-    function addSelectedService() {
-        const opt = servicePickerSelect.options[servicePickerSelect.selectedIndex];
-        if (!opt || !opt.value) return;
+    function selectPet(pet) {
+        selectedPet = pet;
+        maThuCungHidden.value = pet.id;
+        petSearchInput.value = '';
+        petSuggestionsDropdown.style.display = 'none';
+        petValidationMsg.classList.add('d-none');
 
-        const id = parseInt(opt.value);
-        const name = opt.dataset.name;
-        const price = parseFloat(opt.dataset.price) || 0;
+        document.getElementById('displayPetName').textContent = pet.petName;
+        document.getElementById('displayPetBreed').textContent = pet.breed || pet.petType || 'Thú cưng';
+        document.getElementById('displayPetGender').textContent = pet.gender || '';
+        document.getElementById('displayOwnerName').textContent = pet.ownerName;
+        document.getElementById('displayOwnerPhone').textContent = pet.ownerPhone || 'N/A';
+        document.getElementById('displayOwnerTier').textContent = pet.ownerTier || 'Tiêu chuẩn';
 
-        // Kiểm tra xem dịch vụ này đã thêm chưa
-        const exists = selectedServices.some(s => s.id === id);
-        if (exists) {
-            alert('Dịch vụ "' + name + '" đã có trong danh sách chọn.');
+        let discountText = 'Không giảm giá';
+        if (pet.ownerTier === 'VIP') discountText = 'Ưu đãi -5%';
+        else if (pet.ownerTier === 'VVIP') discountText = 'Ưu đãi -10%';
+        else if (pet.ownerTier === 'Thân thiết') discountText = 'Ưu đãi -3%';
+        document.getElementById('displayTierDiscount').textContent = discountText;
+
+        if (pet.weight && !canNangInput.value) {
+            canNangInput.value = pet.weight;
+        }
+
+        selectedPetCard.classList.remove('d-none');
+        recalculateTotals();
+    }
+
+    btnClearPet.addEventListener('click', function() {
+        selectedPet = null;
+        maThuCungHidden.value = '';
+        selectedPetCard.classList.add('d-none');
+        petSearchInput.value = '';
+        petSearchInput.focus();
+        recalculateTotals();
+    });
+
+    // 3. Thao tác tag tình trạng lâm sàng
+    document.querySelectorAll('.condition-tag').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const val = this.getAttribute('data-val');
+            const target = document.getElementById('tinhTrangBanDauInput');
+            if (target.value.includes(val)) {
+                target.value = target.value.replace(val, '').replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, '').trim();
+                this.classList.remove('btn-secondary', 'text-white');
+                this.classList.add('btn-outline-secondary');
+            } else {
+                target.value = target.value ? target.value + ', ' + val : val;
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-secondary', 'text-white');
+            }
+        });
+    });
+
+    // 4. Lọc danh mục dịch vụ theo Tab (Không có emoji)
+    document.querySelectorAll('.service-category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.service-category-tab').forEach(t => {
+                t.classList.remove('active', 'btn-dark');
+                t.classList.add('btn-outline-secondary');
+            });
+            this.classList.add('active', 'btn-dark');
+            this.classList.remove('btn-outline-secondary');
+
+            const cat = this.getAttribute('data-cat');
+            Array.from(servicePickerSelect.options).forEach(opt => {
+                if (!opt.value) return;
+                const nhom = (opt.getAttribute('data-nhom') || '').toLowerCase();
+                const name = (opt.getAttribute('data-name') || '').toLowerCase();
+                let match = false;
+                if (cat === 'all') match = true;
+                else if (cat === 'spa') match = nhom.includes('spa') || nhom.includes('grooming') || name.includes('tắm') || name.includes('cắt tỉa');
+                else if (cat === 'medical') match = nhom.includes('thú y') || nhom.includes('khám') || name.includes('tiêm') || name.includes('thuốc') || name.includes('khám');
+                else if (cat === 'hotel') match = nhom.includes('khách sạn') || nhom.includes('lưu trú') || name.includes('lưu trú') || name.includes('gửi');
+
+                opt.style.display = match ? 'block' : 'none';
+            });
+            servicePickerSelect.value = '';
+        });
+    });
+
+    // 5. Quy tắc phân công chuyên môn theo Role CSDL
+    function isMedicalService(nhom, name) {
+        const text = ((nhom || '') + ' ' + (name || '')).toLowerCase();
+        return text.includes('thú y') || text.includes('khám') || text.includes('tiêm') 
+            || text.includes('vắc xin') || text.includes('thuốc') || text.includes('triệt sản')
+            || text.includes('xét nghiệm') || text.includes('điều trị') || text.includes('phẫu thuật');
+    }
+
+    function getEligibleStaffForService(s) {
+        const nhom = (s.nhom || '').toLowerCase();
+        const name = (s.name || '').toLowerCase();
+
+        // 1. Nhóm Dịch vụ Y tế / Thú y & Khám chữa
+        if (nhom.includes('thú y') || nhom.includes('khám') || nhom.includes('chữa') || nhom.includes('y tế')
+            || name.includes('khám') || name.includes('tiêm') || name.includes('vắc xin')
+            || name.includes('thuốc') || name.includes('triệt sản') || name.includes('xét nghiệm') || name.includes('phẫu thuật')) {
+            
+            // Bác sĩ thú y (Role 3)
+            return staffData.filter(e => e.isDoctor || e.canDoMedical);
+        }
+
+        // 2. Nhóm Spa, Grooming & Khách sạn lưu trú:
+        // Nhân viên chăm sóc (Role 4)
+        return staffData.filter(e => e.canDoSpa || !e.isDoctor);
+    }
+
+    function addServiceById(serviceId) {
+        if (!serviceId) return;
+        const opt = servicePickerSelect.querySelector(`option[value="${serviceId}"]`);
+        if (!opt) return;
+
+        const id = parseInt(serviceId);
+        if (selectedServices.some(s => s.id === id)) {
+            alert('Dịch vụ này đã được chọn trong phiếu tiếp nhận!');
             return;
         }
 
-        selectedServices.push({ id, name, price });
+        const name = opt.getAttribute('data-name');
+        const price = parseFloat(opt.getAttribute('data-price')) || 0;
+        const duration = parseInt(opt.getAttribute('data-duration')) || 45;
+        const nhom = opt.getAttribute('data-nhom') || '';
+        const isMed = isMedicalService(nhom, name);
+
+        // Gợi ý nhân sự ban đầu phù hợp với role của dịch vụ
+        const eligibleStaff = getEligibleStaffForService({ nhom: nhom, name: name });
+        let defaultStaffId = '';
+        if (eligibleStaff.length > 0) {
+            defaultStaffId = eligibleStaff[0].maNV;
+        }
+
+        selectedServices.push({
+            id: id,
+            name: name,
+            price: price,
+            duration: duration,
+            nhom: nhom,
+            isMedical: isMed,
+            staffId: defaultStaffId
+        });
+
         renderSelectedServices();
-        recalculateFinancials();
-        servicePickerSelect.selectedIndex = 0;
+        servicePickerSelect.value = '';
     }
 
-    // Tự động thêm ngay khi người dùng chọn một mục trong dropdown
-    servicePickerSelect.addEventListener('change', addSelectedService);
+    btnAddServiceDirect.addEventListener('click', function() {
+        if (!servicePickerSelect.value) {
+            alert('Vui lòng chọn 1 dịch vụ từ danh sách trước khi bấm Thêm!');
+            return;
+        }
+        addServiceById(servicePickerSelect.value);
+    });
+
+    servicePickerSelect.addEventListener('change', function() {
+        if (this.value) {
+            addServiceById(this.value);
+        }
+    });
 
     window.removeService = function(id) {
         selectedServices = selectedServices.filter(s => s.id !== id);
         renderSelectedServices();
-        recalculateFinancials();
+    };
+
+    window.onServiceStaffChange = function(serviceId, staffId) {
+        const s = selectedServices.find(item => item.id === serviceId);
+        if (s) {
+            s.staffId = staffId ? parseInt(staffId) : '';
+            const hiddenInp = document.getElementById('staffInput_' + serviceId);
+            if (hiddenInp) hiddenInp.value = s.staffId;
+        }
     };
 
     function renderSelectedServices() {
         if (selectedServices.length === 0) {
             selectedServicesContainer.classList.add('d-none');
-            selectedServicesBadges.innerHTML = '';
+            selectedServicesList.innerHTML = '';
             selectedServiceCountBadge.textContent = '0 dịch vụ đã chọn';
+            recalculateTotals();
             return;
         }
 
@@ -480,109 +750,134 @@
 
         let html = '';
         selectedServices.forEach(s => {
+            const badgeCls = s.isMedical ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-primary-subtle text-primary border border-primary-subtle';
+            const catTitle = s.isMedical ? 'Thú y & Khám chữa' : (s.nhom || 'Spa - Grooming');
+
+            // Danh sách nhân sự phù hợp CHUYÊN MÔN THEO ROLE TỪ DATABASE
+            const eligible = getEligibleStaffForService(s);
+            let staffOptionsHtml = '<option value="">-- Phân công chuyên môn --</option>';
+            eligible.forEach(emp => {
+                const isSelected = String(emp.maNV) === String(s.staffId);
+                const rolePrefix = emp.isDoctor ? '[Bác sĩ thú y] ' : '[Nhân viên chăm sóc] ';
+                staffOptionsHtml += `<option value="${emp.maNV}" ${isSelected ? 'selected' : ''}>${rolePrefix}${emp.tenNV} (${emp.chuyenMon})</option>`;
+            });
+
             html += `
-                <span class="badge bg-white text-dark border p-2 d-inline-flex align-items-center gap-2 rounded-3 shadow-xs mb-1">
-                    <span class="fw-semibold text-truncate" style="max-width: 200px;">${s.name}</span>
-                    <span class="text-primary fw-bold">${formatVND(s.price)}</span>
-                    <button type="button" class="btn-close btn-close-sm" style="font-size: 0.65rem;" onclick="removeService(${s.id})" title="Xóa dịch vụ này"></button>
-                    <input type="hidden" name="selectedServiceIds" value="${s.id}">
-                </span>
-            `;
+                <div class="card border rounded-3 p-2 bg-white shadow-none">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge ${badgeCls} px-2 py-1 text-nowrap" style="font-size:0.75rem;">
+                                    ${catTitle}
+                                </span>
+                                <span class="fw-bold text-dark text-truncate" title="${s.name}">${s.name}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-nowrap">
+                            <span class="text-danger fw-bold me-2">${s.price.toLocaleString('vi-VN')} VND</span>
+                            <span class="badge bg-light text-muted border">${s.duration} phút</span>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="selectedServiceIds" value="${s.id}">
+                                <input type="hidden" name="serviceStaffIds" id="staffInput_${s.id}" value="${s.staffId || ''}">
+                                <select class="form-select form-select-sm rounded-3 flex-grow-1" 
+                                        onchange="onServiceStaffChange(${s.id}, this.value)" required>
+                                    ${staffOptionsHtml}
+                                </select>
+                                <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle flex-shrink-0 px-2" onclick="removeService(${s.id})" title="Xóa dịch vụ">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
         });
-        selectedServicesBadges.innerHTML = html;
+
+        selectedServicesList.innerHTML = html;
+        recalculateTotals();
     }
 
-    // 4. Xử lý tự đối chiếu và tự điền tổng tiền tạm tính
-    function recalculateFinancials() {
-        const basePrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
-        const serviceNames = selectedServices.map(s => s.name).join(', ');
+    // 6. Tính toán chi phí, thời lượng và gợi ý giờ trả
+    function recalculateTotals() {
+        let totalDuration = 0;
+        let sumServicePrice = 0;
 
-        let tierDiscount = 0;
-        let tierPct = 0;
-        let ownerTier = 'Tiêu chuẩn';
+        selectedServices.forEach(s => {
+            totalDuration += (s.duration || 45);
+            sumServicePrice += (s.price || 0);
+        });
 
-        if (selectedPet) {
-            ownerTier = selectedPet.ownerTier || 'Tiêu chuẩn';
-            tierPct = getTierDiscountPercentage(ownerTier);
-            if (basePrice > 0 && tierPct > 0) {
-                tierDiscount = Math.round(basePrice * (tierPct / 100));
-            }
+        totalEstimatedDurationElem.textContent = totalDuration;
+
+        // Tính giờ hẹn trả khuyến nghị = Hiện tại + tổng thời lượng + 15 phút đệm
+        if (totalDuration > 0) {
+            const returnDate = new Date();
+            returnDate.setMinutes(returnDate.getMinutes() + totalDuration + 15);
+            const hours = String(returnDate.getHours()).padStart(2, '0');
+            const minutes = String(returnDate.getMinutes()).padStart(2, '0');
+            suggestedReturnTimeElem.textContent = `${hours}:${minutes}`;
+
+            // Cập nhật input hẹn trả nếu chưa được sửa thủ công
+            const offsetDate = new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000);
+            ngayHenTraInput.value = offsetDate.toISOString().slice(0, 16);
         }
 
-        let voucherDiscount = 0;
-        if (appliedVoucher && basePrice > 0) {
+        // Tính chiết khấu hạng thành viên
+        let discountRate = 0;
+        if (selectedPet) {
+            if (selectedPet.ownerTier === 'VVIP') discountRate = 0.10;
+            else if (selectedPet.ownerTier === 'VIP') discountRate = 0.05;
+            else if (selectedPet.ownerTier === 'Thân thiết') discountRate = 0.03;
+        }
+
+        const tierDiscountVal = Math.round(sumServicePrice * discountRate);
+
+        // Tính chiết khấu Voucher
+        let voucherDiscountVal = 0;
+        if (appliedVoucher && sumServicePrice > 0) {
             if (appliedVoucher.percent) {
-                voucherDiscount = Math.round(basePrice * (parseFloat(appliedVoucher.percent) / 100));
-                if (appliedVoucher.maxDiscount && voucherDiscount > parseFloat(appliedVoucher.maxDiscount)) {
-                    voucherDiscount = parseFloat(appliedVoucher.maxDiscount);
+                voucherDiscountVal = Math.round(sumServicePrice * (parseFloat(appliedVoucher.percent) / 100));
+                if (appliedVoucher.maxDiscount && voucherDiscountVal > parseFloat(appliedVoucher.maxDiscount)) {
+                    voucherDiscountVal = parseFloat(appliedVoucher.maxDiscount);
                 }
             } else if (appliedVoucher.discount) {
-                voucherDiscount = parseFloat(appliedVoucher.discount);
+                voucherDiscountVal = parseFloat(appliedVoucher.discount);
             }
         }
-
-        let totalDiscount = tierDiscount + voucherDiscount;
-        if (totalDiscount > basePrice) totalDiscount = basePrice;
-        let finalAmount = basePrice - totalDiscount;
-        if (finalAmount < 0) finalAmount = 0;
-
-        // Điền vào các trường form
-        tongTienInput.value = Math.round(basePrice);
-        tienGiamGiaInput.value = Math.round(totalDiscount);
-        thanhToanInput.value = Math.round(finalAmount);
-
-        // Chi tiết giảm giá
-        let detailParts = [];
-        if (tierDiscount > 0) {
-            detailParts.push(`Hạng ${ownerTier} (-${tierPct}%): ${formatVND(tierDiscount)}`);
-        }
-        if (voucherDiscount > 0) {
-            detailParts.push(`Voucher ${appliedVoucher.code}: ${formatVND(voucherDiscount)}`);
-        }
-        if (giamGiaDetailText) {
-            giamGiaDetailText.textContent = detailParts.length > 0 ? detailParts.join(' + ') : '';
+        if (voucherDiscountVal > sumServicePrice - tierDiscountVal) {
+            voucherDiscountVal = Math.max(0, sumServicePrice - tierDiscountVal);
         }
 
-        // Bảng tóm tắt trực quan
-        if (basePrice > 0) {
-            let breakdownHtml = `Dịch vụ (${selectedServices.length}): <strong>${serviceNames}</strong> (${formatVND(basePrice)})`;
-            if (selectedPet) {
-                breakdownHtml += ` | Khách: <strong>${selectedPet.ownerName}</strong> (Hạng: <span class="badge bg-warning text-dark">${ownerTier}</span>)`;
-                if (tierDiscount > 0) {
-                    breakdownHtml += ` <span class="text-success fw-bold">-${formatVND(tierDiscount)}</span>`;
-                }
-            }
-            if (voucherDiscount > 0) {
-                breakdownHtml += ` | Voucher <strong>${appliedVoucher.code}</strong>: <span class="text-success fw-bold">-${formatVND(voucherDiscount)}</span>`;
-            }
-            summaryBreakdown.innerHTML = breakdownHtml;
-        } else {
-            summaryBreakdown.textContent = selectedPet ? `Đã chọn: ${selectedPet.petName} (Chủ: ${selectedPet.ownerName}) - Vui lòng chọn ít nhất 1 dịch vụ.` : 'Vui lòng chọn thú cưng và dịch vụ chăm sóc để xem tính toán chi tiết.';
-        }
+        const depositVal = parseFloat(tienDatCocInput.value) || 0;
+        const finalEst = Math.max(0, sumServicePrice - tierDiscountVal - voucherDiscountVal - depositVal);
 
-        summaryBigTotal.textContent = formatVND(finalAmount);
+        summaryServiceTotal.textContent = sumServicePrice.toLocaleString('vi-VN') + ' VND';
+        summaryTierDiscount.textContent = '-' + tierDiscountVal.toLocaleString('vi-VN') + ' VND' + (discountRate > 0 ? ` (${discountRate * 100}%)` : '');
+        if (summaryVoucherDiscount) {
+            summaryVoucherDiscount.textContent = '-' + voucherDiscountVal.toLocaleString('vi-VN') + ' VND' + (appliedVoucher && appliedVoucher.code ? ` (${appliedVoucher.code})` : '');
+        }
+        summaryDeposit.textContent = depositVal.toLocaleString('vi-VN') + ' VND';
+        summaryFinalEstimate.textContent = finalEst.toLocaleString('vi-VN') + ' VND';
     }
 
-    // 5. Xử lý Voucher (Áp dụng / Hủy)
-    btnApplyVoucher.addEventListener('click', applyVoucher);
-    voucherCodeInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            applyVoucher();
-        }
-    });
+    tienDatCocInput.addEventListener('input', recalculateTotals);
 
+    // 7. Xử lý Voucher (Áp dụng / Hủy)
     function applyVoucher() {
+        if (!voucherCodeInput) return;
         const code = voucherCodeInput.value.trim().toUpperCase();
         if (!code) {
-            voucherMsg.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Vui lòng nhập mã voucher.</span>';
+            if (voucherMsg) voucherMsg.innerHTML = '<span class="text-danger">Vui lòng nhập mã voucher.</span>';
             return;
         }
 
-        const basePrice = parseFloat(tongTienInput.value) || 0;
+        let sumServicePrice = 0;
+        selectedServices.forEach(s => { sumServicePrice += (s.price || 0); });
+
         const formData = new FormData();
         formData.append('code', code);
-        formData.append('amount', basePrice);
+        formData.append('amount', sumServicePrice);
 
         fetch('/admin/care-tickets/check-voucher', {
             method: 'POST',
@@ -592,218 +887,192 @@
         .then(data => {
             if (data.valid) {
                 appliedVoucher = data;
-                voucherMsg.innerHTML = `<span class="text-success fw-semibold"><i class="fas fa-check-circle"></i> ${data.message}</span>`;
-                btnRemoveVoucher.classList.remove('d-none');
+                if (voucherMsg) voucherMsg.innerHTML = `<span class="text-success fw-semibold">${data.message}</span>`;
+                if (btnRemoveVoucher) btnRemoveVoucher.classList.remove('d-none');
                 voucherCodeInput.readOnly = true;
-                recalculateFinancials();
+                recalculateTotals();
             } else {
                 appliedVoucher = null;
-                voucherMsg.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${data.message}</span>`;
-                btnRemoveVoucher.classList.add('d-none');
-                recalculateFinancials();
+                if (voucherMsg) voucherMsg.innerHTML = `<span class="text-danger">${data.message}</span>`;
+                if (btnRemoveVoucher) btnRemoveVoucher.classList.add('d-none');
+                recalculateTotals();
             }
         })
         .catch(err => {
             console.error(err);
-            voucherMsg.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> Không thể kiểm tra mã voucher lúc này.</span>';
+            if (voucherMsg) voucherMsg.innerHTML = '<span class="text-danger">Không thể kiểm tra mã voucher lúc này.</span>';
         });
     }
 
-    btnRemoveVoucher.addEventListener('click', function() {
-        appliedVoucher = null;
-        voucherCodeInput.value = '';
-        voucherCodeInput.readOnly = false;
-        voucherMsg.innerHTML = '';
-        btnRemoveVoucher.classList.add('d-none');
-        recalculateFinancials();
-    });
-
-    // 6. Xử lý giới hạn ngày giờ & kiểm tra hợp lệ
-    function initDateTimeLimits() {
-        if (!ngayHenTraInput) return;
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const minVal = `${year}-${month}-${day}T${hours}:${minutes}`;
-        ngayHenTraInput.min = minVal;
+    if (btnApplyVoucher) {
+        btnApplyVoucher.addEventListener('click', applyVoucher);
     }
-    initDateTimeLimits();
-
-    function validateNgayHenTra() {
-        if (!ngayHenTraInput || !ngayHenTraInput.value) {
-            if (ngayHenTraInput) ngayHenTraInput.classList.remove('is-invalid');
-            if (ngayHenTraValidationMsg) {
-                ngayHenTraValidationMsg.textContent = '';
-                ngayHenTraValidationMsg.classList.add('d-none');
-            }
-            return true;
-        }
-        const selected = new Date(ngayHenTraInput.value);
-        const now = new Date();
-        if (selected < now) {
-            ngayHenTraInput.classList.add('is-invalid');
-            ngayHenTraValidationMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Ngày giờ không hợp lệ: Không thể chọn thời gian trước hiện tại!';
-            ngayHenTraValidationMsg.classList.remove('d-none');
-            return false;
-        } else {
-            ngayHenTraInput.classList.remove('is-invalid');
-            ngayHenTraValidationMsg.textContent = '';
-            ngayHenTraValidationMsg.classList.add('d-none');
-            return true;
-        }
-    }
-
-    if (ngayHenTraInput) {
-        ngayHenTraInput.addEventListener('change', function() {
-            if (validateNgayHenTra()) {
-                checkScheduleConflict();
-            }
-        });
-        ngayHenTraInput.addEventListener('input', function() {
-            validateNgayHenTra();
-        });
-    }
-
-    // 7. Kiểm tra trùng lịch làm việc nhân viên (AJAX)
-    let conflictCheckTimer = null;
-    function checkScheduleConflict() {
-        clearTimeout(conflictCheckTimer);
-        conflictCheckTimer = setTimeout(() => {
-            const maNV = maNVSelect ? maNVSelect.value : '';
-            const ngayHenTra = ngayHenTraInput ? ngayHenTraInput.value : '';
-            const maThuCung = maThuCungHidden ? maThuCungHidden.value : '';
-
-            if (!maNV || !ngayHenTra) {
-                if (employeeConflictMsg) {
-                    employeeConflictMsg.textContent = '';
-                    employeeConflictMsg.classList.add('d-none');
-                }
-                if (maNVSelect) maNVSelect.classList.remove('is-invalid');
-                return;
-            }
-
-            fetch(`/admin/care-tickets/check-conflict?maNV=${maNV}&ngayHenTra=${encodeURIComponent(ngayHenTra)}&maThuCung=${maThuCung}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.hasError && data.errorType === 'SCHEDULE_CONFLICT') {
-                        maNVSelect.classList.add('is-invalid');
-                        employeeConflictMsg.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i> ${data.message}`;
-                        employeeConflictMsg.classList.remove('d-none');
-
-                        if (dynamicErrorMessage && dynamicErrorAlert) {
-                            dynamicErrorMessage.textContent = data.message;
-                            dynamicErrorAlert.classList.remove('d-none');
-                            dynamicErrorAlert.classList.add('d-flex');
-                        }
-                    } else {
-                        maNVSelect.classList.remove('is-invalid');
-                        employeeConflictMsg.textContent = '';
-                        employeeConflictMsg.classList.add('d-none');
-                        if (dynamicErrorAlert && dynamicErrorMessage && dynamicErrorMessage.textContent.includes('Trùng lịch làm việc')) {
-                            dynamicErrorAlert.classList.add('d-none');
-                            dynamicErrorAlert.classList.remove('d-flex');
-                        }
-                    }
-                })
-                .catch(err => console.error(err));
-        }, 200);
-    }
-
-    if (maNVSelect) {
-        maNVSelect.addEventListener('change', checkScheduleConflict);
-    }
-
-    // 8. Kiểm tra trước khi submit form
-    document.getElementById('careTicketForm').addEventListener('submit', function(e) {
-        if (!maThuCungHidden.value) {
-            e.preventDefault();
-            petValidationMsg.classList.remove('d-none');
-            petSearchInput.focus();
-            window.scrollTo({ top: petSearchInput.offsetTop - 100, behavior: 'smooth' });
-            return;
-        }
-        if (selectedServices.length === 0) {
-            e.preventDefault();
-            serviceValidationMsg.classList.remove('d-none');
-            servicePickerSelect.focus();
-            window.scrollTo({ top: servicePickerSelect.offsetTop - 100, behavior: 'smooth' });
-            return;
-        }
-        if (ngayHenTraInput && ngayHenTraInput.value) {
-            const selected = new Date(ngayHenTraInput.value);
-            if (selected < new Date()) {
+    if (voucherCodeInput) {
+        voucherCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
                 e.preventDefault();
-                ngayHenTraInput.classList.add('is-invalid');
-                ngayHenTraValidationMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Ngày giờ không hợp lệ: Không thể chọn thời gian trước hiện tại!';
-                ngayHenTraValidationMsg.classList.remove('d-none');
-                if (dynamicErrorMessage && dynamicErrorAlert) {
-                    dynamicErrorMessage.textContent = 'Ngày giờ không hợp lệ: Không thể chọn thời gian trước thời điểm hiện tại!';
-                    dynamicErrorAlert.classList.remove('d-none');
-                    dynamicErrorAlert.classList.add('d-flex');
-                }
-                ngayHenTraInput.focus();
-                window.scrollTo({ top: ngayHenTraInput.offsetTop - 100, behavior: 'smooth' });
-                return;
+                applyVoucher();
             }
+        });
+    }
+    if (btnRemoveVoucher) {
+        btnRemoveVoucher.addEventListener('click', function() {
+            appliedVoucher = null;
+            if (voucherCodeInput) {
+                voucherCodeInput.value = '';
+                voucherCodeInput.readOnly = false;
+            }
+            if (voucherMsg) voucherMsg.innerHTML = '';
+            btnRemoveVoucher.classList.add('d-none');
+            recalculateTotals();
+        });
+    }
+
+    // 7. Xử lý Modal thêm nhanh Khách & Thú cưng
+    const btnOpenQuickPetModal = document.getElementById('btnOpenQuickPetModal');
+    const modalElem = document.getElementById('quickCreatePetModal');
+    const btnSubmitQuickPet = document.getElementById('btnSubmitQuickPet');
+    const quickModalAlert = document.getElementById('quickModalAlert');
+
+    function openQuickPetModal() {
+        if (!modalElem) return;
+        quickModalAlert.classList.add('d-none');
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElem);
+            modalInstance.show();
+        } else {
+            modalElem.classList.add('show');
+            modalElem.style.display = 'block';
+            document.body.classList.add('modal-open');
         }
-        if (employeeConflictMsg && !employeeConflictMsg.classList.contains('d-none') && employeeConflictMsg.textContent.trim()) {
+    }
+
+    function closeQuickPetModal() {
+        if (!modalElem) return;
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElem);
+            if (modalInstance) modalInstance.hide();
+        }
+        modalElem.classList.remove('show');
+        modalElem.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    }
+
+    if (btnOpenQuickPetModal) {
+        btnOpenQuickPetModal.addEventListener('click', function(e) {
             e.preventDefault();
-            if (dynamicErrorMessage && dynamicErrorAlert) {
-                dynamicErrorMessage.textContent = employeeConflictMsg.textContent;
-                dynamicErrorAlert.classList.remove('d-none');
-                dynamicErrorAlert.classList.add('d-flex');
-            }
-            maNVSelect.focus();
-            window.scrollTo({ top: maNVSelect.offsetTop - 100, behavior: 'smooth' });
-            return;
-        }
+            openQuickPetModal();
+        });
+    }
+
+    document.querySelectorAll('#quickCreatePetModal [data-bs-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeQuickPetModal();
+        });
     });
 
-    // Tự động sắp xếp lại danh sách nhân viên theo thứ tự tối ưu khi thay đổi thời gian hẹn trả
-    function reloadOptimizedStaffList() {
-        if (!maNVSelect) return;
-        const currentVal = maNVSelect.value;
-        const ngayHenTraVal = ngayHenTraInput ? ngayHenTraInput.value : '';
-        const ticketIdInput = document.querySelector('input[name="maPhieuDV"]');
-        const excludeId = ticketIdInput ? ticketIdInput.value : '';
+    btnSubmitQuickPet.addEventListener('click', function() {
+        const ownerName = document.getElementById('quickOwnerName').value.trim();
+        const ownerPhone = document.getElementById('quickOwnerPhone').value.trim();
+        const ownerAddress = document.getElementById('quickOwnerAddress').value.trim();
+        const petName = document.getElementById('quickPetName').value.trim();
+        const petType = document.getElementById('quickPetType').value;
+        const petGender = document.getElementById('quickPetGender').value;
+        const petBreed = document.getElementById('quickPetBreed').value.trim();
+        const petWeight = document.getElementById('quickPetWeight').value.trim();
 
-        let url = '/admin/care-tickets/optimized-staff-list?ngayHenTra=' + encodeURIComponent(ngayHenTraVal)
-                + (excludeId ? '&excludeTicketId=' + encodeURIComponent(excludeId) : '');
+        if (!ownerName || !ownerPhone || !petName) {
+            quickModalAlert.textContent = 'Vui lòng điền đầy đủ họ tên chủ nuôi, số điện thoại và tên thú cưng!';
+            quickModalAlert.classList.remove('d-none');
+            return;
+        }
 
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                if (!Array.isArray(data)) return;
-                
-                maNVSelect.innerHTML = '<option value="">-- Chọn nhân sự (Đã sắp xếp theo thứ tự tối ưu) --</option>';
+        btnSubmitQuickPet.disabled = true;
+        btnSubmitQuickPet.textContent = 'Đang lưu...';
 
-                data.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.maNV;
-                    opt.textContent = item.displayText;
-                    if (String(item.maNV) === String(currentVal)) {
-                        opt.selected = true;
-                    }
-                    maNVSelect.appendChild(opt);
-                });
-
-                // Kiểm tra lại trạng thái xung đột nếu có nhân viên đang chọn
-                checkScheduleConflict();
+        fetch('/admin/care-tickets/api/quick-create-pet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                hoTenChuNuoi: ownerName,
+                soDienThoai: ownerPhone,
+                diaChi: ownerAddress,
+                tenThuCung: petName,
+                loaiThuCung: petType,
+                gioiTinh: petGender,
+                giongLoai: petBreed,
+                canNang: petWeight
             })
-            .catch(err => console.error('Lỗi tải danh sách nhân sự tối ưu:', err));
-    }
+        })
+        .then(res => res.json())
+        .then(data => {
+            btnSubmitQuickPet.disabled = false;
+            btnSubmitQuickPet.textContent = 'Lưu & Điền vào phiếu ngay';
 
-    if (ngayHenTraInput) {
-        ngayHenTraInput.addEventListener('change', reloadOptimizedStaffList);
-    }
+            if (data.success && data.pet) {
+                petsData.unshift(data.pet);
+                selectPet(data.pet);
 
-    // Tự động khôi phục chọn thú cưng nếu maThuCungHidden đã có giá trị sẵn
-    if (maThuCungHidden && maThuCungHidden.value) {
-        selectPetById(parseInt(maThuCungHidden.value));
-    }
+                // Đóng modal an toàn
+                closeQuickPetModal();
+
+                // Reset modal form
+                document.getElementById('quickOwnerName').value = '';
+                document.getElementById('quickOwnerPhone').value = '';
+                document.getElementById('quickOwnerAddress').value = '';
+                document.getElementById('quickPetName').value = '';
+                document.getElementById('quickPetBreed').value = '';
+                document.getElementById('quickPetWeight').value = '';
+                quickModalAlert.classList.add('d-none');
+            } else {
+                quickModalAlert.textContent = data.message || 'Lỗi tạo hồ sơ nhanh!';
+                quickModalAlert.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            btnSubmitQuickPet.disabled = false;
+            btnSubmitQuickPet.textContent = 'Lưu & Điền vào phiếu ngay';
+            quickModalAlert.textContent = 'Lỗi kết nối máy chủ: ' + err.message;
+            quickModalAlert.classList.remove('d-none');
+        });
+    });
+
+    // 8. Bắt lỗi trước khi Submit Form
+    const careTicketForm = document.getElementById('careTicketForm');
+    careTicketForm.addEventListener('submit', function(e) {
+        let hasError = false;
+
+        if (!maThuCungHidden.value) {
+            petValidationMsg.classList.remove('d-none');
+            hasError = true;
+        } else {
+            petValidationMsg.classList.add('d-none');
+        }
+
+        if (selectedServices.length === 0) {
+            serviceValidationMsg.classList.remove('d-none');
+            hasError = true;
+        } else {
+            serviceValidationMsg.classList.add('d-none');
+        }
+
+        // Kiểm tra từng dịch vụ bắt buộc phải gán nhân sự đúng vai trò chuyên môn từ CSDL
+        for (const s of selectedServices) {
+            const eligible = getEligibleStaffForService(s);
+            const assigned = staffData.find(emp => emp.maNV === s.staffId);
+            if (!assigned || !eligible.some(e => e.maNV === assigned.maNV)) {
+                alert(`Quy định chuyên môn: Dịch vụ '${s.name}' chưa được phân công đúng nhân sự có vai trò/chuyên môn phù hợp!`);
+                hasError = true;
+                break;
+            }
+        }
+
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
     /*]]>*/
 </script>
 </body>

@@ -25,7 +25,7 @@ public class AdminRevenueReportController {
     private AuthService authService;
 
     @GetMapping
-    public String viewReport(@RequestParam(value = "type", defaultValue = "week") String type,
+    public String viewReport(@RequestParam(value = "type", defaultValue = "day") String type,
                              @RequestParam(value = "date", required = false) String date,
                              @RequestParam(value = "month", required = false) String month,
                              @RequestParam(value = "year", required = false) Integer year,
@@ -33,7 +33,7 @@ public class AdminRevenueReportController {
                              @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                              Model model, HttpSession session) {
         if (!authService.isAdmin(session)) {
-            return "redirect:/DangNhap";
+            return authService.redirectUnauthorized(session);
         }
 
         RevenueReportDTO report = revenueReportService.generateReport(type, date, month, year, from, to);
@@ -42,7 +42,7 @@ public class AdminRevenueReportController {
     }
 
     @GetMapping("/export-csv")
-    public void exportCsv(@RequestParam(value = "type", defaultValue = "week") String type,
+    public void exportCsv(@RequestParam(value = "type", defaultValue = "day") String type,
                           @RequestParam(value = "date", required = false) String date,
                           @RequestParam(value = "month", required = false) String month,
                           @RequestParam(value = "year", required = false) Integer year,
@@ -51,7 +51,7 @@ public class AdminRevenueReportController {
                           jakarta.servlet.http.HttpServletResponse response,
                           HttpSession session) throws java.io.IOException {
         if (!authService.isAdmin(session)) {
-            response.sendRedirect("/DangNhap");
+            response.sendRedirect(authService.isLoggedIn(session) ? "/admin" : "/DangNhap");
             return;
         }
 

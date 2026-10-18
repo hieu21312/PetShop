@@ -19,14 +19,53 @@ public class AdminController {
     @Autowired
     private AuthService authService;
 
+    // Điều hướng trang quản trị theo vai trò
+    @GetMapping({"", "/"})
+    public String adminRoot(HttpSession session) {
+        if (!authService.isLoggedIn(session)) {
+            return "redirect:/DangNhap";
+        }
+        if (authService.isAdmin(session)) {
+            return "redirect:/admin/index";
+        }
+        if (authService.isDoctor(session)) {
+            return "redirect:/admin/doctor/treatment";
+        }
+        if (authService.isCashier(session)) {
+            return "redirect:/admin/thu-ngan";
+        }
+        if (session.getAttribute("maNV") != null) {
+            return "redirect:/staff/my-tasks";
+        }
+        return "redirect:/DangNhap";
+    }
+
     // Dashboard Admin
     @GetMapping("/index")
     public String index(Model model, HttpSession session) {
-        // Kiểm tra quyền Admin
+        if (!authService.isLoggedIn(session)) {
+            return "redirect:/DangNhap";
+        }
+        // Kiểm tra quyền Admin, nếu là nhân sự khác thì điều hướng về trang phù hợp
         if (!authService.isAdmin(session)) {
+            if (authService.isDoctor(session)) {
+                return "redirect:/admin/doctor/treatment";
+            }
+            if (authService.isCashier(session)) {
+                return "redirect:/admin/thu-ngan";
+            }
+            if (session.getAttribute("maNV") != null) {
+                return "redirect:/staff/my-tasks";
+            }
             return "redirect:/DangNhap";
         }
         model.addAttribute("dashboard", adminService.getDashboardData());
         return "admin/index";
+    }
+
+    // Chuyển tiếp lịch làm việc của nhân viên
+    @GetMapping("/my-tasks")
+    public String myTasksRedirect() {
+        return "redirect:/staff/my-tasks";
     }
 }

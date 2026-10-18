@@ -35,7 +35,7 @@ public class AdminProductController {
     // Danh sách sản phẩm
     @GetMapping
     public String listProducts(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Product> products = productRepository.findAll();
         model.addAttribute("products", products);
         return "admin/products";
@@ -44,7 +44,7 @@ public class AdminProductController {
     // Form thêm sản phẩm
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("product", new Product());
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("suppliers", supplierRepository.findAll());
@@ -56,7 +56,7 @@ public class AdminProductController {
     public String createProduct(@ModelAttribute Product product,
                                 @RequestParam("fileImage") MultipartFile file,
                                 HttpSession session) throws IOException {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         
         if (file.isEmpty()) {
             session.setAttribute("error", "Vui lòng chọn ảnh đại diện cho sản phẩm.");
@@ -79,7 +79,7 @@ public class AdminProductController {
     // Form sửa sản phẩm
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Product product = productRepository.findById(id).orElse(null);
         if (product == null) return "redirect:/admin/products";
         model.addAttribute("product", product);
@@ -94,7 +94,7 @@ public class AdminProductController {
                                 @ModelAttribute Product product,
                                 @RequestParam(value = "fileImage", required = false) MultipartFile file,
                                 HttpSession session) throws IOException {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Product existing = productRepository.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/products";
         existing.setTenSP(product.getTenSP());
@@ -120,7 +120,7 @@ public class AdminProductController {
     // Xóa sản phẩm
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Integer id, HttpSession session) throws IOException {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Product product = productRepository.findById(id).orElse(null);
         if (product != null) {
             if (product.getAnhDaiDien() != null) deleteFile(product.getAnhDaiDien());

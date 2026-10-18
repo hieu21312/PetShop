@@ -30,7 +30,7 @@ public class AdminCustomerController {
     // Danh sách khách hàng
     @GetMapping
     public String listCustomers(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Customer> customers = customerRepository.findAll();
         model.addAttribute("customers", customers);
         return "admin/customers";
@@ -39,7 +39,7 @@ public class AdminCustomerController {
     // Xem đơn hàng của khách hàng
     @GetMapping("/orders/{id}")
     public String viewOrders(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Customer customer = customerRepository.findById(id).orElse(null);
         if (customer == null) return "redirect:/admin/customers";
         List<Order> orders = orderRepository.findByMaKHOrderByNgayLapDesc(id);

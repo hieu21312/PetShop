@@ -31,11 +31,11 @@ public class StatisticController {
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                         HttpSession session) {
         if (!authService.isAdmin(session)) {
-            return "redirect:/DangNhap";
+            return authService.redirectUnauthorized(session);
         }
         if (from != null && to != null) {
             return "redirect:/admin/reports?type=custom&from=" + from + "&to=" + to;
         }
-        return "redirect:/admin/reports";
+        return "redirect:/admin/reports?type=day";
     }
 }

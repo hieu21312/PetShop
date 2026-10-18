@@ -29,7 +29,7 @@ public class AdminDoctorTreatmentController {
 
     @GetMapping
     public String listPetsInTreatment(Model model, HttpSession session) {
-        if (!authService.canViewTreatment(session)) return "redirect:/DangNhap";
+        if (!authService.canViewTreatment(session)) return authService.redirectUnauthorized(session);
 
         List<HoSoThuCung> pets = nhatKyDieuTriService.getDanhSachThuCungDangDieuTri();
         model.addAttribute("pets", pets);
@@ -38,7 +38,7 @@ public class AdminDoctorTreatmentController {
 
     @GetMapping("/{maThuCung}")
     public String viewTreatmentRecord(@PathVariable("maThuCung") Integer maThuCung, Model model, HttpSession session) {
-        if (!authService.canViewTreatment(session)) return "redirect:/DangNhap";
+        if (!authService.canViewTreatment(session)) return authService.redirectUnauthorized(session);
 
         HoSoThuCung pet = nhatKyDieuTriService.getHoSoThuCung(maThuCung)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hồ sơ thú cưng #" + maThuCung));

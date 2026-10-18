@@ -24,6 +24,11 @@ public class DashboardDTO {
     // Tổng doanh thu kết hợp (Sản phẩm + Dịch vụ)
     private BigDecimal tongDoanhThuTongCong;
 
+    // Doanh thu theo ngày (Hôm nay)
+    private BigDecimal doanhThuHomNay;
+    private BigDecimal doanhThuDichVuHomNay;
+    private BigDecimal tongDoanhThuHomNay;
+
     // Constructors
     public DashboardDTO() {}
 
@@ -72,6 +77,15 @@ public class DashboardDTO {
 
     public BigDecimal getTongDoanhThuTongCong() { return tongDoanhThuTongCong; }
     public void setTongDoanhThuTongCong(BigDecimal tongDoanhThuTongCong) { this.tongDoanhThuTongCong = tongDoanhThuTongCong; }
+
+    public BigDecimal getDoanhThuHomNay() { return doanhThuHomNay; }
+    public void setDoanhThuHomNay(BigDecimal doanhThuHomNay) { this.doanhThuHomNay = doanhThuHomNay; }
+
+    public BigDecimal getDoanhThuDichVuHomNay() { return doanhThuDichVuHomNay; }
+    public void setDoanhThuDichVuHomNay(BigDecimal doanhThuDichVuHomNay) { this.doanhThuDichVuHomNay = doanhThuDichVuHomNay; }
+
+    public BigDecimal getTongDoanhThuHomNay() { return tongDoanhThuHomNay; }
+    public void setTongDoanhThuHomNay(BigDecimal tongDoanhThuHomNay) { this.tongDoanhThuHomNay = tongDoanhThuHomNay; }
 
     public static class TopProductDTO {
         private String tenSP;

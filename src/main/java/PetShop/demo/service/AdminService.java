@@ -85,6 +85,30 @@ public class AdminService {
         dto.setTongDoanhThuDichVu(tongDoanhThuDichVu);
         dto.setTongDoanhThuTongCong(tongDoanhThu.add(tongDoanhThuDichVu));
 
+        // 3. Thống kê theo ngày (Hôm nay)
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfToday = today.atStartOfDay();
+        LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
+
+        BigDecimal doanhThuSPHomNay = BigDecimal.ZERO;
+        try {
+            doanhThuSPHomNay = orderRepository.findOrdersBetween(startOfToday, endOfToday).stream()
+                    .map(Order::getTongTien)
+                    .filter(val -> val != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } catch (Exception e) {}
+        dto.setDoanhThuHomNay(doanhThuSPHomNay);
+
+        BigDecimal doanhThuDichVuHomNay = BigDecimal.ZERO;
+        try {
+            doanhThuDichVuHomNay = phieuRepository.findTicketsBetween(startOfToday, endOfToday).stream()
+                    .map(p -> p.getThanhToan() != null ? p.getThanhToan() : p.getTongTien())
+                    .filter(val -> val != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } catch (Exception e) {}
+        dto.setDoanhThuDichVuHomNay(doanhThuDichVuHomNay);
+        dto.setTongDoanhThuHomNay(doanhThuSPHomNay.add(doanhThuDichVuHomNay));
+
         // Doanh thu dịch vụ 7 ngày gần nhất
         List<Object[]> serviceRevenueData = new ArrayList<>();
         try {

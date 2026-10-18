@@ -22,14 +22,14 @@ public class AdminSupplierController {
 
     @GetMapping
     public String listSuppliers(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("suppliers", supplierRepository.findAll());
         return "admin/suppliers";
     }
 
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         model.addAttribute("supplier", new Supplier());
         return "admin/supplier-form";
     }
@@ -38,7 +38,7 @@ public class AdminSupplierController {
     public String createSupplier(@ModelAttribute Supplier supplier,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         supplierRepository.save(supplier);
         ra.addFlashAttribute("success", "Thêm nhà cung cấp thành công!");
         return "redirect:/admin/suppliers";
@@ -46,7 +46,7 @@ public class AdminSupplierController {
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Supplier supplier = supplierRepository.findById(id).orElse(null);
         if (supplier == null) return "redirect:/admin/suppliers";
         model.addAttribute("supplier", supplier);
@@ -58,7 +58,7 @@ public class AdminSupplierController {
                                  @ModelAttribute Supplier supplier,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Supplier existing = supplierRepository.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/suppliers";
         existing.setTenNCC(supplier.getTenNCC());
@@ -73,7 +73,7 @@ public class AdminSupplierController {
     public String deleteSupplier(@PathVariable Integer id,
                                  RedirectAttributes ra,
                                  HttpSession session) {
-        if (!authService.isAdmin(session)) return "redirect:/DangNhap";
+        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         Supplier sup = supplierRepository.findById(id).orElse(null);
         if (sup != null && !sup.getProducts().isEmpty()) {
             ra.addFlashAttribute("error", "Nhà cung cấp đang có sản phẩm, không thể xóa!");

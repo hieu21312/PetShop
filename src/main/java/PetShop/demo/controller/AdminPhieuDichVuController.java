@@ -12,6 +12,10 @@ import PetShop.demo.repository.DichVuChamSocRepository;
 import PetShop.demo.repository.EmployeeRepository;
 import PetShop.demo.repository.HoSoThuCungRepository;
 import PetShop.demo.repository.PhieuDichVuChamSocRepository;
+import PetShop.demo.model.enity.ChiTietDichVuChamSoc;
+import PetShop.demo.repository.ChiTietDichVuChamSocRepository;
+import PetShop.demo.model.enity.Customer;
+import PetShop.demo.repository.CustomerRepository;
 import PetShop.demo.model.enity.Voucher;
 import PetShop.demo.service.AuthService;
 import PetShop.demo.service.MembershipService;
@@ -49,6 +53,9 @@ public class AdminPhieuDichVuController {
     private EmployeeRepository employeeRepository;
 
     @Autowired
+    private ChiTietDichVuChamSocRepository chiTietDichVuChamSocRepository;
+
+    @Autowired
     private PetShop.demo.service.ThongBaoService thongBaoService;
 
     @Autowired
@@ -63,6 +70,106 @@ public class AdminPhieuDichVuController {
     @Autowired
     private BookingRepository bookingRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    public static boolean isCareServiceStaff(Employee emp) {
+        if (emp == null) return false;
+        if (emp.getTrangThai() != null && !emp.getTrangThai().trim().equalsIgnoreCase("Đang làm việc")) {
+            return false;
+        }
+        int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+                ? emp.getRole().getTenVaiTro().trim() : "";
+
+        // Các vai trò trực tiếp làm dịch vụ chăm sóc / y tế thú cưng từ CSDL (tblVaiTro):
+        // 3: Bác sĩ thú y, 4: Nhân viên chăm sóc (hoặc Chăm sóc thú cưng)
+        return roleId == 3 || roleId == 4 || roleId == 8 || roleId == 13
+                || roleName.equalsIgnoreCase("Bác sĩ thú y") 
+                || roleName.equalsIgnoreCase("Bác sĩ")
+                || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
+                || roleName.equalsIgnoreCase("Chăm sóc thú cưng");
+    }
+
+    public static boolean isReceptionStaff(Employee emp) {
+        if (emp == null) return false;
+        if (emp.getTrangThai() != null && !emp.getTrangThai().trim().equalsIgnoreCase("Đang làm việc")) {
+            return false;
+        }
+        int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+                ? emp.getRole().getTenVaiTro().trim() : "";
+
+        // Các vai trò phụ trách tiếp nhận khách tại quầy / tạo phiếu từ CSDL:
+        // 5: Thu ngân, 1: Admin, 2: Quản lý cửa hàng (cũng hỗ trợ roleId 6 cũ nếu có)
+        return roleId == 5 || roleId == 1 || roleId == 2 || roleId == 6
+                || roleName.equalsIgnoreCase("Thu ngân")
+                || roleName.equalsIgnoreCase("Nhân viên thu ngân")
+                || roleName.equalsIgnoreCase("Quản lý cửa hàng")
+                || roleName.equalsIgnoreCase("Quản lý")
+                || roleName.equalsIgnoreCase("Admin");
+    }
+
+    public static boolean isEligibleForService(Employee emp, DichVuChamSoc s) {
+        if (emp == null || s == null) return false;
+        if (emp.getTrangThai() != null && !emp.getTrangThai().trim().equalsIgnoreCase("Đang làm việc")) {
+            return false;
+        }
+
+        int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+                ? emp.getRole().getTenVaiTro().trim() : "";
+        String chuyenMon = emp.getChuyenMon() != null ? emp.getChuyenMon().trim().toLowerCase() : "";
+
+        String nhom = s.getNhomDichVu() != null ? s.getNhomDichVu().trim().toLowerCase() : "";
+        String name = s.getTenDichVu() != null ? s.getTenDichVu().trim().toLowerCase() : "";
+
+        // 1. Nhóm Dịch vụ Y tế / Thú y & Khám chữa bệnh
+        if (nhom.contains("thú y") || nhom.contains("khám") || nhom.contains("chữa") || nhom.contains("y tế")
+                || name.contains("khám") || name.contains("tiêm") || name.contains("vắc xin") 
+                || name.contains("thuốc") || name.contains("triệt sản") || name.contains("xét nghiệm") || name.contains("phẫu thuật")) {
+
+            // Bắt buộc Bác sĩ thú y (Role 3)
+            return roleId == 3 || roleName.equalsIgnoreCase("Bác sĩ thú y") || roleName.equalsIgnoreCase("Bác sĩ");
+        }
+
+        // 2. Nhóm Spa & Grooming (Tắm sấy, cắt tỉa lông, vệ sinh tai móng, cạo lông, gỡ rối)
+        if (nhom.contains("spa") || nhom.contains("grooming")
+                || name.contains("tắm") || name.contains("cắt tỉa") || name.contains("cạo lông") 
+                || name.contains("vệ sinh") || name.contains("gỡ rối")) {
+            // Chuyên viên Nhân viên chăm sóc (Role 4 hoặc Role 8 cũ)
+            return roleId == 4 || roleId == 8 
+                    || roleName.equalsIgnoreCase("Nhân viên chăm sóc") 
+                    || roleName.equalsIgnoreCase("Chăm sóc thú cưng") 
+                    || chuyenMon.contains("grooming") || chuyenMon.contains("spa");
+        }
+
+        // 3. Nhóm Khách sạn thú cưng / Trông giữ Lưu trú
+        if (nhom.contains("khách sạn") || nhom.contains("lưu trú") || name.contains("khách sạn") || name.contains("bán trú") || name.contains("trông giữ")) {
+            // Nhân viên chăm sóc (Role 4 hoặc Role 8)
+            return roleId == 4 || roleId == 8
+                    || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
+                    || roleName.equalsIgnoreCase("Chăm sóc thú cưng");
+        }
+
+        // Mặc định các dịch vụ khác: Nhân viên chăm sóc hoặc Bác sĩ
+        return roleId == 4 || roleId == 3 
+                || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
+                || roleName.equalsIgnoreCase("Bác sĩ thú y");
+    }
+
+    private boolean isMedicalService(DichVuChamSoc s) {
+        if (s == null) return false;
+        String group = s.getNhomDichVu() != null ? s.getNhomDichVu().trim().toLowerCase() : "";
+        if (group.contains("thú y") || group.contains("khám") || group.contains("chữa")) {
+            return true;
+        }
+        String name = s.getTenDichVu() != null ? s.getTenDichVu().trim().toLowerCase() : "";
+        return name.contains("khám") || name.contains("tiêm") || name.contains("vắc xin") || name.contains("thuốc")
+                || name.contains("triệt sản") || name.contains("xét nghiệm") || name.contains("phẫu thuật")
+                || name.contains("điều trị");
+    }
+
     public List<Map<String, Object>> getOptimizedStaffList(LocalDateTime start, LocalDateTime end, Integer excludeTicketId) {
         if (start == null) start = LocalDateTime.now();
         if (end == null) end = start.plusHours(1);
@@ -75,10 +182,28 @@ public class AdminPhieuDichVuController {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Employee emp : allEmployees) {
+            // Chỉ lấy nhân sự thuộc chuyên môn dịch vụ thú y & chăm sóc thú cưng đang làm việc
+            if (!isCareServiceStaff(emp)) {
+                continue;
+            }
+
+            int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
+            String roleName = (emp.getRole() != null) ? emp.getRole().getTenVaiTro() : "";
+            boolean isDoctor = roleId == 3 || "Bác sĩ thú y".equalsIgnoreCase(roleName) || "Bác sĩ".equalsIgnoreCase(roleName);
+            boolean isCareStaff = roleId == 4 || roleId == 8 || "Nhân viên chăm sóc".equalsIgnoreCase(roleName) || "Chăm sóc thú cưng".equalsIgnoreCase(roleName);
+
             Map<String, Object> item = new HashMap<>();
             item.put("maNV", emp.getMaNV());
             item.put("tenNV", emp.getTenNV());
-            item.put("chuyenMon", emp.getChuyenMon() != null ? emp.getChuyenMon() : "Nhân viên");
+            item.put("roleId", roleId);
+            item.put("roleName", roleName);
+            item.put("chuyenMon", emp.getChuyenMon() != null ? emp.getChuyenMon() : roleName);
+            item.put("isDoctor", isDoctor);
+            item.put("isMedical", isDoctor);
+            item.put("canDoDoctorOnly", isDoctor);
+            item.put("canDoMedical", isDoctor);
+            item.put("canDoSpa", isCareStaff);
+            item.put("canDoHotel", isCareStaff);
 
             String conflict = checkScheduleConflict(emp.getMaNV(), start, end, excludeTicketId);
             boolean isAvailable = (conflict == null);
@@ -99,18 +224,20 @@ public class AdminPhieuDichVuController {
             // Điểm sắp xếp: Khả dụng (ưu tiên 0) + số ca hôm nay; Bận (ưu tiên 1000) + số ca
             item.put("sortScore", (isAvailable ? 0 : 1000) + tasksToday);
 
+            String roleBadge = isDoctor ? "[Bác sĩ thú y] " : "[Nhân viên chăm sóc] ";
+
             String roleInfo = (emp.getChuyenMon() != null && !emp.getChuyenMon().trim().isEmpty()) 
                     ? " (" + emp.getChuyenMon().trim() + ")" 
-                    : "";
+                    : (!roleName.isEmpty() ? " (" + roleName + ")" : "");
             String label;
             if (isAvailable) {
                 if (tasksToday == 0) {
-                    label = "⭐ " + emp.getTenNV() + roleInfo + " — Tối ưu nhất (Rảnh, 0 ca)";
+                    label = roleBadge + emp.getTenNV() + roleInfo + " — Rảnh (0 ca)";
                 } else {
-                    label = "✅ " + emp.getTenNV() + roleInfo + " — Khả dụng (" + tasksToday + " ca hôm nay)";
+                    label = roleBadge + emp.getTenNV() + roleInfo + " — Khả dụng (" + tasksToday + " ca hôm nay)";
                 }
             } else {
-                label = "⚠️ " + emp.getTenNV() + roleInfo + " — Đang bận / Trùng lịch";
+                label = roleBadge + emp.getTenNV() + roleInfo + " — Đang bận / Trùng lịch";
             }
             item.put("displayText", label);
 
@@ -132,6 +259,12 @@ public class AdminPhieuDichVuController {
         LocalDateTime end = (ticket != null && ticket.getNgayHenTra() != null) ? ticket.getNgayHenTra() : start.plusHours(1);
         Integer excludeId = (ticket != null) ? ticket.getMaPhieuDV() : null;
         model.addAttribute("employees", getOptimizedStaffList(start, end, excludeId));
+
+        // Danh sách nhân sự phụ trách tiếp nhận khách tại quầy (Tư vấn viên, CSKH, Bán hàng, Quản lý)
+        List<Employee> receptionStaff = employeeRepository.findAll().stream()
+                .filter(AdminPhieuDichVuController::isReceptionStaff)
+                .toList();
+        model.addAttribute("receptionStaff", receptionStaff);
     }
 
     public String checkScheduleConflict(Integer maNV, LocalDateTime start, LocalDateTime end, Integer excludeTicketId) {
@@ -183,7 +316,8 @@ public class AdminPhieuDichVuController {
     @ResponseBody
     public Map<String, Object> checkConflict(@RequestParam(value = "maNV", required = false) Integer maNV,
                                             @RequestParam(value = "ngayHenTra", required = false) String ngayHenTraStr,
-                                            @RequestParam(value = "maThuCung", required = false) Integer maThuCung) {
+                                            @RequestParam(value = "maThuCung", required = false) Integer maThuCung,
+                                            @RequestParam(value = "hasMedicalService", required = false, defaultValue = "false") Boolean hasMedicalService) {
         Map<String, Object> res = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime ngayHenTra = null;
@@ -198,6 +332,22 @@ public class AdminPhieuDichVuController {
             res.put("errorType", "PAST_DATE");
             res.put("message", "Ngày giờ không hợp lệ: Không thể chọn thời gian trước thời điểm hiện tại.");
             return res;
+        }
+
+        // Kiểm tra thẩm quyền y tế nếu dịch vụ có khám chữa bệnh / tiêm phòng / kê thuốc
+        if (Boolean.TRUE.equals(hasMedicalService) && maNV != null) {
+            Employee emp = employeeRepository.findById(maNV).orElse(null);
+            if (emp != null) {
+                String roleName = (emp.getRole() != null) ? emp.getRole().getTenVaiTro() : "";
+                boolean isDoctor = "Bác sĩ thú y".equalsIgnoreCase(roleName) || "Bác sĩ".equalsIgnoreCase(roleName);
+                if (!isDoctor) {
+                    res.put("hasError", true);
+                    res.put("errorType", "MEDICAL_ROLE_RESTRICTION");
+                    res.put("message", "Quy định chuyên môn: Dịch vụ khám chữa bệnh / tiêm phòng / kê thuốc bắt buộc phải do Bác sĩ thú y thực hiện. Nhân sự '" 
+                            + emp.getTenNV() + "' (" + (roleName.isEmpty() ? "Nhân viên" : roleName) + ") không có thẩm quyền y tế này!");
+                    return res;
+                }
+            }
         }
 
         if (maNV != null && ngayHenTra != null) {
@@ -262,7 +412,9 @@ public class AdminPhieuDichVuController {
             ngayHenTra = now.plusHours(1);
         }
 
-        List<Employee> allEmployees = employeeRepository.findAll();
+        List<Employee> allEmployees = employeeRepository.findAll().stream()
+                .filter(AdminPhieuDichVuController::isCareServiceStaff)
+                .toList();
         List<Employee> eligible = allEmployees.stream().filter(emp -> {
             if (chuyenMon != null && !chuyenMon.trim().isEmpty()) {
                 String cm = emp.getChuyenMon() != null ? emp.getChuyenMon().toLowerCase() : "";
@@ -320,12 +472,105 @@ public class AdminPhieuDichVuController {
         return res;
     }
 
+    // Endpoint tạo nhanh Chủ nuôi & Thú cưng trực tiếp từ modal tiếp nhận
+    @PostMapping("/api/quick-create-pet")
+    @ResponseBody
+    public Map<String, Object> quickCreatePet(@RequestBody Map<String, String> payload) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            String hoTenChu = payload.get("hoTenChuNuoi");
+            String sdt = payload.get("soDienThoai");
+            String diaChi = payload.get("diaChi");
+            String tenPet = payload.get("tenThuCung");
+            String loaiPet = payload.get("loaiThuCung");
+            String giongLoai = payload.get("giongLoai");
+            String gioiTinh = payload.get("gioiTinh");
+            String canNangStr = payload.get("canNang");
+
+            if (hoTenChu == null || hoTenChu.trim().isEmpty() || sdt == null || sdt.trim().isEmpty() 
+                    || tenPet == null || tenPet.trim().isEmpty()) {
+                res.put("success", false);
+                res.put("message", "Vui lòng nhập đầy đủ tên chủ nuôi, số điện thoại và tên thú cưng.");
+                return res;
+            }
+
+            // Tìm hoặc tạo mới ChuNuoi
+            ChuNuoi owner = chuNuoiRepository.findAll().stream()
+                    .filter(c -> c.getSoDienThoai() != null && c.getSoDienThoai().trim().equals(sdt.trim()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (owner == null) {
+                owner = new ChuNuoi();
+                owner.setHoTenChuNuoi(hoTenChu.trim());
+                owner.setSoDienThoai(sdt.trim());
+                owner.setDiaChi(diaChi != null ? diaChi.trim() : "");
+                owner.setLoaiChuNuoi("Tiêu chuẩn");
+                owner.setDiemTichLuy(0);
+                owner.setNgayDangKy(LocalDateTime.now());
+
+                // Tự động liên kết hoặc tạo Khách hàng trong tblKhachHang
+                var custOpt = customerRepository.findFirstByDienThoaiOrEmail(sdt.trim(), null);
+                if (custOpt.isPresent()) {
+                    owner.setMaKH(custOpt.get().getMaKH());
+                } else {
+                    Customer newCust = new Customer();
+                    newCust.setTenKH(hoTenChu.trim());
+                    newCust.setDienThoai(sdt.trim());
+                    newCust.setDiaChi(diaChi != null ? diaChi.trim() : "");
+                    newCust.setMatKhau("123456");
+                    newCust.setHangThanhVien("Tiêu chuẩn");
+                    newCust.setDiemTichLuy(0);
+                    newCust.setIsLocked(false);
+                    newCust = customerRepository.save(newCust);
+                    owner.setMaKH(newCust.getMaKH());
+                }
+                owner = chuNuoiRepository.save(owner);
+            }
+
+            // Tạo mới HoSoThuCung
+            HoSoThuCung pet = new HoSoThuCung();
+            pet.setMaChuNuoi(owner.getMaChuNuoi());
+            pet.setTenThuCung(tenPet.trim());
+            pet.setLoaiThuCung(loaiPet != null && !loaiPet.trim().isEmpty() ? loaiPet.trim() : "Chó");
+            pet.setGiongLoai(giongLoai != null && !giongLoai.trim().isEmpty() ? giongLoai.trim() : "Chưa rõ giống");
+            pet.setGioiTinh(gioiTinh != null && !gioiTinh.trim().isEmpty() ? gioiTinh.trim() : "Đực");
+            pet.setHinhAnh("default-pet.jpg");
+            if (canNangStr != null && !canNangStr.trim().isEmpty()) {
+                try {
+                    pet.setCanNang(new BigDecimal(canNangStr.trim()));
+                } catch (Exception ignored) {}
+            }
+            pet = hoSoThuCungRepository.save(pet);
+
+            Map<String, Object> petData = new HashMap<>();
+            petData.put("id", pet.getMaThuCung());
+            petData.put("petName", pet.getTenThuCung());
+            petData.put("petType", pet.getLoaiThuCung());
+            petData.put("breed", pet.getGiongLoai());
+            petData.put("gender", pet.getGioiTinh());
+            petData.put("weight", pet.getCanNang());
+            petData.put("ownerId", owner.getMaChuNuoi());
+            petData.put("ownerName", owner.getHoTenChuNuoi());
+            petData.put("ownerPhone", owner.getSoDienThoai());
+            petData.put("ownerTier", owner.getLoaiChuNuoi());
+
+            res.put("success", true);
+            res.put("message", "Đã khởi tạo thành công hồ sơ bé '" + pet.getTenThuCung() + "' cho chủ " + owner.getHoTenChuNuoi() + "!");
+            res.put("pet", petData);
+        } catch (Exception ex) {
+            res.put("success", false);
+            res.put("message", "Lỗi tạo hồ sơ nhanh: " + ex.getMessage());
+        }
+        return res;
+    }
+
     // 1. Danh sách phiếu chăm sóc
     @GetMapping
     public String listTickets(@RequestParam(value = "status", required = false) String status,
                               @RequestParam(value = "keyword", required = false) String keyword,
                               Model model, HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
 
         List<PhieuDichVuChamSoc> tickets;
         String trimmedKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
@@ -345,12 +590,17 @@ public class AdminPhieuDichVuController {
 
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
 
         PhieuDichVuChamSoc ticket = new PhieuDichVuChamSoc();
         String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String randPart = String.format("%04d", new Random().nextInt(10000));
         ticket.setSoPhieu("PDV-" + datePart + "-" + randPart);
+
+        Integer currentMaNV = (Integer) session.getAttribute("maNV");
+        if (currentMaNV != null) {
+            ticket.setMaNVTiepNhan(currentMaNV);
+        }
 
         populateFormModel(model, ticket);
         return "admin/care-ticket-form";
@@ -359,11 +609,15 @@ public class AdminPhieuDichVuController {
     @PostMapping("/create")
     public String createTicket(@ModelAttribute("ticket") PhieuDichVuChamSoc ticket,
                                @RequestParam(value = "selectedServiceIds", required = false) List<Integer> selectedServiceIds,
+                               @RequestParam(value = "serviceStaffIds", required = false) List<Integer> serviceStaffIds,
                                @RequestParam(value = "selectedServiceId", required = false) Integer selectedServiceId,
                                @RequestParam(value = "voucherCode", required = false) String voucherCode,
+                               @RequestParam(value = "doDacGuiKem", required = false) List<String> doDacGuiKem,
+                               @RequestParam(value = "thanNhiet", required = false) String thanNhiet,
+                               @RequestParam(value = "tienDatCoc", required = false) BigDecimal tienDatCoc,
                                Model model,
                                HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -374,7 +628,7 @@ public class AdminPhieuDichVuController {
             return "admin/care-ticket-form";
         }
 
-        // 2. Kiểm tra trùng lịch làm việc của nhân viên
+        // 2. Kiểm tra trùng lịch làm việc của nhân viên tiếp nhận/phụ trách chính
         if (ticket.getMaNVThucHien() != null && ticket.getNgayHenTra() != null) {
             LocalDateTime start = ticket.getNgayTiepNhan() != null ? ticket.getNgayTiepNhan() : now;
             String conflictMsg = checkScheduleConflict(ticket.getMaNVThucHien(), start, ticket.getNgayHenTra(), null);
@@ -409,42 +663,68 @@ public class AdminPhieuDichVuController {
             }
         }
 
-        // Xử lý nhiều dịch vụ được chọn
+        // Lấy danh sách dịch vụ được chọn
+        List<DichVuChamSoc> chosenServices = new ArrayList<>();
         if (selectedServiceIds != null && !selectedServiceIds.isEmpty()) {
-            List<DichVuChamSoc> chosenServices = dichVuChamSocRepository.findAllById(selectedServiceIds);
-            BigDecimal sumPrice = BigDecimal.ZERO;
-            StringBuilder sb = new StringBuilder();
-            for (DichVuChamSoc s : chosenServices) {
-                if (s.getGiaDichVu() != null) {
-                    sumPrice = sumPrice.add(s.getGiaDichVu());
-                }
-                if (sb.length() > 0) sb.append(", ");
-                sb.append(s.getTenDichVu());
-            }
-            if (ticket.getTongTien() == null || ticket.getTongTien().compareTo(BigDecimal.ZERO) == 0) {
-                ticket.setTongTien(sumPrice);
-            }
-            String oldReq = ticket.getYeuCauCuaChuNuoi();
-            String prefix = "Dịch vụ: " + sb.toString();
-            if (oldReq == null || oldReq.trim().isEmpty()) {
-                ticket.setYeuCauCuaChuNuoi(prefix);
-            } else if (!oldReq.contains(prefix)) {
-                ticket.setYeuCauCuaChuNuoi(prefix + " | " + oldReq);
-            }
+            chosenServices = dichVuChamSocRepository.findAllById(selectedServiceIds);
         } else if (selectedServiceId != null) {
-            DichVuChamSoc s = dichVuChamSocRepository.findById(selectedServiceId).orElse(null);
-            if (s != null) {
-                if (ticket.getTongTien() == null || ticket.getTongTien().compareTo(BigDecimal.ZERO) == 0) {
-                    ticket.setTongTien(s.getGiaDichVu() != null ? s.getGiaDichVu() : BigDecimal.ZERO);
-                }
-                String oldReq = ticket.getYeuCauCuaChuNuoi();
-                String prefix = "Dịch vụ: " + s.getTenDichVu();
-                if (oldReq == null || oldReq.trim().isEmpty()) {
-                    ticket.setYeuCauCuaChuNuoi(prefix);
-                } else if (!oldReq.contains(prefix)) {
-                    ticket.setYeuCauCuaChuNuoi(prefix + " | " + oldReq);
-                }
+            dichVuChamSocRepository.findById(selectedServiceId).ifPresent(chosenServices::add);
+        }
+
+        BigDecimal sumPrice = BigDecimal.ZERO;
+        StringBuilder sb = new StringBuilder();
+
+        // Kiểm tra từng dịch vụ và phân công nhân sự tương ứng
+        for (int i = 0; i < chosenServices.size(); i++) {
+            DichVuChamSoc s = chosenServices.get(i);
+            if (s.getGiaDichVu() != null) {
+                sumPrice = sumPrice.add(s.getGiaDichVu());
             }
+
+            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i) 
+                    ? serviceStaffIds.get(i) 
+                    : ticket.getMaNVThucHien();
+
+            Employee assignedEmp = (assignedStaffId != null) ? employeeRepository.findById(assignedStaffId).orElse(null) : null;
+            String assignedEmpTitle = (assignedEmp != null) ? assignedEmp.getTenNV() : "Chưa phân công";
+
+            // Ràng buộc quy định chuyên môn từ CSDL: mỗi dịch vụ chỉ có role tương ứng mới có thể phân công
+            if (assignedEmp == null) {
+                model.addAttribute("errorMessage", "Vui lòng phân công nhân sự phụ trách cho dịch vụ '" + s.getTenDichVu() + "'.");
+                populateFormModel(model, ticket);
+                return "admin/care-ticket-form";
+            }
+
+            if (!isEligibleForService(assignedEmp, s)) {
+                String roleName = assignedEmp.getRole() != null ? assignedEmp.getRole().getTenVaiTro() : "Nhân viên";
+                model.addAttribute("errorMessage", "Quy định chuyên môn: Dịch vụ '" + s.getTenDichVu() 
+                        + "' không thuộc phạm vi vai trò '" + roleName + "' của nhân sự '" 
+                        + assignedEmp.getTenNV() + "'. Vui lòng phân công đúng nhân sự phụ trách!");
+                populateFormModel(model, ticket);
+                return "admin/care-ticket-form";
+            }
+
+            String roleName = assignedEmp.getRole() != null ? assignedEmp.getRole().getTenVaiTro() : "";
+            assignedEmpTitle = "[" + roleName + "] " + assignedEmp.getTenNV();
+
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(s.getTenDichVu()).append(" (").append(assignedEmpTitle).append(")");
+        }
+
+        if (ticket.getTongTien() == null || ticket.getTongTien().compareTo(BigDecimal.ZERO) == 0) {
+            ticket.setTongTien(sumPrice);
+        }
+        String oldReq = ticket.getYeuCauCuaChuNuoi();
+        String prefix = "Dịch vụ: " + sb.toString();
+        if (oldReq == null || oldReq.trim().isEmpty()) {
+            ticket.setYeuCauCuaChuNuoi(prefix);
+        } else if (!oldReq.contains(prefix)) {
+            ticket.setYeuCauCuaChuNuoi(prefix + " | " + oldReq);
+        }
+
+        // Tự động gán nhân sự chính của phiếu nếu chưa có
+        if (ticket.getMaNVThucHien() == null && serviceStaffIds != null && !serviceStaffIds.isEmpty() && serviceStaffIds.get(0) != null) {
+            ticket.setMaNVThucHien(serviceStaffIds.get(0));
         }
 
         // Tự động tính giảm giá theo hạng thành viên nếu chưa có giảm giá
@@ -474,12 +754,79 @@ public class AdminPhieuDichVuController {
             }
         }
 
+        // Ghi nhận thân nhiệt (nếu có)
+        if (thanNhiet != null && !thanNhiet.trim().isEmpty()) {
+            String tnStr = "Thân nhiệt: " + thanNhiet.trim() + "°C";
+            String curInit = ticket.getTinhTrangBanDau();
+            ticket.setTinhTrangBanDau(curInit != null && !curInit.trim().isEmpty() ? tnStr + " | " + curInit : tnStr);
+        }
+
+        // Ghi nhận đồ đạc phụ kiện gửi kèm
+        if (doDacGuiKem != null && !doDacGuiKem.isEmpty()) {
+            String doDacStr = "Đồ gửi kèm: " + String.join(", ", doDacGuiKem);
+            String note = ticket.getGhiChu();
+            ticket.setGhiChu(note != null && !note.isEmpty() ? note + " | " + doDacStr : doDacStr);
+        }
+
+        // Tiền đặt cọc (nếu có)
+        if (tienDatCoc != null && tienDatCoc.compareTo(BigDecimal.ZERO) > 0) {
+            ticket.setTrangThaiThanhToan("Đã đặt cọc");
+            String cocStr = String.format("Đã cọc: %,.0fVND", tienDatCoc);
+            String note = ticket.getGhiChu();
+            ticket.setGhiChu(note != null && !note.isEmpty() ? note + " | " + cocStr : cocStr);
+        } else {
+            if (ticket.getTrangThaiThanhToan() == null || ticket.getTrangThaiThanhToan().isEmpty()) {
+                ticket.setTrangThaiThanhToan("Chưa thanh toán");
+            }
+        }
+
         if (ticket.getTongTien() == null) ticket.setTongTien(BigDecimal.ZERO);
         if (ticket.getTienGiamGia() == null) ticket.setTienGiamGia(BigDecimal.ZERO);
         if (ticket.getThanhToan() == null) ticket.setThanhToan(ticket.getTongTien().subtract(ticket.getTienGiamGia()));
         if (ticket.getThanhToan().compareTo(BigDecimal.ZERO) < 0) ticket.setThanhToan(BigDecimal.ZERO);
 
-        phieuRepository.save(ticket);
+        PhieuDichVuChamSoc savedTicket = phieuRepository.save(ticket);
+
+        // Lưu chi tiết dịch vụ chăm sóc vào tblChiTietDichVuChamSoc cho từng mục
+        for (int i = 0; i < chosenServices.size(); i++) {
+            DichVuChamSoc s = chosenServices.get(i);
+            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i) 
+                    ? serviceStaffIds.get(i) 
+                    : savedTicket.getMaNVThucHien();
+
+            Employee assignedEmp = (assignedStaffId != null) ? employeeRepository.findById(assignedStaffId).orElse(null) : null;
+            String staffDisplay = "Chưa phân công";
+            if (assignedEmp != null) {
+                String role = assignedEmp.getRole() != null ? assignedEmp.getRole().getTenVaiTro() : "";
+                if ("Bác sĩ thú y".equalsIgnoreCase(role) || "Bác sĩ".equalsIgnoreCase(role)) {
+                    staffDisplay = "BS. " + assignedEmp.getTenNV();
+                } else if ("Kỹ thuật viên thú y".equalsIgnoreCase(role)) {
+                    staffDisplay = "KTV. " + assignedEmp.getTenNV();
+                } else {
+                    staffDisplay = assignedEmp.getTenNV();
+                }
+            }
+
+            ChiTietDichVuChamSoc ct = new ChiTietDichVuChamSoc();
+            ct.setMaPhieuDV(savedTicket.getMaPhieuDV());
+            ct.setMaDVCS(s.getMaDVCS());
+            ct.setSoLuong(1);
+            ct.setDonGia(s.getGiaDichVu() != null ? s.getGiaDichVu() : BigDecimal.ZERO);
+            ct.setPhuPhi(BigDecimal.ZERO);
+            ct.setThanhTien(s.getGiaDichVu() != null ? s.getGiaDichVu() : BigDecimal.ZERO);
+            ct.setNhanVienPhuTrach(staffDisplay);
+            ct.setGhiChuChiTiet(s.getTenDichVu());
+            chiTietDichVuChamSocRepository.save(ct);
+        }
+
+        // Cập nhật lại cân nặng mới nhất vào hồ sơ thú cưng tblHoSoThuCung
+        if (savedTicket.getMaThuCung() != null && savedTicket.getCanNangTiepNhan() != null) {
+            hoSoThuCungRepository.findById(savedTicket.getMaThuCung()).ifPresent(p -> {
+                p.setCanNang(savedTicket.getCanNangTiepNhan());
+                hoSoThuCungRepository.save(p);
+            });
+        }
+
         return "redirect:/admin/care-tickets";
     }
 
@@ -538,12 +885,19 @@ public class AdminPhieuDichVuController {
     // 4. Xem chi tiết phiếu & cập nhật trạng thái
     @GetMapping("/detail/{id}")
     public String viewDetail(@PathVariable("id") Integer id, Model model, HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
         PhieuDichVuChamSoc ticket = phieuRepository.findById(id).orElse(null);
         if (ticket == null) return "redirect:/admin/care-tickets";
 
         model.addAttribute("ticket", ticket);
-        model.addAttribute("employees", employeeRepository.findAll());
+        List<Employee> careStaff = employeeRepository.findAll().stream()
+                .filter(AdminPhieuDichVuController::isCareServiceStaff)
+                .toList();
+        model.addAttribute("employees", careStaff);
+
+        List<ChiTietDichVuChamSoc> serviceDetails = chiTietDichVuChamSocRepository.findByMaPhieuDV(id);
+        model.addAttribute("serviceDetails", serviceDetails);
+
         int pointsEarned = membershipService.calculatePoints(ticket.getThanhToan());
         model.addAttribute("pointsEarned", pointsEarned);
         return "admin/care-ticket-detail";
@@ -555,8 +909,9 @@ public class AdminPhieuDichVuController {
                                @RequestParam("trangThaiThanhToan") String trangThaiThanhToan,
                                @RequestParam(value = "hinhThucThanhToan", required = false) String hinhThucThanhToan,
                                @RequestParam(value = "ketQuaChamSoc", required = false) String ketQuaChamSoc,
+                               @RequestParam(value = "voucherCode", required = false) String voucherCode,
                                HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
 
         PhieuDichVuChamSoc ticket = phieuRepository.findById(id).orElse(null);
         if (ticket != null) {
@@ -565,6 +920,34 @@ public class AdminPhieuDichVuController {
             ticket.setTrangThaiThanhToan(trangThaiThanhToan);
             if (hinhThucThanhToan != null) ticket.setHinhThucThanhToan(hinhThucThanhToan);
             if (ketQuaChamSoc != null) ticket.setKetQuaChamSoc(ketQuaChamSoc);
+
+            // Xử lý áp dụng voucher nếu có lúc thanh toán
+            if (voucherCode != null && !voucherCode.trim().isEmpty()) {
+                Optional<Voucher> vOpt = voucherService.getVoucherByCode(voucherCode.trim().toUpperCase());
+                if (vOpt.isPresent()) {
+                    Voucher v = vOpt.get();
+                    if (v.getSoLuong() != null && v.getSoLuong() > 0) {
+                        v.setSoLuong(v.getSoLuong() - 1);
+                        voucherService.saveVoucher(v);
+                    }
+                    BigDecimal amount = ticket.getTongTien() != null ? ticket.getTongTien() : BigDecimal.ZERO;
+                    BigDecimal vDiscount = BigDecimal.ZERO;
+                    if (v.getPhanTramGiam() != null && amount.compareTo(BigDecimal.ZERO) > 0) {
+                        vDiscount = amount.multiply(v.getPhanTramGiam()).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+                        if (v.getSoTienGiamToiDa() != null && vDiscount.compareTo(v.getSoTienGiamToiDa()) > 0) {
+                            vDiscount = v.getSoTienGiamToiDa();
+                        }
+                    }
+                    BigDecimal curDiscount = ticket.getTienGiamGia() != null ? ticket.getTienGiamGia() : BigDecimal.ZERO;
+                    ticket.setTienGiamGia(curDiscount.add(vDiscount));
+                    BigDecimal newPay = amount.subtract(ticket.getTienGiamGia());
+                    ticket.setThanhToan(newPay.compareTo(BigDecimal.ZERO) > 0 ? newPay : BigDecimal.ZERO);
+
+                    String note = ticket.getGhiChu();
+                    String vNote = "Áp dụng Voucher: " + v.getMaGiamGia() + " (-" + vDiscount + "VND)";
+                    ticket.setGhiChu(note != null && !note.isEmpty() ? note + " | " + vNote : vNote);
+                }
+            }
 
             if ("Đã bàn giao thú cưng".equals(trangThaiDichVu) || "Hoàn thành chăm sóc".equals(trangThaiDichVu)) {
                 if (ticket.getNgayTraThucTe() == null) {
@@ -589,7 +972,7 @@ public class AdminPhieuDichVuController {
 
     @GetMapping("/delete/{id}")
     public String deleteTicket(@PathVariable("id") Integer id, HttpSession session) {
-        if (!authService.canManageCareTickets(session)) return "redirect:/DangNhap";
+        if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
         phieuRepository.deleteById(id);
         return "redirect:/admin/care-tickets";
     }
