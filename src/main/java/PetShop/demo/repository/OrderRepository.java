@@ -11,6 +11,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByMaKHOrderByNgayLapDesc(Integer maKH);
     List<Order> findAllByOrderByNgayLapDesc();
 
+    List<Order> findByHinhThucThanhToanAndDaThanhToanFalseOrderByNgayLapDesc(String hinhThucThanhToan);
+
+    @Query("SELECT o FROM Order o WHERE (o.hinhThucThanhToan = 'BankTransfer' AND (o.daThanhToan IS NULL OR o.daThanhToan = false)) OR (o.tinhTrang = 1 AND (o.daThanhToan IS NULL OR o.daThanhToan = false)) ORDER BY o.ngayLap DESC")
+    List<Order> findPendingPaymentOrders();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE (o.hinhThucThanhToan = 'BankTransfer' AND (o.daThanhToan IS NULL OR o.daThanhToan = false)) OR (o.tinhTrang = 1 AND (o.daThanhToan IS NULL OR o.daThanhToan = false))")
+    long countPendingPaymentOrders();
+
     @Query("SELECT o FROM Order o WHERE o.ngayLap >= :from AND o.ngayLap <= :to AND o.tinhTrang = 4")
     List<Order> findCompletedOrdersBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 

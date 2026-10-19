@@ -19,6 +19,8 @@ public class OrderService {
     @Autowired private CartService cartService;
     @Autowired private ProductRepository productRepository;
     @Autowired private InventoryRepository inventoryRepository;
+    @Autowired private CustomerRepository customerRepository;
+    @Autowired private ThongBaoService thongBaoService;
 
     @Transactional
     public Order createOrder(String diaChiGiaoHang, Boolean daThanhToan, String maGiamGia, BigDecimal tienGiam, String hinhThuc, HttpSession session) {
@@ -106,6 +108,44 @@ public class OrderService {
             });
         }
 
+        // Tạo thông báo cho khách hàng
+        String paymentDesc = "BankTransfer".equalsIgnoreCase(hinhThuc) ? "Chuyển khoản ngân hàng" : ("COD".equalsIgnoreCase(hinhThuc) ? "Thanh toán khi nhận hàng (COD)" : hinhThuc);
+        String formattedPrice = (tongSauGiam != null) ? String.format("%,d", tongSauGiam.longValue()) : "0";
+        try {
+            thongBaoService.taoThongBaoDatLich(
+                    maKH,
+                    "📦 Đặt hàng thành công #" + order.getMaHD(),
+                    "Đơn hàng #" + order.getMaHD() + " (" + paymentDesc + ") với tổng tiền " + formattedPrice + "đ đã được đặt thành công. Chúng tôi sẽ xử lý ngay khi nhận được thanh toán.",
+                    LocalDateTime.now(),
+                    "DonHang",
+                    "/DonHang/ChiTiet/" + order.getMaHD()
+            );
+
+            // Tạo thông báo cho nhân sự / thu ngân
+            String customerName = "Khách hàng";
+            var cOpt = customerRepository.findById(maKH);
+            if (cOpt.isPresent() && cOpt.get().getTenKH() != null) {
+                customerName = cOpt.get().getTenKH();
+            }
+
+            String staffTitle = "BankTransfer".equalsIgnoreCase(hinhThuc)
+                    ? "💳 Chờ xác nhận chuyển khoản đơn hàng #" + order.getMaHD()
+                    : "🛒 Đơn hàng mới #" + order.getMaHD();
+
+            String staffContent = "Khách hàng " + customerName + " vừa đặt mua hàng (Mã đơn: #" + order.getMaHD()
+                    + ", Tổng tiền: " + formattedPrice + "đ, Phương thức: " + paymentDesc + "). "
+                    + ("BankTransfer".equalsIgnoreCase(hinhThuc) ? "Vui lòng kiểm tra chuyển khoản và xác nhận thanh toán." : "Vui lòng xử lý đơn hàng.");
+
+            thongBaoService.taoThongBaoStaff(
+                    staffTitle,
+                    staffContent,
+                    "XacNhanThanhToan",
+                    "/admin/thu-ngan?tab=orders"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         cartService.clearCart(session);
         return order;
     }
@@ -125,12 +165,12 @@ public class OrderService {
                 });
             }
         }
-
-        // Hoàn lại voucher nếu có
-        if (order.getMaGiamGia() != null && !order.getMaGiamGia().isEmpty()) {
+        if (order.getMaGiamGia() != null) {
             voucherRepository.findById(order.getMaGiamGia()).ifPresent(v -> {
-                v.setSoLuong(v.getSoLuong() + 1);
-                voucherRepository.save(v);
+                if (v.getSoLuong() != null) {
+                    v.setSoLuong(v.getSoLuong() + 1);
+                    voucherRepository.save(v);
+                }
             });
         }
     }

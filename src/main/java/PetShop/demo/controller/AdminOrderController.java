@@ -34,7 +34,7 @@ public class AdminOrderController {
     // Danh sách đơn hàng
     @GetMapping
     public String listOrders(Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
+        if (!authService.isAdmin(session) && !authService.isCashier(session)) return authService.redirectUnauthorized(session);
         List<Order> orders = orderRepository.findAllByOrderByNgayLapDesc();
         model.addAttribute("orders", orders);
         return "admin/orders";
@@ -43,7 +43,7 @@ public class AdminOrderController {
     // Xem chi tiết đơn hàng
     @GetMapping("/detail/{id}")
     public String orderDetail(@PathVariable Integer id, Model model, HttpSession session) {
-        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
+        if (!authService.isAdmin(session) && !authService.isCashier(session)) return authService.redirectUnauthorized(session);
         Order order = orderRepository.findById(id).orElse(null);
         if (order == null) return "redirect:/admin/orders";
         model.addAttribute("order", order);
@@ -61,7 +61,7 @@ public class AdminOrderController {
     public String updateOrder(@ModelAttribute Order updatedOrder,
                               @RequestParam Integer maHD,
                               HttpSession session) {
-        if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
+        if (!authService.isAdmin(session) && !authService.isCashier(session)) return authService.redirectUnauthorized(session);
         Order order = orderRepository.findById(maHD).orElse(null);
         if (order == null) return "redirect:/admin/orders";
         
@@ -91,7 +91,7 @@ public class AdminOrderController {
 
             String tieuDe = "Cập nhật đơn hàng #" + order.getMaHD();
             String noiDung = "Đơn hàng #" + order.getMaHD() + " của bạn " + statusText + ". Cảm ơn bạn đã mua sắm tại PetShop!";
-            thongBaoService.taoThongBaoNhacLich(order.getMaKH(), null, tieuDe, noiDung, null);
+            thongBaoService.taoThongBaoDatLich(order.getMaKH(), tieuDe, noiDung, null, "DonHang", "/DonHang/ChiTiet/" + order.getMaHD());
         }
 
         return "redirect:/admin/orders/detail/" + maHD;

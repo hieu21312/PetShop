@@ -103,9 +103,15 @@
                                     <tr th:each="d : ${details}">
                                         <td>
                                             <div class="d-flex align-items-center gap-3">
-                                                <img th:if="${d.product != null and d.product.hinhAnh != null}"
-                                                     th:src="@{${d.product.hinhAnh}}"
-                                                     style="width: 55px; height: 55px; object-fit: cover; border-radius: 8px;">
+                                                <img th:if="${d.product != null and d.product.anhDaiDien != null}"
+                                                     th:src="${d.product.anhDaiDien.startsWith('http') or d.product.anhDaiDien.startsWith('/') ? d.product.anhDaiDien : ('/Content/HinhAnh/' + d.product.anhDaiDien)}"
+                                                     style="width: 55px; height: 55px; object-fit: cover; border-radius: 8px;"
+                                                     onerror="this.onerror=null; this.src='/images/default-pet.png';">
+                                                <div th:unless="${d.product != null and d.product.anhDaiDien != null}" 
+                                                     class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                                     style="width: 55px; height: 55px; min-width: 55px;">
+                                                    <i class="fas fa-box-open text-muted"></i>
+                                                </div>
                                                 <div>
                                                     <strong class="text-dark d-block" th:text="${d.product != null ? d.product.tenSP : 'Sản phẩm #' + d.id.maSP}"></strong>
                                                     <small class="text-muted" th:text="'Mã SP: #' + ${d.id.maSP}"></small>

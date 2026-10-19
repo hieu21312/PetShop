@@ -9,7 +9,7 @@
             <div class="card border-0 shadow-sm rounded-4 text-center p-4">
                 <i class="fas fa-check-circle text-success fa-5x mb-3"></i>
                 <h3 class="fw-bold">Đặt hàng thành công!</h3>
-                <p class="text-muted">Mã đơn hàng: <strong th:text="${orderId}"></strong></p>
+                <p class="text-muted">Mã đơn hàng: <a th:href="@{/DonHang/ChiTiet/{id}(id=${orderId})}" class="fw-bold text-primary text-decoration-none" title="Xem chi tiết đơn hàng"><strong th:text="${'#DH' + orderId}"></strong> <i class="fas fa-external-link-alt small ms-1"></i></a></p>
                 <p class="mb-1">Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.</p>
                 <p class="text-success small fw-semibold"><i class="fas fa-gift me-1"></i> Đơn hàng sẽ tự động tích điểm thăng hạng thành viên sau khi thanh toán thành công!</p>
 
@@ -41,9 +41,16 @@
                     <p>Hình thức thanh toán: <strong>COD (Thanh toán khi nhận hàng)</strong></p>
                 </div>
 
-                <div class="mt-4">
-                    <a th:href="@{/}" class="btn btn-primary rounded-pill px-4">Tiếp tục mua sắm</a>
-                    <a th:href="@{/GioHang}" class="btn btn-outline-secondary rounded-pill px-4 ms-2">Xem lại giỏ hàng</a>
+                <div class="mt-4 d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                    <a th:href="@{/DonHang/ChiTiet/{id}(id=${orderId})}" class="btn text-white rounded-pill px-4 fw-semibold shadow-sm" style="background: linear-gradient(45deg, #0d6efd, #0b5ed7);">
+                        <i class="fas fa-file-invoice me-1"></i> Xem chi tiết đơn hàng
+                    </a>
+                    <a th:href="@{/DonHang/CuaToi}" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm">
+                        <i class="fas fa-box-open me-1"></i> Đơn hàng của tôi
+                    </a>
+                    <a th:href="@{/}" class="btn btn-light rounded-pill px-4 border text-secondary">
+                        <i class="fas fa-shopping-bag me-1"></i> Tiếp tục mua sắm
+                    </a>
                 </div>
             </div>
         </div>

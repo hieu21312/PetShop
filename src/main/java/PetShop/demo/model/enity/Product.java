@@ -102,6 +102,7 @@ public class Product {
 
     public String getAnhDaiDien() { return anhDaiDien; }
     public void setAnhDaiDien(String anhDaiDien) { this.anhDaiDien = anhDaiDien; }
+    public String getHinhAnh() { return anhDaiDien; }
 
     public Integer getMaDanhMuc() { return maDanhMuc; }
     public void setMaDanhMuc(Integer maDanhMuc) { this.maDanhMuc = maDanhMuc; }

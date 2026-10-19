@@ -108,9 +108,12 @@
             <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" th:href="@{/admin/inventory}" class="list-group-item list-group-item-action" title="Quản Lý tồn kho">
                 <i class="fas fa-boxes me-2"></i><span class="menu-text"> Quản Lý tồn kho</span>
             </a>
-            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
-               th:href="@{/admin/orders}" class="list-group-item list-group-item-action" title="Quản Lý đơn hàng">
-                <i class="fas fa-file-alt me-2"></i><span class="menu-text"> Quản Lý đơn hàng</span>
+            <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý' or (session.role != null and (session.role == 'Thu ngân' or session.role == 'Nhân viên thu ngân' or session.role == 'Nhân viên bán hàng'))}" 
+               th:href="@{/admin/orders}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" title="Quản Lý đơn hàng">
+                <span><i class="fas fa-file-alt me-2"></i><span class="menu-text"> Quản Lý đơn hàng</span></span>
+                <span th:if="${pendingOrdersCount != null and pendingOrdersCount > 0}" 
+                      class="badge bg-danger rounded-pill px-2 py-1 shadow-sm badge-pill-counter" 
+                      th:text="${pendingOrdersCount} + ' mới'" title="Đơn hàng chờ xác nhận thanh toán"></span>
             </a>
             <a th:if="${session.role == 'Admin' or session.role == 'Quản lý cửa hàng' or session.role == 'Quản lý'}" 
                th:href="@{/admin/customers}" class="list-group-item list-group-item-action" title="Quản Lý khách hàng">

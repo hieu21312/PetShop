@@ -12,12 +12,15 @@ public class ThongBao {
     @Column(name = "MaThongBao")
     private Integer maThongBao;
 
-    @Column(name = "MaKH", nullable = false)
+    @Column(name = "MaKH")
     private Integer maKH;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaKH", insertable = false, updatable = false)
     private Customer khachHang;
+
+    @Column(name = "MaNV")
+    private Integer maNV;
 
     @Column(name = "MaThuCung")
     private Integer maThuCung;
@@ -34,6 +37,9 @@ public class ThongBao {
 
     @Column(name = "LoaiThongBao")
     private String loaiThongBao = "NhacLichTaiKham";
+
+    @Column(name = "LienKet")
+    private String lienKet;
 
     @Column(name = "NgayTao")
     private LocalDateTime ngayTao;
@@ -57,6 +63,9 @@ public class ThongBao {
     public Customer getKhachHang() { return khachHang; }
     public void setKhachHang(Customer khachHang) { this.khachHang = khachHang; }
 
+    public Integer getMaNV() { return maNV; }
+    public void setMaNV(Integer maNV) { this.maNV = maNV; }
+
     public Integer getMaThuCung() { return maThuCung; }
     public void setMaThuCung(Integer maThuCung) { this.maThuCung = maThuCung; }
 
@@ -71,6 +80,9 @@ public class ThongBao {
 
     public String getLoaiThongBao() { return loaiThongBao; }
     public void setLoaiThongBao(String loaiThongBao) { this.loaiThongBao = loaiThongBao; }
+
+    public String getLienKet() { return lienKet; }
+    public void setLienKet(String lienKet) { this.lienKet = lienKet; }
 
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }

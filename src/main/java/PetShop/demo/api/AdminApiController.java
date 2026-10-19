@@ -152,7 +152,7 @@ public class AdminApiController {
 
             String tieuDe = "Cập nhật đơn hàng #" + order.getMaHD();
             String noiDung = "Đơn hàng #" + order.getMaHD() + " của bạn " + statusText + ". Cảm ơn bạn đã mua sắm tại PetShop!";
-            thongBaoService.taoThongBaoNhacLich(order.getMaKH(), null, tieuDe, noiDung, null);
+            thongBaoService.taoThongBaoDatLich(order.getMaKH(), tieuDe, noiDung, null, "DonHang", "/DonHang/ChiTiet/" + order.getMaHD());
         }
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật đơn hàng #" + maHD + " thành công"));

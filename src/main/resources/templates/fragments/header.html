@@ -239,10 +239,16 @@
                                             style="font-size: 0.75rem;" title="Đánh dấu tất cả là đã đọc">
                                         <i class="fas fa-check-double me-1 text-success"></i>Đã đọc tất cả
                                     </button>
-                                    <a th:href="@{/GioHang?tab=services}" class="small text-decoration-none fw-semibold"
-                                        style="color: #e91e63; font-size: 0.8rem;">
-                                        Lịch hẹn <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
-                                    </a>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a th:if="${session.maNV == null}" th:href="@{/DonHang/CuaToi}" class="small text-decoration-none fw-semibold"
+                                            style="color: #0d6efd; font-size: 0.8rem;">
+                                            Đơn hàng <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                        </a>
+                                        <a th:href="@{${session.maNV != null ? '/admin/thu-ngan?tab=orders' : '/GioHang?tab=services'}}" class="small text-decoration-none fw-semibold"
+                                            style="color: #e91e63; font-size: 0.8rem;">
+                                            <span th:text="${session.maNV != null ? 'Quầy Thu ngân' : 'Lịch hẹn'}">Lịch hẹn</span> <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
@@ -273,7 +279,7 @@
                                                   data-type=${tb.loaiThongBao != null ? tb.loaiThongBao : 'Thông báo'},
                                                   data-date=${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')},
                                                   data-hen=${tb.ngayHen != null ? #temporals.format(tb.ngayHen, 'dd/MM/yyyy HH:mm') : ''},
-                                                  data-redirect=@{/GioHang?tab=services}"
+                                                  data-redirect=${tb.lienKet != null ? tb.lienKet : (tb.loaiThongBao == 'DonHang' ? '/DonHang/CuaToi' : (session.maNV != null ? '/admin/thu-ngan?tab=orders' : '/GioHang?tab=services'))}"
                                          style="cursor: pointer; transition: all 0.2s ease;">
                                         <div class="fw-bold text-dark mb-1 d-flex justify-content-between align-items-start"
                                              style="font-size: 0.88rem; line-height: 1.3;">
@@ -294,7 +300,7 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="text-muted" style="font-size: 0.72rem;"
                                                     th:text="${#temporals.format(tb.ngayTao, 'dd/MM/yyyy HH:mm')}">04/10/2026 08:00</span>
-                                                <a th:href="@{/ThongBao/xem/{id}(id=${tb.maThongBao})}"
+                                                <a th:href="@{/ThongBao/xem/{id}(id=${tb.maThongBao}, redirect=${tb.lienKet != null ? tb.lienKet : (tb.loaiThongBao == 'DonHang' ? '/DonHang/CuaToi' : (session.maNV != null ? '/admin/thu-ngan?tab=orders' : '/GioHang?tab=services'))})}"
                                                    class="small text-decoration-none fw-semibold notification-direct-link"
                                                    style="color: #e91e63; font-size: 0.75rem;"
                                                    title="Xem chi tiết trên trang lịch hẹn">
@@ -484,7 +490,7 @@
                     <button type="button" class="btn btn-light rounded-pill px-3 fw-medium text-secondary" data-bs-dismiss="modal" style="font-size: 0.88rem;">Đóng</button>
                     <a id="modalThongBaoActionBtn" href="/GioHang?tab=services" class="btn text-white rounded-pill px-4 fw-semibold shadow-sm"
                        style="background: linear-gradient(45deg, #ff4d6d, #ff758f); font-size: 0.88rem;">
-                        <i class="fas fa-calendar-alt me-1"></i> Xem lịch hẹn & Dịch vụ
+                        <i id="modalThongBaoActionIcon" class="fas fa-calendar-alt me-1"></i> <span id="modalThongBaoActionText">Xem lịch hẹn & Dịch vụ</span>
                     </a>
                 </div>
             </div>
@@ -540,7 +546,27 @@
                 if (modalContent) modalContent.textContent = content;
                 if (modalType) modalType.textContent = type;
                 if (modalDate) modalDate.textContent = date ? date : '';
-                if (modalActionBtn) modalActionBtn.href = redirectUrl;
+                if (modalActionBtn) {
+                    modalActionBtn.href = redirectUrl;
+                    var modalActionText = document.getElementById('modalThongBaoActionText');
+                    var modalActionIcon = document.getElementById('modalThongBaoActionIcon');
+                    var isOrderNotif = redirectUrl.indexOf('/DonHang') !== -1 || type === 'DonHang' || (title && title.toLowerCase().includes('đơn hàng'));
+                    var isCashierNotif = redirectUrl.indexOf('/admin/thu-ngan') !== -1;
+
+                    if (isOrderNotif) {
+                        if (modalActionText) modalActionText.textContent = 'Xem chi tiết đơn hàng';
+                        if (modalActionIcon) modalActionIcon.className = 'fas fa-file-invoice me-1';
+                        modalActionBtn.style.background = 'linear-gradient(45deg, #0d6efd, #0b5ed7)';
+                    } else if (isCashierNotif) {
+                        if (modalActionText) modalActionText.textContent = 'Đến Quầy Thu ngân';
+                        if (modalActionIcon) modalActionIcon.className = 'fas fa-cash-register me-1';
+                        modalActionBtn.style.background = 'linear-gradient(45deg, #0d9488, #14b8a6)';
+                    } else {
+                        if (modalActionText) modalActionText.textContent = 'Xem lịch hẹn & Dịch vụ';
+                        if (modalActionIcon) modalActionIcon.className = 'fas fa-calendar-alt me-1';
+                        modalActionBtn.style.background = 'linear-gradient(45deg, #ff4d6d, #ff758f)';
+                    }
+                }
 
                 if (ngayHen && ngayHen.trim() !== '') {
                     if (modalHen) modalHen.textContent = ngayHen;

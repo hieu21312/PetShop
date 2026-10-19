@@ -22,28 +22,32 @@ public class NotificationApiController {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Lấy danh sách thông báo của khách hàng
+    // Lấy danh sách thông báo của khách hàng hoặc nhân viên
     @GetMapping
     public ResponseEntity<?> getNotifications(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;
         if (maKH == null && session != null) {
             maKH = (Integer) session.getAttribute("maKH");
         }
-        if (maKH == null) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
 
-        List<ThongBao> list = thongBaoService.getThongBaoByCustomer(maKH);
-
-        // Nếu khách chưa có thông báo nào, tự động tạo 1 thông báo chào mừng & ưu đãi
-        if (list.isEmpty()) {
-            thongBaoService.taoThongBaoDatLich(
-                    maKH,
-                    "🎉 Chào mừng bạn đến với PetShop!",
-                    "Cảm ơn bạn đã sử dụng ứng dụng PetShop Mobile. Nhận ngay ưu đãi tích điểm cho mỗi đơn hàng!",
-                    LocalDateTime.now(),
-                    "KhuyenMai"
-            );
+        List<ThongBao> list;
+        if (maKH != null) {
             list = thongBaoService.getThongBaoByCustomer(maKH);
+            // Nếu khách chưa có thông báo nào, tự động tạo 1 thông báo chào mừng & ưu đãi
+            if (list.isEmpty()) {
+                thongBaoService.taoThongBaoDatLich(
+                        maKH,
+                        "🎉 Chào mừng bạn đến với PetShop!",
+                        "Cảm ơn bạn đã sử dụng ứng dụng PetShop Mobile. Nhận ngay ưu đãi tích điểm cho mỗi đơn hàng!",
+                        LocalDateTime.now(),
+                        "KhuyenMai"
+                );
+                list = thongBaoService.getThongBaoByCustomer(maKH);
+            }
+        } else if (employeeId != null) {
+            list = thongBaoService.getThongBaoStaff(employeeId);
+        } else {
+            return ResponseEntity.ok(Collections.emptyList());
         }
 
         List<Map<String, Object>> result = new ArrayList<>();
@@ -53,6 +57,7 @@ public class NotificationApiController {
             map.put("tieuDe", tb.getTieuDe());
             map.put("noiDung", tb.getNoiDung());
             map.put("loaiThongBao", tb.getLoaiThongBao());
+            map.put("lienKet", tb.getLienKet());
             map.put("ngayTao", tb.getNgayTao() != null ? tb.getNgayTao().format(FORMATTER) : "");
             map.put("ngayHen", tb.getNgayHen() != null ? tb.getNgayHen().format(FORMATTER) : null);
             map.put("trangThai", tb.getTrangThai());
@@ -66,10 +71,16 @@ public class NotificationApiController {
     // Đếm số thông báo chưa đọc
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;
         if (maKH == null && session != null) {
             maKH = (Integer) session.getAttribute("maKH");
         }
-        long count = maKH != null ? thongBaoService.demThongBaoChuaDoc(maKH) : 0;
+        long count = 0;
+        if (maKH != null) {
+            count = thongBaoService.demThongBaoChuaDoc(maKH);
+        } else if (employeeId != null) {
+            count = thongBaoService.demThongBaoStaffChuaDoc(employeeId);
+        }
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
 
@@ -81,10 +92,15 @@ public class NotificationApiController {
         long unreadCount = 0;
         if (session != null) {
             Integer customerId = (Integer) session.getAttribute("maKH");
+            Integer employeeId = (Integer) session.getAttribute("maNV");
             if (customerId != null) {
                 unreadCount = thongBaoService.demThongBaoChuaDoc(customerId);
                 session.setAttribute("unreadNotifications", unreadCount);
                 session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(customerId));
+            } else if (employeeId != null) {
+                unreadCount = thongBaoService.demThongBaoStaffChuaDoc(employeeId);
+                session.setAttribute("unreadNotifications", unreadCount);
+                session.setAttribute("notificationList", thongBaoService.getThongBaoStaff(employeeId));
             }
         }
 
@@ -98,6 +114,7 @@ public class NotificationApiController {
     // Đánh dấu tất cả đã đọc
     @PostMapping("/read-all")
     public ResponseEntity<?> markAllAsRead(@RequestParam(required = false) Integer maKH, HttpSession session) {
+        Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;
         if (maKH == null && session != null) {
             maKH = (Integer) session.getAttribute("maKH");
         }
@@ -107,6 +124,12 @@ public class NotificationApiController {
             if (session != null) {
                 session.setAttribute("unreadNotifications", 0L);
                 session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(maKH));
+            }
+        } else if (employeeId != null) {
+            thongBaoService.danhDauTatCaStaffDaDoc(employeeId);
+            if (session != null) {
+                session.setAttribute("unreadNotifications", 0L);
+                session.setAttribute("notificationList", thongBaoService.getThongBaoStaff(employeeId));
             }
         }
 

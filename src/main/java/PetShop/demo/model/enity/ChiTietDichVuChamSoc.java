@@ -25,13 +25,13 @@ public class ChiTietDichVuChamSoc {
     @Column(name = "SoLuong")
     private Integer soLuong = 1;
 
-    @Column(name = "DonGia")
+    @Column(name = "DonGia", precision = 18, scale = 2)
     private BigDecimal donGia;
 
-    @Column(name = "PhuPhi")
+    @Column(name = "PhuPhi", precision = 18, scale = 2)
     private BigDecimal phuPhi;
 
-    @Column(name = "ThanhTien")
+    @Column(name = "ThanhTien", precision = 18, scale = 2)
     private BigDecimal thanhTien;
 
     @Column(name = "NhanVienPhuTrach")

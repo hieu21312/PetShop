@@ -20,7 +20,7 @@ public class DichVuChamSoc {
     @Column(name = "DoiTuongApDung")
     private String doiTuongApDung;
 
-    @Column(name = "GiaDichVu", nullable = false)
+    @Column(name = "GiaDichVu", nullable = false, precision = 18, scale = 2)
     private BigDecimal giaDichVu;
 
     @Column(name = "ThoiGianThucHien")

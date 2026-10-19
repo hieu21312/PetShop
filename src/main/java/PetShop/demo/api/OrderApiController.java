@@ -196,8 +196,27 @@ public class OrderApiController {
                     "📦 Đặt hàng thành công #" + saved.getMaHD(),
                     "Đơn hàng #" + saved.getMaHD() + " gồm " + detailList.size() + " món với tổng tiền " + finalTotal + " đ đã được tạo thành công.",
                     LocalDateTime.now(),
-                    "DonHang"
+                    "DonHang",
+                    "/DonHang/ChiTiet/" + saved.getMaHD()
             );
+
+            // Tạo thông báo cho thu ngân và admin
+            try {
+                String custName = custOpt.map(PetShop.demo.model.enity.Customer::getTenKH).orElse("Khách hàng");
+                String staffTitle = "BankTransfer".equalsIgnoreCase(hinhThuc)
+                        ? "💳 Chờ xác nhận chuyển khoản đơn hàng #" + saved.getMaHD()
+                        : "🛒 Đơn hàng mới #" + saved.getMaHD();
+                String staffContent = "Khách hàng " + custName + " vừa đặt đơn hàng #" + saved.getMaHD()
+                        + " với tổng tiền " + String.format("%,d", finalTotal.longValue()) + "đ (" + hinhThuc + "). "
+                        + ("BankTransfer".equalsIgnoreCase(hinhThuc) ? "Vui lòng kiểm tra chuyển khoản và xác nhận thanh toán." : "Vui lòng xử lý đơn hàng.");
+
+                thongBaoService.taoThongBaoStaff(
+                        staffTitle,
+                        staffContent,
+                        "XacNhanThanhToan",
+                        "/admin/thu-ngan?tab=orders"
+                );
+            } catch (Exception ignored) {}
 
             Map<String, Object> respMap = new HashMap<>();
             respMap.put("success", true);
@@ -236,7 +255,8 @@ public class OrderApiController {
                     "❌ Đơn hàng #" + id + " đã được hủy",
                     "Bạn đã hủy đơn hàng #" + id + " thành công.",
                     LocalDateTime.now(),
-                    "HuyDon"
+                    "HuyDon",
+                    "/DonHang/ChiTiet/" + id
             );
 
             return ResponseEntity.ok(Map.of("success", true, "message", "Đã hủy đơn hàng #" + id));

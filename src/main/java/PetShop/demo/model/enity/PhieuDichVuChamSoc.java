@@ -48,7 +48,7 @@ public class PhieuDichVuChamSoc {
     @Column(name = "NgayTraThucTe")
     private LocalDateTime ngayTraThucTe;
 
-    @Column(name = "CanNangTiepNhan")
+    @Column(name = "CanNangTiepNhan", precision = 5, scale = 2)
     private BigDecimal canNangTiepNhan;
 
     @Column(name = "TinhTrangBanDau")
@@ -60,13 +60,13 @@ public class PhieuDichVuChamSoc {
     @Column(name = "KetQuaChamSoc")
     private String ketQuaChamSoc;
 
-    @Column(name = "TongTien")
+    @Column(name = "TongTien", precision = 18, scale = 2)
     private BigDecimal tongTien = BigDecimal.ZERO;
 
-    @Column(name = "TienGiamGia")
+    @Column(name = "TienGiamGia", precision = 18, scale = 2)
     private BigDecimal tienGiamGia = BigDecimal.ZERO;
 
-    @Column(name = "ThanhToan")
+    @Column(name = "ThanhToan", precision = 18, scale = 2)
     private BigDecimal thanhToan = BigDecimal.ZERO;
 
     @Column(name = "HinhThucThanhToan")

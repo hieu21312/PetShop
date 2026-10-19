@@ -3,8 +3,54 @@
         <div class="row">
             <div class="col-md-3"><div th:replace="~{admin/admin-sidebar :: sidebar}"></div></div>
             <div class="col-md-9">
-                <div class="d-flex justify-content-between align-items-center mb-4"><h2 class="fw-bold text-gradient"><i class="fas fa-shopping-bag"></i> Quản lý đơn hàng</h2><span class="badge bg-danger fs-6 px-3 py-2">Tổng: <span th:text="${#lists.size(orders)}"></span> đơn</span></div>
-                <div class="card border-0 shadow-sm"><div class="card-body p-0"><table class="table table-hover mb-0"><thead class="table-pink"><tr><th>Mã đơn</th><th>Khách hàng</th><th>Ngày lập</th><th>Tổng tiền</th><th>Tình trạng</th><th>Thao tác</th></tr></thead><tbody><tr th:each="order : ${orders}"><td th:text="${order.maHD}">...</td><td th:text="${order.customer != null ? order.customer.tenKH : 'Khách lẻ'}">...</td><td th:text="${#temporals.format(order.ngayLap, 'dd/MM/yyyy HH:mm')}">...</td><td th:text="${order.tongTien != null ? #numbers.formatDecimal(order.tongTien, 1, 'POINT', 0, 'COMMA') + 'VND' : '0VND'}">...</td><td th:text="${order.orderStatus != null ? order.orderStatus.tinhTrangDonHang : 'Đang xử lý'}">...</td><td><a th:href="@{/admin/orders/detail/{id}(id=${order.maHD})}" class="btn btn-sm btn-primary">Cập nhật</a></td></tr><tr th:if="${#lists.isEmpty(orders)}"><td colspan="6" class="text-center">Chưa có đơn hàng nào</td></tr></tbody></table></div></div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-gradient"><i class="fas fa-shopping-bag"></i> Quản lý đơn hàng</h2>
+                    <span class="badge bg-danger fs-6 px-3 py-2">Tổng: <span th:text="${#lists.size(orders)}"></span> đơn</span>
+                </div>
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-pink">
+                                <tr>
+                                    <th class="ps-3">Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày lập</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Thanh toán</th>
+                                    <th>Tình trạng</th>
+                                    <th class="text-end pe-3">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${orders}">
+                                    <td class="ps-3 fw-bold text-danger" th:text="'#HD' + ${order.maHD}">#HD1</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark" th:text="${order.customer != null ? order.customer.tenKH : 'Khách lẻ'}">Khách hàng</div>
+                                        <div class="small text-muted" th:if="${order.customer != null and order.customer.soDienThoai != null}">
+                                            <i class="fas fa-phone small text-success me-1"></i><span th:text="${order.customer.soDienThoai}"></span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${#temporals.format(order.ngayLap, 'dd/MM/yyyy HH:mm')}">...</td>
+                                    <td class="fw-bold text-danger" th:text="${order.tongTien != null ? #numbers.formatDecimal(order.tongTien, 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">...</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${order.daThanhToan != null and order.daThanhToan ? 'bg-success' : 'bg-danger-subtle text-danger border border-danger-subtle'}"
+                                              th:text="${order.daThanhToan != null and order.daThanhToan ? 'Đã thanh toán' : ('BankTransfer'.equalsIgnoreCase(order.hinhThucThanhToan) ? 'Chờ xác nhận CK' : 'Chưa thanh toán')}"></span>
+                                        <small class="d-block text-muted mt-1" th:if="${order.hinhThucThanhToan != null}" th:text="${order.hinhThucThanhToan}"></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="${order.orderStatus != null ? order.orderStatus.tinhTrangDonHang : 'Đang xử lý'}">...</span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a th:href="@{/admin/orders/detail/{id}(id=${order.maHD})}" class="btn btn-sm btn-primary rounded-pill px-3">Chi tiết</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(orders)}">
+                                    <td colspan="7" class="text-center py-4 text-muted">Chưa có đơn hàng nào</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
