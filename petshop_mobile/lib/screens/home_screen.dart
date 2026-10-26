@@ -5,6 +5,8 @@ import '../models/product_model.dart';
 import '../models/category_model.dart';
 import '../models/booking_model.dart';
 import '../models/order_model.dart';
+import '../models/pet_model.dart';
+import 'my_pets_screen.dart';
 import '../services/api_service.dart';
 import '../services/cart_service.dart';
 import 'product_detail_screen.dart';
@@ -14,7 +16,6 @@ import 'notification_screen.dart';
 import 'admin_home_screen.dart';
 import 'staff_tasks_screen.dart';
 import '../widgets/app_toast.dart';
-import '../widgets/qr_payment_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel currentUser;
@@ -44,26 +45,43 @@ class _HomeScreenState extends State<HomeScreen> {
   ServiceModel? _selectedService;
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
+  late TextEditingController _customerNameController;
+  late TextEditingController _phoneController;
   final _petNameController = TextEditingController();
   final _noteController = TextEditingController();
+  TextEditingController? _autocompletePetController;
   bool _isBookingSubmitting = false;
 
   // Tab 2: Lịch hẹn & Đơn hàng
   List<BookingModel> _myBookings = [];
   List<OrderModel> _myOrders = [];
-  bool _isLoadingHistory = false;
+  List<PetModel> _myPets = [];
+  
   late UserModel _currentUser;
 
   @override
   void initState() {
     super.initState();
     _currentUser = widget.currentUser;
+    _customerNameController = TextEditingController(text: _currentUser.tenKH);
+    _phoneController = TextEditingController(text: _currentUser.dienThoai ?? '');
     _loadUserProfile();
     _loadCategories();
     _loadProducts();
     _loadServices();
     _loadHistory();
     _loadNotificationsCount();
+    _loadMyPets();
+  }
+
+  void _loadMyPets() async {
+    if (_currentUser.maKH <= 0) return;
+    final pets = await ApiService.getMyPets(_currentUser.maKH);
+    if (mounted) {
+      setState(() {
+        _myPets = pets;
+      });
+    }
   }
 
   void _loadUserProfile() async {
@@ -72,6 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (updated != null && mounted) {
       setState(() {
         _currentUser = updated;
+        if (_customerNameController.text.isEmpty) {
+          _customerNameController.text = updated.tenKH;
+        }
+        if (_phoneController.text.isEmpty) {
+          _phoneController.text = updated.dienThoai ?? '';
+        }
       });
     }
   }
@@ -120,23 +144,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _loadHistory() async {
     if (_currentUser.maKH <= 0) {
-      if (mounted) setState(() => _isLoadingHistory = false);
+      
       return;
     }
-    setState(() => _isLoadingHistory = true);
+    
     final bookings = await ApiService.getMyBookings(_currentUser.maKH);
     final orders = await ApiService.getMyOrders(_currentUser.maKH);
     if (mounted) {
       setState(() {
         _myBookings = bookings;
         _myOrders = orders;
-        _isLoadingHistory = false;
+        
       });
     }
   }
 
   void _submitBooking() async {
-    if (_selectedService == null) return;
+    if (_selectedService == null) {
+      AppToast.show(context, message: 'Vui lòng chọn gói dịch vụ chăm sóc!');
+      return;
+    }
+    if (_customerNameController.text.trim().isEmpty) {
+      AppToast.show(context, message: 'Vui lòng nhập họ tên người đặt lịch!');
+      return;
+    }
+    if (_petNameController.text.trim().isEmpty) {
+      AppToast.show(context, message: 'Vui lòng nhập hoặc chọn tên thú cưng!');
+      return;
+    }
     setState(() => _isBookingSubmitting = true);
 
     final ngayStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
@@ -144,8 +179,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final res = await ApiService.createBooking(
       maKH: _currentUser.maKH,
-      tenKhachHang: _currentUser.tenKH,
-      soDienThoai: _currentUser.dienThoai ?? '',
+      tenKhachHang: _customerNameController.text.trim(),
+      soDienThoai: _phoneController.text.trim(),
       email: _currentUser.email,
       ngayDat: ngayStr,
       gioDat: gioStr,
@@ -157,15 +192,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (mounted) {
       if (res['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('🎉 Đặt lịch hẹn thành công!')),
-        );
+        AppToast.show(context, message: '🎉 Đặt lịch hẹn thành công!');
         _loadHistory();
-        setState(() => _currentIndex = 2); // Chuyển sang tab Lịch sử
+        _petNameController.clear();
+        if (_autocompletePetController != null) {
+          _autocompletePetController!.clear();
+        }
+        _noteController.clear();
+        setState(() {});
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${res['message']}')),
-        );
+        AppToast.show(context, message: 'Lỗi: ${res['message']}');
       }
     }
   }
@@ -231,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         : _currentIndex == 1
                             ? 'Đặt Lịch Dịch Vụ'
                             : _currentIndex == 2
-                                ? 'Đơn Hàng & Lịch Hẹn'
+                                ? 'Hồ Sơ Thú Cưng'
                                 : 'Tài Khoản Cá Nhân',
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
@@ -271,6 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(builder: (_) => NotificationScreen(currentUser: _currentUser)),
                   );
                   _loadNotificationsCount();
+    _loadMyPets();
                 },
               ),
             ),
@@ -295,8 +332,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (ordered == true) {
                         _loadHistory();
                         _loadNotificationsCount();
+                        _loadMyPets();
                         _loadUserProfile();
-                        setState(() => _currentIndex = 2);
                       }
                     },
                   ),
@@ -337,8 +374,9 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = i;
             _isSearching = false;
           });
-          if (i == 2) _loadHistory();
-          if (i == 3) _loadUserProfile();
+          if (i == 1) _loadHistory();
+          if (i == 2) _loadMyPets();
+          if (i == 3) { _loadUserProfile(); _loadMyPets(); }
         },
         selectedItemColor: const Color(0xFFE91E63),
         unselectedItemColor: Colors.grey,
@@ -346,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Sản phẩm'),
           BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: 'Đặt lịch'),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Lịch sử'),
+          BottomNavigationBarItem(icon: Icon(Icons.pets), label: 'Thú cưng'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Tài khoản'),
         ],
       ),
@@ -360,12 +398,29 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildBookingTab();
       case 2:
-        return _buildHistoryTab();
+        return _buildPetsTab();
       case 3:
         return _buildProfileTab();
       default:
         return const SizedBox();
     }
+  }
+
+  // TAB 2: HỒ SƠ THÚ CƯNG CỦA BẢN THÂN
+  Widget _buildPetsTab() {
+    return MyPetsScreen(
+      currentUser: _currentUser,
+      showAppBar: false,
+      onSelectPetForBooking: (pet) {
+        setState(() {
+          _currentIndex = 1;
+          _petNameController.text = pet.tenThuCung;
+          if (_autocompletePetController != null) {
+            _autocompletePetController!.text = pet.tenThuCung;
+          }
+        });
+      },
+    );
   }
 
   // TAB 0: SẢN PHẨM & TÌM KIẾM
@@ -782,15 +837,284 @@ class _HomeScreenState extends State<HomeScreen> {
                   onChanged: (val) => setState(() => _selectedService = val),
                 ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _petNameController,
-                decoration: InputDecoration(
-                  labelText: 'Tên thú cưng & Giống loài *',
-                  hintText: 'VD: Cún Lu Lu - Poodle',
-                  prefixIcon: const Icon(Icons.pets),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+              // Thông tin người đặt lịch
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _customerNameController,
+                      decoration: InputDecoration(
+                        labelText: 'Họ tên người đặt *',
+                        hintText: 'Nhập họ tên...',
+                        prefixIcon: const Icon(Icons.person, color: Color(0xFFE91E63)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'Số điện thoại *',
+                        hintText: 'Nhập SĐT...',
+                        prefixIcon: const Icon(Icons.phone, color: Color(0xFFE91E63)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
+
+              // Gợi ý khi nhập tên thú cưng (Autocomplete thông minh)
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  final query = textEditingValue.text.toLowerCase().trim();
+                  final List<String> list = [];
+
+                  // 1. Gợi ý từ Hồ sơ thú cưng của khách hàng
+                  for (final p in _myPets) {
+                    final desc = p.giongLoai != null && p.giongLoai!.isNotEmpty
+                        ? p.giongLoai!
+                        : p.loaiThuCung;
+                    final full = '${p.tenThuCung} ($desc)';
+                    if (query.isEmpty ||
+                        p.tenThuCung.toLowerCase().contains(query) ||
+                        desc.toLowerCase().contains(query) ||
+                        p.loaiThuCung.toLowerCase().contains(query)) {
+                      list.add(full);
+                    }
+                  }
+
+                  // 2. Gợi ý các giống chó/mèo phổ biến
+                  final commonBreeds = [
+                    'Chó Poodle',
+                    'Chó Corgi',
+                    'Chó Phốc Sóc (Pomeranian)',
+                    'Chó Golden Retriever',
+                    'Chó Husky Siberian',
+                    'Chó Alaska Malamute',
+                    'Chó Pug',
+                    'Chó Samoyed',
+                    'Chó Shiba Inu',
+                    'Chó Bull Pháp',
+                    'Chó Chihuahua',
+                    'Chó Becgie',
+                    'Mèo Anh Lông Ngắn (ALN)',
+                    'Mèo Anh Lông Dài (ALD)',
+                    'Mèo Ba Tư (Persian)',
+                    'Mèo Munchkin Chân Ngắn',
+                    'Mèo Ragdoll',
+                    'Mèo Xiêm',
+                    'Mèo Bengal',
+                    'Mèo Tai Cụp Scottish',
+                    'Mèo Nga Mắt Xanh',
+                    'Mèo Mướp Ta',
+                    'Chuột Hamster Bear',
+                    'Chuột Hamster Winter White',
+                    'Thỏ Cảnh Minilop',
+                    'Thỏ Sư Tử Lionhead',
+                  ];
+
+                  for (final b in commonBreeds) {
+                    if (query.isNotEmpty && b.toLowerCase().contains(query)) {
+                      if (!list.contains(b)) list.add(b);
+                    }
+                  }
+
+                  if (query.isEmpty) {
+                    for (final b in commonBreeds.take(5)) {
+                      if (!list.contains(b)) list.add(b);
+                    }
+                  }
+
+                  return list;
+                },
+                onSelected: (String selection) {
+                  _petNameController.text = selection;
+                  if (_autocompletePetController != null) {
+                    _autocompletePetController!.text = selection;
+                  }
+                  setState(() {});
+                },
+                fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                  _autocompletePetController = controller;
+                  if (_petNameController.text.isNotEmpty && controller.text.isEmpty) {
+                    controller.text = _petNameController.text;
+                  }
+                  return ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: controller,
+                    builder: (context, val, _) {
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onChanged: (text) {
+                          _petNameController.text = text;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Tên thú cưng & Giống loài *',
+                          hintText: 'Nhập tên hoặc giống (có gợi ý tự động)...',
+                          prefixIcon: const Icon(Icons.pets, color: Color(0xFFE91E63)),
+                          suffixIcon: val.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  tooltip: 'Xóa',
+                                  onPressed: () {
+                                    controller.clear();
+                                    _petNameController.clear();
+                                    setState(() {});
+                                  },
+                                )
+                              : const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFE91E63), width: 1.5),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 6,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width - 80,
+                        constraints: const BoxConstraints(maxHeight: 250),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFCE4EC), width: 1.5),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFF0F5),
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.lightbulb_outline, size: 14, color: Color(0xFFE91E63)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Gợi ý tên thú cưng & Giống loài',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFE91E63),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.separated(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                separatorBuilder: (_, _) => const Divider(height: 1),
+                                itemBuilder: (context, index) {
+                                  final opt = options.elementAt(index);
+                                  final isMyPet = _myPets.any((p) => opt.startsWith(p.tenThuCung));
+                                  return ListTile(
+                                    dense: true,
+                                    visualDensity: VisualDensity.compact,
+                                    leading: CircleAvatar(
+                                      radius: 13,
+                                      backgroundColor: isMyPet ? const Color(0xFFFCE4EC) : Colors.grey.shade100,
+                                      child: Icon(
+                                        isMyPet ? Icons.pets : Icons.auto_awesome,
+                                        size: 13,
+                                        color: isMyPet ? const Color(0xFFE91E63) : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      opt,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isMyPet ? FontWeight.bold : FontWeight.w500,
+                                        color: isMyPet ? const Color(0xFFE91E63) : Colors.black87,
+                                      ),
+                                    ),
+                                    subtitle: isMyPet
+                                        ? const Text(
+                                            '🐾 Bé cưng trong hồ sơ của bạn',
+                                            style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.bold),
+                                          )
+                                        : null,
+                                    trailing: const Icon(Icons.north_west, size: 13, color: Colors.grey),
+                                    onTap: () {
+                                      onSelected(opt);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              if (_myPets.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.pets, size: 14, color: Color(0xFFE91E63)),
+                    const SizedBox(width: 6),
+                    Text('Hoặc chọn nhanh bé cưng của bạn:',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _myPets.map((pet) {
+                      final isSelected = _petNameController.text.trim() == pet.tenThuCung;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          avatar: Text(pet.speciesIcon),
+                          label: Text('${pet.tenThuCung} (${pet.giongLoai != null && pet.giongLoai!.isNotEmpty ? pet.giongLoai : pet.loaiThuCung})'),
+                          selected: isSelected,
+                          selectedColor: const Color(0xFFFCE4EC),
+                          checkmarkColor: const Color(0xFFE91E63),
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: isSelected ? const Color(0xFFE91E63) : Colors.black87,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          onSelected: (val) {
+                            setState(() {
+                              final textVal = val ? pet.tenThuCung : '';
+                              _petNameController.text = textVal;
+                              if (_autocompletePetController != null) {
+                                _autocompletePetController!.text = textVal;
+                              }
+                            });
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -857,145 +1181,120 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // TAB 2: LỊCH SỬ ĐƠN HÀNG & LỊCH HẸN
-  Widget _buildHistoryTab() {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          const TabBar(
-            labelColor: Color(0xFFE91E63),
-            indicatorColor: Color(0xFFE91E63),
-            unselectedLabelColor: Colors.grey,
-            tabs: [
-              Tab(icon: Icon(Icons.shopping_bag), text: 'Đơn hàng'),
-              Tab(icon: Icon(Icons.event_available), text: 'Lịch hẹn'),
-            ],
-          ),
-          Expanded(
-            child: _isLoadingHistory
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFFE91E63)))
-                : TabBarView(
+
+  void _showMyBookingsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.65,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (_, scrollController) {
+            return Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // List đơn hàng
-                      _myOrders.isEmpty
-                          ? const Center(child: Text('Bạn chưa có đơn hàng nào'))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(12),
-                              itemCount: _myOrders.length,
-                              itemBuilder: (ctx, i) {
-                                final o = _myOrders[i];
-                                return Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  child: ListTile(
-                                    title: Text('Đơn hàng #${o.maHD}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Tổng tiền: ${currencyFormat.format(o.tongTien)} đ'),
-                                        Text('Trạng thái: ${o.tinhTrangText}'),
-                                        Text(
-                                          'Thanh toán: ${o.hinhThucThanhToan == "BankTransfer" ? "Chuyển khoản QR" : "Khi nhận hàng (COD)"}${o.daThanhToan ? " (Đã thanh toán)" : ""}',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: o.hinhThucThanhToan == "BankTransfer"
-                                                ? const Color(0xFFE91E63)
-                                                : Colors.grey.shade600,
-                                            fontWeight: o.hinhThucThanhToan == "BankTransfer" ? FontWeight.bold : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    trailing: Wrap(
-                                      spacing: 4,
-                                      crossAxisAlignment: WrapCrossAlignment.center,
-                                      children: [
-                                        if (o.hinhThucThanhToan == 'BankTransfer' && !o.daThanhToan && o.tinhTrang == 1)
-                                          OutlinedButton.icon(
-                                            icon: const Icon(Icons.qr_code_2, size: 15, color: Color(0xFFE91E63)),
-                                            label: const Text('Mã QR', style: TextStyle(fontSize: 11, color: Color(0xFFE91E63))),
-                                            style: OutlinedButton.styleFrom(
-                                              side: const BorderSide(color: Color(0xFFE91E63)),
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            ),
-                                            onPressed: () {
-                                              QRPaymentDialog.show(
-                                                context,
-                                                maHD: o.maHD,
-                                                tongTien: o.tongTien,
-                                              );
-                                            },
-                                          ),
-                                        if (o.tinhTrang == 1)
-                                          TextButton(
-                                            style: TextButton.styleFrom(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                              minimumSize: Size.zero,
-                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            ),
-                                            onPressed: () async {
-                                              final confirm = await showDialog<bool>(
-                                                context: context,
-                                                builder: (_) => AlertDialog(
-                                                  title: const Text('Xác nhận'),
-                                                  content: const Text('Bạn có chắc muốn hủy đơn này?'),
-                                                  actions: [
-                                                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Không')),
-                                                    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hủy đơn')),
-                                                  ],
-                                                ),
-                                              );
-                                              if (confirm == true) {
-                                                final res = await ApiService.cancelOrder(o.maHD, _currentUser.maKH);
-                                                if (!mounted) return;
-                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? '')));
-                                                _loadHistory();
-                                              }
-                                            },
-                                            child: const Text('Hủy', style: TextStyle(color: Colors.red, fontSize: 12)),
-                                          )
-                                        else
-                                          Chip(
-                                            label: Text(o.tinhTrangText, style: const TextStyle(fontSize: 10)),
-                                            backgroundColor: o.tinhTrang == 4 ? Colors.green.shade50 : Colors.grey.shade100,
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                      // List lịch hẹn
-                      _myBookings.isEmpty
-                          ? const Center(child: Text('Bạn chưa có lịch hẹn nào'))
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(12),
-                              itemCount: _myBookings.length,
-                              itemBuilder: (ctx, i) {
-                                final b = _myBookings[i];
-                                return Card(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  child: ListTile(
-                                    leading: const CircleAvatar(
-                                      backgroundColor: Color(0xFFFFF0F5),
-                                      child: Icon(Icons.spa, color: Color(0xFFE91E63)),
-                                    ),
-                                    title: Text(b.tenDichVu ?? 'Dịch vụ chăm sóc', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Text('Thời gian: ${b.ngayDat} ${b.gioDat}\nTrạng thái: ${b.trangThai}'),
-                                    isThreeLine: true,
-                                  ),
-                                );
-                              },
-                            ),
+                      Row(
+                        children: [
+                          const Icon(Icons.event_available, color: Color(0xFFE91E63)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Lịch Hẹn Của Tôi ()',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
                     ],
                   ),
-          ),
-        ],
-      ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: _myBookings.isEmpty
+                      ? const Center(child: Text('Bạn chưa có lịch hẹn dịch vụ nào'))
+                      : ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _myBookings.length,
+                          itemBuilder: (context, i) {
+                            final b = _myBookings[i];
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.only(bottom: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              child: ListTile(
+                                leading: const CircleAvatar(
+                                  backgroundColor: Color(0xFFFCE4EC),
+                                  child: Icon(Icons.calendar_month, color: Color(0xFFE91E63)),
+                                ),
+                                title: Text(
+                                  b.tenDichVu ?? 'Dịch vụ chăm sóc',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text('📅 Ngày hẹn: \ - '),
+                                    if (b.ghiChu != null && b.ghiChu!.isNotEmpty)
+                                      Text('📝 Ghi chú: '),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: b.trangThai == 'Đã xác nhận'
+                                            ? Colors.green.shade50
+                                            : b.trangThai == 'Đã hoàn thành'
+                                                ? Colors.blue.shade50
+                                                : Colors.orange.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        b.trangThai,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: b.trangThai == 'Đã xác nhận'
+                                              ? Colors.green.shade700
+                                              : b.trangThai == 'Đã hoàn thành'
+                                                  ? Colors.blue.shade700
+                                                  : Colors.orange.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -1139,6 +1438,165 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          // Card: Hồ sơ thú cưng của tôi
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            elevation: 1.5,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFCE4EC),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.pets, color: Color(0xFFE91E63), size: 22),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Hồ sơ thú cưng của tôi',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                              Text('${_myPets.length} bé cưng đã đăng ký',
+                                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(foregroundColor: const Color(0xFFE91E63)),
+                        onPressed: () {
+                          setState(() => _currentIndex = 2);
+                        },
+                        icon: const Icon(Icons.arrow_forward_ios, size: 14),
+                        label: const Text('Quản lý', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (_myPets.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text('🐾', style: TextStyle(fontSize: 28)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Chưa có hồ sơ thú cưng',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                const SizedBox(height: 2),
+                                Text('Thêm thông tin để nhận lịch nhắc tiêm phòng và đặt lịch tiện lợi!',
+                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE91E63),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MyPetsScreen(currentUser: _currentUser),
+                                ),
+                              );
+                              _loadMyPets();
+                            },
+                            child: const Text('+ Thêm bé', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _myPets.map((pet) {
+                          return Container(
+                            width: 175,
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: pet.isDog
+                                  ? const Color(0xFFFFF3E0)
+                                  : (pet.isCat ? const Color(0xFFF3E5F5) : const Color(0xFFE0F2F1)),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: pet.isDog
+                                    ? Colors.orange.shade200
+                                    : (pet.isCat ? Colors.purple.shade200 : Colors.teal.shade200),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(pet.speciesIcon, style: const TextStyle(fontSize: 26)),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(pet.genderDisplay,
+                                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  pet.tenThuCung,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  pet.giongLoai != null && pet.giongLoai!.isNotEmpty ? pet.giongLoai! : pet.loaiThuCung,
+                                  style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${pet.weightDisplay} • ${pet.ageDisplay}',
+                                  style: TextStyle(color: Colors.grey.shade600, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Column(
@@ -1153,6 +1611,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   leading: const Icon(Icons.home, color: Color(0xFFE91E63)),
                   title: const Text('Địa chỉ nhận hàng'),
                   subtitle: Text(_currentUser.diaChi ?? 'Chưa cập nhật'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.receipt_long, color: Color(0xFFE91E63)),
+                  title: const Text('Lịch sử mua hàng', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text('${_myOrders.length} đơn hàng đã mua'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CartScreen(currentUser: _currentUser, initialTab: 1),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.event_available, color: Color(0xFFE91E63)),
+                  title: const Text('Lịch hẹn chăm sóc của tôi', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text('${_myBookings.length} lịch hẹn dịch vụ'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                  onTap: _showMyBookingsBottomSheet,
                 ),
               ],
             ),
@@ -1424,6 +1905,68 @@ class _HomeScreenState extends State<HomeScreen> {
                       _selectedCategoryId = null;
                     });
                     _loadProducts();
+                  },
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+
+                // Menu Hồ sơ thú cưng
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                  leading: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFCE4EC),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.pets, color: Color(0xFFE91E63), size: 18),
+                  ),
+                  title: Row(
+                    children: [
+                      const Text('Hồ sơ thú cưng của tôi',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                      const SizedBox(width: 8),
+                      if (_myPets.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE91E63),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text('${_myPets.length}',
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ),
+                    ],
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+                  onTap: () {
+                    Navigator.pop(context); // Close drawer
+                    setState(() => _currentIndex = 2);
+                  },
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+
+                // Menu Lịch sử mua hàng
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                  leading: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.receipt_long, color: Colors.blue, size: 18),
+                  ),
+                  title: const Text('Lịch sử mua hàng',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                  trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CartScreen(currentUser: _currentUser, initialTab: 1),
+                      ),
+                    );
                   },
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),

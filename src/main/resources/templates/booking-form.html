@@ -40,7 +40,7 @@
                         </div>
                     </div>
 
-                    <form th:action="@{/DatLich}" method="post">
+                    <form th:action="@{/DatLich}" method="post" onsubmit="var pet=document.getElementById('tenThuCungInput').value.trim(); var note=document.getElementById('ghiChuTextarea').value.trim(); if(pet){ document.getElementById('ghiChuTextarea').value = 'Bé: ' + pet + (note ? ('. ' + note) : ''); }">
                         <input type="hidden" name="maDV" th:value="${service.maDV}">
 
                         <h6 class="fw-bold mb-3" style="color: #ff4d6d;"><i class="fas fa-user me-2"></i>Thông tin Khách hàng</h6>
@@ -81,8 +81,35 @@
                                 <small class="text-muted">Tối đa 3 lượt khách/khung giờ</small>
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Thông tin Thú cưng &amp; Ghi chú thêm</label>
-                                <textarea name="ghiChu" class="form-control" rows="3" placeholder="Tên bé, Giống loài (Poodle/Corgi/Mèo Anh...), Cân nặng, Lưu ý đặc biệt (nếu có)..."></textarea>
+                                <label class="form-label fw-semibold">Tên thú cưng &amp; Giống loài <span class="text-danger">*</span></label>
+                                <input type="text" id="tenThuCungInput" class="form-control mb-2" list="petSuggestionsList" 
+                                       placeholder="Gõ để nhận gợi ý: Lu Lu, Poodle, Mèo Anh lông ngắn, Corgi, Husky..." autocomplete="off" required>
+                                <datalist id="petSuggestionsList">
+                                    <option value="Chó Poodle"></option>
+                                    <option value="Chó Corgi Chân Ngắn"></option>
+                                    <option value="Chó Phốc Sóc (Pomeranian)"></option>
+                                    <option value="Chó Golden Retriever"></option>
+                                    <option value="Chó Husky Siberian"></option>
+                                    <option value="Chó Alaska Malamute"></option>
+                                    <option value="Chó Pug Mặt Xệ"></option>
+                                    <option value="Chó Samoyed"></option>
+                                    <option value="Chó Shiba Inu"></option>
+                                    <option value="Chó Bull Pháp"></option>
+                                    <option value="Mèo Anh Lông Ngắn (ALN)"></option>
+                                    <option value="Mèo Anh Lông Dài (ALD)"></option>
+                                    <option value="Mèo Ba Tư (Persian)"></option>
+                                    <option value="Mèo Munchkin Chân Ngắn"></option>
+                                    <option value="Mèo Ragdoll Mắt Xanh"></option>
+                                    <option value="Mèo Xiêm"></option>
+                                    <option value="Mèo Bengal"></option>
+                                    <option value="Mèo Tai Cụp Scottish"></option>
+                                    <option value="Chuột Hamster Bear"></option>
+                                    <option value="Thỏ Cảnh Minilop"></option>
+                                </datalist>
+                                <small class="text-muted d-block mb-3"><i class="fas fa-lightbulb text-warning me-1"></i>Hỗ trợ gợi ý tự động khi gõ tên hoặc giống thú cưng</small>
+
+                                <label class="form-label fw-semibold">Thông tin thêm &amp; Ghi chú cho bác sĩ</label>
+                                <textarea name="ghiChu" id="ghiChuTextarea" class="form-control" rows="2" placeholder="Cân nặng, lưu ý sức khỏe, thói quen của bé (nếu có)..."></textarea>
                             </div>
                         </div>
 

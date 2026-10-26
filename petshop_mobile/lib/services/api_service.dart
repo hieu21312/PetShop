@@ -7,6 +7,7 @@ import '../models/category_model.dart';
 import '../models/booking_model.dart';
 import '../models/order_model.dart';
 import '../models/notification_model.dart';
+import '../models/pet_model.dart';
 
 class ApiService {
   // Tự động nhận diện: localhost cho Web/Windows, 10.0.2.2 cho Android Emulator
@@ -505,5 +506,60 @@ class ApiService {
       debugPrint('getAdminRevenueReport error: $e');
     }
     return null;
+  }
+
+  // --- PETS APIs (HỒ SƠ THÚ CƯNG) ---
+  // 15. Lấy danh sách hồ sơ thú cưng của khách hàng
+  static Future<List<PetModel>> getMyPets(int maKH) async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/api/pets/my?maKH=$maKH'));
+      if (res.statusCode == 200) {
+        final List list = jsonDecode(utf8.decode(res.bodyBytes));
+        return list.map((json) => PetModel.fromJson(json)).toList();
+      }
+    } catch (e) {
+      debugPrint('getMyPets error: $e');
+    }
+    return [];
+  }
+
+  // 16. Thêm mới hồ sơ thú cưng
+  static Future<Map<String, dynamic>> createPet(int maKH, Map<String, dynamic> petData) async {
+    try {
+      final payload = Map<String, dynamic>.from(petData);
+      payload['maKH'] = maKH;
+      final res = await http.post(
+        Uri.parse('$baseUrl/api/pets'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // 17. Cập nhật hồ sơ thú cưng
+  static Future<Map<String, dynamic>> updatePet(int id, Map<String, dynamic> petData) async {
+    try {
+      final res = await http.put(
+        Uri.parse('$baseUrl/api/pets/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(petData),
+      );
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // 18. Xóa hồ sơ thú cưng
+  static Future<Map<String, dynamic>> deletePet(int id, int maKH) async {
+    try {
+      final res = await http.delete(Uri.parse('$baseUrl/api/pets/$id?maKH=$maKH'));
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
   }
 }
