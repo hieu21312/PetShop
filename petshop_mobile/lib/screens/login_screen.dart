@@ -42,76 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showServerConfigDialog() {
-    final ipCtrl = TextEditingController(text: ApiService.baseUrl);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cấu hình địa chỉ Máy chủ', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Chọn nhanh theo môi trường chạy ứng dụng:',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                ActionChip(
-                  label: const Text('Chrome/Web: localhost'),
-                  onPressed: () => ipCtrl.text = 'http://localhost:8080',
-                ),
-                ActionChip(
-                  label: const Text('Giả lập: 10.0.2.2'),
-                  onPressed: () => ipCtrl.text = 'http://10.0.2.2:8080',
-                ),
-                ActionChip(
-                  label: const Text('Máy thật: 192.168.1.148'),
-                  onPressed: () => ipCtrl.text = 'http://192.168.1.148:8080',
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: ipCtrl,
-              decoration: InputDecoration(
-                labelText: 'URL API Backend',
-                hintText: 'http://192.168.x.x:8080',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE91E63),
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              final newUrl = ipCtrl.text.trim();
-              if (newUrl.isNotEmpty) {
-                ApiService.setBaseUrl(newUrl);
-                setState(() {});
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text('Lưu cấu hình'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showErrorDialog(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -327,61 +257,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: const Text(
                               'Đăng ký ngay',
                               style: TextStyle(color: Color(0xFFE91E63), fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Tài khoản mẫu thử nghiệm:',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
-                          InkWell(
-                            onTap: _showServerConfigDialog,
-                            child: Row(
-                              children: [
-                                Icon(Icons.settings, size: 13, color: Colors.grey.shade600),
-                                const SizedBox(width: 3),
-                                Text(
-                                  'Cấu hình IP',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600, decoration: TextDecoration.underline),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              onPressed: () {
-                                _emailController.text = 'admin';
-                                _passwordController.text = '123';
-                              },
-                              child: const Text('👑 Admin (admin / 123)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              onPressed: () {
-                                _emailController.text = 'minha@gmail.com';
-                                _passwordController.text = '123';
-                              },
-                              child: const Text('👤 Khách (minha / 123)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
