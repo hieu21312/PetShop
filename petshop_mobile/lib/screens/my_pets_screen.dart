@@ -572,6 +572,20 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
     );
   }
 
+  void _handleSelectPetForBooking(PetModel pet) {
+    if (widget.onSelectPetForBooking != null) {
+      widget.onSelectPetForBooking!(pet);
+      // Chỉ pop nếu màn hình này được mở dạng trang riêng (showAppBar == true)
+      if (widget.showAppBar && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, pet);
+      }
+    }
+  }
+
   void _showPetDetailModal(PetModel pet) {
     showModalBottomSheet(
       context: context,
@@ -748,12 +762,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                               ),
                               onPressed: () {
                                 Navigator.pop(ctx);
-                                if (widget.onSelectPetForBooking != null) {
-                                  widget.onSelectPetForBooking!(pet);
-                                  Navigator.pop(context);
-                                } else {
-                                  Navigator.pop(context, pet);
-                                }
+                                _handleSelectPetForBooking(pet);
                               },
                               icon: const Icon(Icons.calendar_month, size: 18),
                               label: const Text('Đặt lịch bé này'),
@@ -1125,12 +1134,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                       visualDensity: VisualDensity.compact,
                     ),
                     onPressed: () {
-                      if (widget.onSelectPetForBooking != null) {
-                        widget.onSelectPetForBooking!(pet);
-                        Navigator.pop(context);
-                      } else {
-                        Navigator.pop(context, pet);
-                      }
+                      _handleSelectPetForBooking(pet);
                     },
                     icon: const Icon(Icons.calendar_today, size: 16),
                     label: const Text('Đặt dịch vụ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
