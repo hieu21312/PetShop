@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = N'QL_PetShop')
+﻿IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = N'QL_PetShop')
 BEGIN
     CREATE DATABASE [QL_PetShop]
 END
@@ -149,7 +149,8 @@ CREATE TABLE [dbo].[tblDichVu](
     [MaDV] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
     [TenDV] [nvarchar](200) NULL, -- 'Tắm gội', 'Khám bệnh', 'Cắt tỉa lông'
     [MoTa] [nvarchar](max) NULL,
-    [GiaDichVu] [decimal](18, 2) NULL
+    [GiaDichVu] [decimal](18, 2) NULL,
+    [HinhAnh] [nvarchar](255) NULL
 )
 GO
 
@@ -418,27 +419,27 @@ INSERT INTO [dbo].[tblTonKho] ([MaSP], [SoLuongTon], [TrangThai]) VALUES
 (28, 35, NULL);
 GO
 
-INSERT INTO [dbo].[tblDichVu] ([TenDV], [MoTa], [GiaDichVu]) VALUES
-(N'Tắm gội', N'Tắm, sấy và chải lông cho thú cưng', 150000),
-(N'Cắt tỉa lông', N'Cắt tỉa tạo kiểu chuyên nghiệp', 200000),
-(N'Khám tổng quát', N'Khám sức khỏe toàn diện', 100000),
-(N'Tiêm phòng', N'Tiêm ngừa bệnh dại, care, parvo', 250000),
-(N'Chăm sóc sau phẫu thuật', N'Theo dõi thú cưng sau điều trị', 300000),
-(N'Khách sạn thú cưng', N'Lưu trú an toàn, tiện nghi', 400000),
-(N'Ve sinh tai & răng', N'Làm sạch vùng tai, miệng', 100000),
-(N'Cạo lông mùa hè', N'Cạo sạch giúp mát mẻ', 120000),
-(N'Tư vấn dinh dưỡng', N'Xây dựng khẩu phần ăn hợp lý', 80000),
-(N'Khám da liễu', N'Điều trị viêm da, nấm, rụng lông', 200000),
-(N'Massage thư giãn', N'Giúp thú cưng giảm căng thẳng và tuần hoàn tốt hơn', 180000),
-(N'Gỡ rối lông', N'Gỡ rối lông bị rối, xù, kết cục', 100000),
-(N'Chăm sóc móng', N'Cắt móng, vệ sinh móng cho thú cưng', 90000),
-(N'Xịt khử mùi', N'Khử mùi hôi cơ thể bằng sản phẩm an toàn', 70000),
-(N'Chụp ảnh thú cưng', N'Chụp ảnh chuyên nghiệp, lưu giữ khoảnh khắc', 250000),
-(N'Đào tạo cơ bản', N'Dạy thú cưng các kỹ năng cơ bản như ngồi, nằm, đi vệ sinh đúng chỗ', 300000),
-(N'Gửi thú cưng theo giờ', N'Dịch vụ giữ thú cưng ngắn hạn theo giờ', 50000),
-(N'Chăm sóc thú cưng cao tuổi', N'Dịch vụ đặc biệt cho thú cưng lớn tuổi, theo dõi sức khỏe định kỳ', 350000),
-(N'Xét nghiệm máu', N'Kiểm tra tổng quát các chỉ số máu', 280000),
-(N'Vệ sinh tuyến hôi', N'Làm sạch tuyến hôi giúp thú cưng thơm tho và khỏe mạnh', 120000);
+INSERT INTO [dbo].[tblDichVu] ([TenDV], [MoTa], [GiaDichVu], [HinhAnh]) VALUES
+(N'Tắm gội', N'Tắm, sấy và chải lông cho thú cưng', 150000, N'tam-goi.jpg'),
+(N'Cắt tỉa lông', N'Cắt tỉa tạo kiểu chuyên nghiệp', 200000, N'cat-tia-long.jpg'),
+(N'Khám tổng quát', N'Khám sức khỏe toàn diện', 100000, N'kham-tong-quat.jpg'),
+(N'Tiêm phòng', N'Tiêm ngừa bệnh dại, care, parvo', 250000, N'tiem-phong.jpg'),
+(N'Chăm sóc sau phẫu thuật', N'Theo dõi thú cưng sau điều trị', 300000, N'cham-soc-sau-phau-thuat.jpg'),
+(N'Khách sạn thú cưng', N'Lưu trú an toàn, tiện nghi', 400000, N'khach-san-thu-cung.jpg'),
+(N'Ve sinh tai & răng', N'Làm sạch vùng tai, miệng', 100000, N've-sinh-tai-rang.jpg'),
+(N'Cạo lông mùa hè', N'Cạo sạch giúp mát mẻ', 120000, N'cao-long.jpg'),
+(N'Tư vấn dinh dưỡng', N'Xây dựng khẩu phần ăn hợp lý', 80000, N'tu-van-dinh-duong.jpg'),
+(N'Khám da liễu', N'Điều trị viêm da, nấm, rụng lông', 200000, N'kham-da-lieu.jpg'),
+(N'Massage thư giãn', N'Giúp thú cưng giảm căng thẳng và tuần hoàn tốt hơn', 180000, N'massage.jpg'),
+(N'Gỡ rối lông', N'Gỡ rối lông bị rối, xù, kết cục', 100000, N'go-roi-long.jpg'),
+(N'Chăm sóc móng', N'Cắt móng, vệ sinh móng cho thú cưng', 90000, N'cham-soc-mong.jpg'),
+(N'Xịt khử mùi', N'Khử mùi hôi cơ thể bằng sản phẩm an toàn', 70000, N'xit-khu-mui.jpg'),
+(N'Chụp ảnh thú cưng', N'Chụp ảnh chuyên nghiệp, lưu giữ khoảnh khắc', 250000, N'chup-anh.jpg'),
+(N'Đào tạo cơ bản', N'Dạy thú cưng các kỹ năng cơ bản như ngồi, nằm, đi vệ sinh đúng chỗ', 300000, N'dao-tao.jpg'),
+(N'Gửi thú cưng theo giờ', N'Dịch vụ giữ thú cưng ngắn hạn theo giờ', 50000, N'gui-thu-cung.jpg'),
+(N'Chăm sóc thú cưng cao tuổi', N'Dịch vụ đặc biệt cho thú cưng lớn tuổi, theo dõi sức khỏe định kỳ', 350000, N'cham-soc-cao-tuoi.jpg'),
+(N'Xét nghiệm máu', N'Kiểm tra tổng quát các chỉ số máu', 280000, N'xet-nghiem-mau.jpg'),
+(N'Vệ sinh tuyến hôi', N'Làm sạch tuyến hôi giúp thú cưng thơm tho và khỏe mạnh', 120000, N've-sinh-tuyen-hoi.jpg');
 GO
 
 INSERT INTO [dbo].[tblHinhAnh] ([MaSP], [HinhAnh]) VALUES
@@ -1605,8 +1606,10 @@ IF OBJECT_ID(N'[dbo].[tblThongBao]', N'U') IS NULL
 BEGIN
     CREATE TABLE [dbo].[tblThongBao](
         [MaThongBao] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-        [MaKH] [int] NOT NULL,
+        [MaKH] [int] NULL,
+        [MaNV] [int] NULL,
         [MaThuCung] [int] NULL,
+        [LienKet] [nvarchar](255) NULL,
         [TieuDe] [nvarchar](200) NOT NULL,
         [NoiDung] [nvarchar](max) NULL,
         [LoaiThongBao] [nvarchar](50) NULL DEFAULT N'NhacLichTaiKham',
@@ -1617,4 +1620,843 @@ BEGIN
         CONSTRAINT [FK_tblThongBao_tblHoSoThuCung] FOREIGN KEY([MaThuCung]) REFERENCES [dbo].[tblHoSoThuCung] ([MaThuCung])
     );
 END
+GO
+
+
+-- ====================================================================================================
+-- MỤC 8: XỬ LÝ LỖI GIAO DỊCH THANH TOÁN VÀ CÁC LỆNH TỔNG HỢP ROLLUP DỮ LIỆU
+-- ====================================================================================================
+USE [QL_PetShop]
+GO
+
+-- ====================================================================================================
+-- TÀI LIỆU VÀ KỊCH BẢN SQL:
+-- 1. XỬ LÝ CÁC LỖI HAY XẢY RA TRONG THANH TOÁN (DOUBLE PAYMENT, AMOUNT MISMATCH, OUT OF STOCK, v.v.)
+-- 2. CÁC LỆNH TỔNG HỢP BÁO CÁO ĐA CHIỀU BẰNG GROUP BY ROLLUP
+-- ====================================================================================================
+
+-- ====================================================================================================
+-- PHẦN I: KIỂM TRA & BỔ SUNG CỘT BẢO ĐẢM TOÀN VẸN CHO HỆ THỐNG THANH TOÁN
+-- ====================================================================================================
+
+IF COL_LENGTH('dbo.tblHoaDon', 'HinhThucThanhToan') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDon ADD [HinhThucThanhToan] NVARCHAR(50) NULL DEFAULT N'COD';
+END
+GO
+
+IF COL_LENGTH('dbo.tblHoaDon', 'DaCongDiem') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDon ADD [DaCongDiem] BIT NULL DEFAULT 0;
+END
+GO
+
+IF COL_LENGTH('dbo.tblKhachHang', 'DiemTichLuy') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblKhachHang ADD [DiemTichLuy] INT NULL DEFAULT 0;
+END
+GO
+
+IF COL_LENGTH('dbo.tblKhachHang', 'HangThanhVien') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblKhachHang ADD [HangThanhVien] NVARCHAR(50) NULL DEFAULT N'Tiêu chuẩn';
+END
+GO
+
+IF COL_LENGTH('dbo.tblHoaDonDichVu', 'TrangThai') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDonDichVu ADD [TrangThai] NVARCHAR(50) NULL DEFAULT N'ChoThanhToan';
+END
+GO
+
+IF COL_LENGTH('dbo.tblHoaDonDichVu', 'PhuongThucThanhToan') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDonDichVu ADD [PhuongThucThanhToan] NVARCHAR(50) NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.tblHoaDonDichVu', 'MaPhieuDV') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDonDichVu ADD [MaPhieuDV] INT NULL;
+END
+GO
+
+IF COL_LENGTH('dbo.tblHoaDonDichVu', 'MaDatLich') IS NULL
+BEGIN
+    ALTER TABLE dbo.tblHoaDonDichVu ADD [MaDatLich] INT NULL;
+END
+GO
+
+-- ====================================================================================================
+-- PHẦN II: BẢNG NHẬT KÝ KIỂM TOÁN GIAO DỊCH & XỬ LÝ LỖI THANH TOÁN (PAYMENT AUDIT LOG)
+-- ====================================================================================================
+
+IF OBJECT_ID(N'[dbo].[tblLichSuGiaoDichThanhToan]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[tblLichSuGiaoDichThanhToan](
+        [MaGiaoDich] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
+        [LoaiHoaDon] [nvarchar](20) NOT NULL, -- 'HoaDonHang' hoặc 'HoaDonDichVu'
+        [MaHD] [int] NULL,                    -- Mã đơn hàng sản phẩm
+        [MaHDDV] [int] NULL,                  -- Mã hóa đơn dịch vụ chăm sóc / spa
+        [SoTienGiaoDich] [decimal](18, 2) NOT NULL,
+        [PhuongThucThanhToan] [nvarchar](50) NOT NULL, -- 'TienMat', 'VNPay', 'VietQR', 'ChuyenKhoan', 'COD'
+        [MaGiaoDichCongTT] [nvarchar](100) NULL,      -- Mã tham chiếu ngân hàng / VNPay TxnRef
+        [TrangThaiGiaoDich] [nvarchar](30) NOT NULL,   -- 'ThanhCong', 'ThatBai', 'DaHoanTien', 'CanhBao'
+        [MaLoi] [nvarchar](50) NULL,                   -- Mã lỗi chuẩn hóa
+        [ThongBaoLoi] [nvarchar](500) NULL,            -- Diễn giải chi tiết nguyên nhân lỗi
+        [NgayGiaoDich] [datetime] NULL DEFAULT GETDATE(),
+        [NguoiThucHien] [int] NULL,                    -- Mã NV hoặc Mã KH thực hiện giao dịch
+        CONSTRAINT [FK_tblLichSuGiaoDich_tblHoaDon] FOREIGN KEY([MaHD]) REFERENCES [dbo].[tblHoaDon] ([MaHD]),
+        CONSTRAINT [FK_tblLichSuGiaoDich_tblHoaDonDichVu] FOREIGN KEY([MaHDDV]) REFERENCES [dbo].[tblHoaDonDichVu] ([MaHDDV])
+    );
+END
+GO
+
+-- ====================================================================================================
+-- PHẦN III: STORED PROCEDURES XỬ LÝ CÁC LỖI HAY XẢY RA TRONG THANH TOÁN
+-- ====================================================================================================
+
+-- ----------------------------------------------------------------------------------------------------
+-- 1. SP: sp_XuLyThanhToanDonHang
+-- Xử lý thanh toán cho đơn hàng sản phẩm với kiểm tra toàn diện:
+--  + Lỗi 1: Đơn hàng không tồn tại (ERR_ORDER_NOT_FOUND)
+--  + Lỗi 2: Thanh toán trùng lặp / Double Payment (ERR_ALREADY_PAID)
+--  + Lỗi 3: Đơn hàng đã bị hủy (ERR_ORDER_CANCELLED)
+--  + Lỗi 4: Số tiền thanh toán không khớp với hóa đơn (ERR_AMOUNT_MISMATCH)
+--  + Lỗi 5: Tồn kho không đủ tại thời điểm chốt thanh toán (ERR_OUT_OF_STOCK) kèm khóa dòng UPDLOCK
+--  + Lỗi 6: Ngoại lệ hệ thống / Deadlock -> Rollback an toàn (ERR_TRANSACTION_FAILED)
+-- ----------------------------------------------------------------------------------------------------
+IF OBJECT_ID(N'[dbo].[sp_XuLyThanhToanDonHang]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[sp_XuLyThanhToanDonHang];
+GO
+
+CREATE PROCEDURE [dbo].[sp_XuLyThanhToanDonHang]
+    @MaHD INT,
+    @SoTienThanhToan DECIMAL(18, 2),
+    @PhuongThuc NVARCHAR(50),
+    @MaGiaoDichNgoai NVARCHAR(100) = NULL,
+    @MaNV INT = NULL,
+    @KetQua BIT OUTPUT,
+    @MaLoi NVARCHAR(50) OUTPUT,
+    @ThongBao NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @TongTien DECIMAL(18, 2);
+    DECLARE @DaThanhToan BIT;
+    DECLARE @TinhTrang INT;
+    DECLARE @MaKH INT;
+    DECLARE @DaCongDiem BIT;
+
+    BEGIN TRY
+        -- 1. KIỂM TRA ĐƠN HÀNG CÓ TỒN TẠI KHÔNG
+        SELECT 
+            @TongTien = TongTien,
+            @DaThanhToan = ISNULL(DaThanhToan, 0),
+            @TinhTrang = TinhTrang,
+            @MaKH = MaKH,
+            @DaCongDiem = ISNULL(DaCongDiem, 0)
+        FROM dbo.tblHoaDon WITH (UPDLOCK, ROWLOCK)
+        WHERE MaHD = @MaHD;
+
+        IF @TongTien IS NULL
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_ORDER_NOT_FOUND';
+            SET @ThongBao = N'Lỗi: Không tìm thấy đơn hàng với mã #' + CAST(@MaHD AS NVARCHAR(20));
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 2. KIỂM TRA THANH TOÁN TRÙNG LẶP (IDEMPOTENCY / DOUBLE PAYMENT CHECK)
+        IF @DaThanhToan = 1
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_ALREADY_PAID';
+            SET @ThongBao = N'Cảnh báo thanh toán trùng: Đơn hàng #' + CAST(@MaHD AS NVARCHAR(20)) + N' đã được thanh toán thành công trước đó.';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'CanhBao', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 3. KIỂM TRA TRẠNG THÁI ĐƠN HÀNG (NẾU ĐÃ BỊ HỦY THÌ KHÔNG CHO THANH TOÁN)
+        IF @TinhTrang = 5 -- 5 = Đã hủy
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_ORDER_CANCELLED';
+            SET @ThongBao = N'Lỗi: Đơn hàng #' + CAST(@MaHD AS NVARCHAR(20)) + N' đã bị hủy trước đó, không thể tiến hành thanh toán.';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 4. KIỂM TRA SỐ TIỀN THANH TOÁN CÓ KHỚP VỚI HÓA ĐƠN KHÔNG
+        IF @SoTienThanhToan < @TongTien
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_AMOUNT_MISMATCH';
+            SET @ThongBao = N'Lỗi số tiền không hợp lệ: Số tiền thanh toán (' + FORMAT(@SoTienThanhToan, 'N0') + 
+                            N' đ) nhỏ hơn tổng tiền đơn hàng (' + FORMAT(@TongTien, 'N0') + N' đ).';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- BẮT ĐẦU TRANSACTION ĐẢM BẢO TÍNH TOÀN VẸN VÀ KHÓA TỒN KHO TRÁNH RACE CONDITION
+        BEGIN TRANSACTION;
+
+        -- 5. KIỂM TRA VÀ KHÓA TỒN KHO CHO TỪNG SẢN PHẨM TRONG ĐƠN
+        DECLARE @MaSPThieu INT;
+        DECLARE @TenSPThieu NVARCHAR(200);
+        DECLARE @SoLuongTonHienTai INT;
+        DECLARE @SoLuongYeuCau INT;
+
+        SELECT TOP 1
+            @MaSPThieu = sp.MaSP,
+            @TenSPThieu = sp.TenSP,
+            @SoLuongTonHienTai = ISNULL(tk.SoLuongTon, 0),
+            @SoLuongYeuCau = ct.SoLuong
+        FROM dbo.tblChiTietHoaDon ct
+        INNER JOIN dbo.tblSanPham sp ON ct.MaSP = sp.MaSP
+        LEFT JOIN dbo.tblTonKho tk WITH (UPDLOCK, HOLDLOCK) ON ct.MaSP = tk.MaSP
+        WHERE ct.MaHD = @MaHD AND ISNULL(tk.SoLuongTon, 0) < ct.SoLuong;
+
+        IF @MaSPThieu IS NOT NULL
+        BEGIN
+            ROLLBACK TRANSACTION;
+
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_OUT_OF_STOCK';
+            SET @ThongBao = N'Lỗi hết hàng: Sản phẩm "' + @TenSPThieu + N'" không đủ tồn kho (chỉ còn ' + 
+                            CAST(@SoLuongTonHienTai AS NVARCHAR(10)) + N', yêu cầu ' + CAST(@SoLuongYeuCau AS NVARCHAR(10)) + N').';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 6. CẬP NHẬT TRỪ TỒN KHO THỰC TẾ
+        UPDATE tk
+        SET tk.SoLuongTon = tk.SoLuongTon - ct.SoLuong
+        FROM dbo.tblTonKho tk
+        INNER JOIN dbo.tblChiTietHoaDon ct ON tk.MaSP = ct.MaSP
+        WHERE ct.MaHD = @MaHD;
+
+        -- 7. CẬP NHẬT TRẠNG THÁI HÓA ĐƠN ĐÃ THANH TOÁN
+        UPDATE dbo.tblHoaDon
+        SET 
+            DaThanhToan = 1,
+            TinhTrang = 2, -- 2 = Đã xác nhận / Chuẩn bị giao
+            HinhThucThanhToan = @PhuongThuc,
+            MaNV = COALESCE(@MaNV, MaNV)
+        WHERE MaHD = @MaHD;
+
+        -- 8. TÍCH LŨY ĐIỂM THƯỞNG CHO HỘI VIÊN (100.000 VNĐ = 1 ĐIỂM)
+        IF @MaKH IS NOT NULL AND @DaCongDiem = 0
+        BEGIN
+            DECLARE @DiemCong INT = CAST((@TongTien / 100000.0) AS INT);
+            IF @DiemCong > 0
+            BEGIN
+                UPDATE dbo.tblKhachHang
+                SET DiemTichLuy = ISNULL(DiemTichLuy, 0) + @DiemCong
+                WHERE MaKH = @MaKH;
+
+                -- Tự động nâng hạng thành viên dựa trên điểm
+                UPDATE dbo.tblKhachHang
+                SET HangThanhVien = CASE 
+                    WHEN DiemTichLuy >= 1000 THEN N'VVIP'
+                    WHEN DiemTichLuy >= 500  THEN N'VIP'
+                    WHEN DiemTichLuy >= 100  THEN N'Thân thiết'
+                    ELSE N'Tiêu chuẩn'
+                END
+                WHERE MaKH = @MaKH;
+
+                UPDATE dbo.tblHoaDon
+                SET DaCongDiem = 1
+                WHERE MaHD = @MaHD;
+            END
+        END
+
+        -- 9. GHI VẾT GIAO DỊCH THÀNH CÔNG VÀO AUDIT LOG
+        INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+            (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+        VALUES 
+            (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThanhCong', NULL, N'Thanh toán đơn hàng thành công', @MaNV);
+
+        COMMIT TRANSACTION;
+
+        SET @KetQua = 1;
+        SET @MaLoi = NULL;
+        SET @ThongBao = N'Thanh toán đơn hàng #' + CAST(@MaHD AS NVARCHAR(20)) + N' thành công.';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        SET @KetQua = 0;
+        SET @MaLoi = N'ERR_TRANSACTION_FAILED';
+        SET @ThongBao = N'Lỗi giao dịch hệ thống: ' + ERROR_MESSAGE();
+
+        INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+            (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+        VALUES 
+            (N'HoaDonHang', @MaHD, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+    END CATCH
+END;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- 2. SP: sp_XuLyThanhToanHoaDonDichVu
+-- Xử lý thanh toán cho hóa đơn dịch vụ chăm sóc & spa tại quầy Thu ngân / Online:
+--  + Chống double payment
+--  + Kiểm tra số tiền thanh toán
+--  + Tự động đồng bộ trạng thái sang Phiếu dịch vụ chăm sóc & Lịch hẹn
+--  + Tích lũy điểm hội viên
+-- ----------------------------------------------------------------------------------------------------
+IF OBJECT_ID(N'[dbo].[sp_XuLyThanhToanHoaDonDichVu]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[sp_XuLyThanhToanHoaDonDichVu];
+GO
+
+CREATE PROCEDURE [dbo].[sp_XuLyThanhToanHoaDonDichVu]
+    @MaHDDV INT,
+    @SoTienThanhToan DECIMAL(18, 2),
+    @PhuongThuc NVARCHAR(50),
+    @MaGiaoDichNgoai NVARCHAR(100) = NULL,
+    @MaNV INT = NULL,
+    @KetQua BIT OUTPUT,
+    @MaLoi NVARCHAR(50) OUTPUT,
+    @ThongBao NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @TongTien DECIMAL(18, 2);
+    DECLARE @TrangThai NVARCHAR(50);
+    DECLARE @MaKH INT;
+    DECLARE @MaPhieuDV INT;
+    DECLARE @MaDatLich INT;
+
+    BEGIN TRY
+        -- 1. KIỂM TRA HÓA ĐƠN DỊCH VỤ CÓ TỒN TẠI KHÔNG
+        SELECT 
+            @TongTien = TongTien,
+            @TrangThai = ISNULL(TrangThai, N'ChoThanhToan'),
+            @MaKH = MaKH,
+            @MaPhieuDV = MaPhieuDV,
+            @MaDatLich = MaDatLich
+        FROM dbo.tblHoaDonDichVu WITH (UPDLOCK, ROWLOCK)
+        WHERE MaHDDV = @MaHDDV;
+
+        IF @TongTien IS NULL
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_BILL_NOT_FOUND';
+            SET @ThongBao = N'Lỗi: Không tìm thấy hóa đơn dịch vụ với mã #' + CAST(@MaHDDV AS NVARCHAR(20));
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonDichVu', @MaHDDV, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 2. KIỂM TRA DOUBLE PAYMENT
+        IF @TrangThai = N'DaThanhToan'
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_ALREADY_PAID';
+            SET @ThongBao = N'Cảnh báo thanh toán trùng: Hóa đơn dịch vụ #' + CAST(@MaHDDV AS NVARCHAR(20)) + N' đã được thanh toán trước đó.';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonDichVu', @MaHDDV, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'CanhBao', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        -- 3. KIỂM TRA SỐ TIỀN
+        IF @SoTienThanhToan < @TongTien
+        BEGIN
+            SET @KetQua = 0;
+            SET @MaLoi = N'ERR_AMOUNT_MISMATCH';
+            SET @ThongBao = N'Lỗi số tiền: Số tiền thanh toán (' + FORMAT(@SoTienThanhToan, 'N0') + 
+                            N' đ) nhỏ hơn tổng chi phí dịch vụ (' + FORMAT(@TongTien, 'N0') + N' đ).';
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+                (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+            VALUES 
+                (N'HoaDonDichVu', @MaHDDV, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+
+            RETURN;
+        END
+
+        BEGIN TRANSACTION;
+
+        -- 4. CẬP NHẬT TRẠNG THÁI HÓA ĐƠN DỊCH VỤ
+        UPDATE dbo.tblHoaDonDichVu
+        SET 
+            TrangThai = N'DaThanhToan',
+            PhuongThucThanhToan = @PhuongThuc,
+            MaNV = COALESCE(@MaNV, MaNV)
+        WHERE MaHDDV = @MaHDDV;
+
+        -- 5. ĐỒNG BỘ SANG PHIẾU DỊCH VỤ CHĂM SÓC (NẾU CÓ LIÊN KẾT)
+        IF @MaPhieuDV IS NOT NULL
+        BEGIN
+            UPDATE dbo.tblPhieuDichVuChamSoc
+            SET 
+                TrangThaiThanhToan = N'Đã thanh toán',
+                TrangThaiDichVu = CASE WHEN TrangThaiDichVu = N'Chờ thanh toán' THEN N'Hoàn thành' ELSE TrangThaiDichVu END
+            WHERE MaPhieuDV = @MaPhieuDV;
+        END
+
+        -- 6. ĐỒNG BỘ SANG LỊCH HẸN TRỰC TUYẾN (NẾU CÓ LIÊN KẾT)
+        IF @MaDatLich IS NOT NULL
+        BEGIN
+            UPDATE dbo.tblDatLich
+            SET 
+                TrangThai = N'Hoàn thành',
+                TrangThaiThanhToan = N'Đã thanh toán'
+            WHERE MaDatLich = @MaDatLich;
+        END
+
+        -- 7. TÍCH LŨY ĐIỂM HỘI VIÊN DỊCH VỤ
+        IF @MaKH IS NOT NULL
+        BEGIN
+            DECLARE @DiemCongDV INT = CAST((@TongTien / 100000.0) AS INT);
+            IF @DiemCongDV > 0
+            BEGIN
+                UPDATE dbo.tblKhachHang
+                SET DiemTichLuy = ISNULL(DiemTichLuy, 0) + @DiemCongDV
+                WHERE MaKH = @MaKH;
+            END
+        END
+
+        -- 8. GHI LOG KIỂM TOÁN
+        INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+            (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+        VALUES 
+            (N'HoaDonDichVu', @MaHDDV, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThanhCong', NULL, N'Thanh toán hóa đơn dịch vụ thành công', @MaNV);
+
+        COMMIT TRANSACTION;
+
+        SET @KetQua = 1;
+        SET @MaLoi = NULL;
+        SET @ThongBao = N'Thanh toán hóa đơn dịch vụ #' + CAST(@MaHDDV AS NVARCHAR(20)) + N' thành công.';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        SET @KetQua = 0;
+        SET @MaLoi = N'ERR_TRANSACTION_FAILED';
+        SET @ThongBao = N'Lỗi giao dịch hệ thống: ' + ERROR_MESSAGE();
+
+        INSERT INTO dbo.tblLichSuGiaoDichThanhToan 
+            (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, MaGiaoDichCongTT, TrangThaiGiaoDich, MaLoi, ThongBaoLoi, NguoiThucHien)
+        VALUES 
+            (N'HoaDonDichVu', @MaHDDV, @SoTienThanhToan, @PhuongThuc, @MaGiaoDichNgoai, N'ThatBai', @MaLoi, @ThongBao, @MaNV);
+    END CATCH
+END;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- 3. SP: sp_HoanTienVaHuyGiaoDich
+-- Xử lý hoàn tiền / đảo ngược giao dịch khi xảy ra khiếu nại hoặc lỗi phát sinh sau thanh toán:
+--  + Hoàn trả lại tồn kho vào tblTonKho (nếu là đơn hàng sản phẩm)
+--  + Khôi phục trạng thái thanh toán về chưa thanh toán hoặc đã hủy
+--  + Khấu trừ lại điểm tích lũy đã cộng
+--  + Ghi log giao dịch hoàn tiền
+-- ----------------------------------------------------------------------------------------------------
+IF OBJECT_ID(N'[dbo].[sp_HoanTienVaHuyGiaoDich]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[sp_HoanTienVaHuyGiaoDich];
+GO
+
+CREATE PROCEDURE [dbo].[sp_HoanTienVaHuyGiaoDich]
+    @LoaiHoaDon NVARCHAR(20), -- 'HoaDonHang' hoặc 'HoaDonDichVu'
+    @MaHoaDon INT,
+    @LyDoHoanTien NVARCHAR(500),
+    @MaNV INT = NULL,
+    @KetQua BIT OUTPUT,
+    @ThongBao NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF @LoaiHoaDon = N'HoaDonHang'
+        BEGIN
+            DECLARE @TongTienHang DECIMAL(18, 2);
+            DECLARE @MaKHHang INT;
+            DECLARE @DaThanhToanHang BIT;
+
+            SELECT 
+                @TongTienHang = TongTien,
+                @MaKHHang = MaKH,
+                @DaThanhToanHang = ISNULL(DaThanhToan, 0)
+            FROM dbo.tblHoaDon WITH (UPDLOCK, ROWLOCK)
+            WHERE MaHD = @MaHoaDon;
+
+            IF @TongTienHang IS NULL OR @DaThanhToanHang = 0
+            BEGIN
+                ROLLBACK TRANSACTION;
+                SET @KetQua = 0;
+                SET @ThongBao = N'Lỗi: Đơn hàng #' + CAST(@MaHoaDon AS NVARCHAR(20)) + N' không tồn tại hoặc chưa từng được thanh toán.';
+                RETURN;
+            END
+
+            -- Hoàn trả số lượng sản phẩm vào kho
+            UPDATE tk
+            SET tk.SoLuongTon = tk.SoLuongTon + ct.SoLuong
+            FROM dbo.tblTonKho tk
+            INNER JOIN dbo.tblChiTietHoaDon ct ON tk.MaSP = ct.MaSP
+            WHERE ct.MaHD = @MaHoaDon;
+
+            -- Cập nhật trạng thái đơn hàng
+            UPDATE dbo.tblHoaDon
+            SET 
+                DaThanhToan = 0,
+                TinhTrang = 5 -- 5 = Đã hủy / Hoàn tiền
+            WHERE MaHD = @MaHoaDon;
+
+            -- Khấu trừ lại điểm thưởng nếu đã tích
+            IF @MaKHHang IS NOT NULL
+            BEGIN
+                DECLARE @DiemTru INT = CAST((@TongTienHang / 100000.0) AS INT);
+                UPDATE dbo.tblKhachHang
+                SET DiemTichLuy = CASE WHEN DiemTichLuy >= @DiemTru THEN DiemTichLuy - @DiemTru ELSE 0 END
+                WHERE MaKH = @MaKHHang;
+            END
+
+            -- Ghi log hoàn tiền
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan
+                (LoaiHoaDon, MaHD, SoTienGiaoDich, PhuongThucThanhToan, TrangThaiGiaoDich, ThongBaoLoi, NguoiThucHien)
+            VALUES
+                (N'HoaDonHang', @MaHoaDon, @TongTienHang, N'HoanTien', N'DaHoanTien', @LyDoHoanTien, @MaNV);
+        END
+        ELSE IF @LoaiHoaDon = N'HoaDonDichVu'
+        BEGIN
+            DECLARE @TongTienDV DECIMAL(18, 2);
+            DECLARE @TrangThaiDV NVARCHAR(50);
+            DECLARE @MaKHDV INT;
+
+            SELECT 
+                @TongTienDV = TongTien,
+                @TrangThaiDV = TrangThai,
+                @MaKHDV = MaKH
+            FROM dbo.tblHoaDonDichVu WITH (UPDLOCK, ROWLOCK)
+            WHERE MaHDDV = @MaHoaDon;
+
+            IF @TongTienDV IS NULL OR @TrangThaiDV <> N'DaThanhToan'
+            BEGIN
+                ROLLBACK TRANSACTION;
+                SET @KetQua = 0;
+                SET @ThongBao = N'Lỗi: Hóa đơn dịch vụ #' + CAST(@MaHoaDon AS NVARCHAR(20)) + N' chưa được thanh toán, không thể hoàn tiền.';
+                RETURN;
+            END
+
+            UPDATE dbo.tblHoaDonDichVu
+            SET TrangThai = N'DaHuy'
+            WHERE MaHDDV = @MaHoaDon;
+
+            -- Khấu trừ điểm dịch vụ
+            IF @MaKHDV IS NOT NULL
+            BEGIN
+                DECLARE @DiemTruDV INT = CAST((@TongTienDV / 100000.0) AS INT);
+                UPDATE dbo.tblKhachHang
+                SET DiemTichLuy = CASE WHEN DiemTichLuy >= @DiemTruDV THEN DiemTichLuy - @DiemTruDV ELSE 0 END
+                WHERE MaKH = @MaKHDV;
+            END
+
+            INSERT INTO dbo.tblLichSuGiaoDichThanhToan
+                (LoaiHoaDon, MaHDDV, SoTienGiaoDich, PhuongThucThanhToan, TrangThaiGiaoDich, ThongBaoLoi, NguoiThucHien)
+            VALUES
+                (N'HoaDonDichVu', @MaHoaDon, @TongTienDV, N'HoanTien', N'DaHoanTien', @LyDoHoanTien, @MaNV);
+        END
+
+        COMMIT TRANSACTION;
+        SET @KetQua = 1;
+        SET @ThongBao = N'Hoàn tiền và hủy giao dịch thành công cho hóa đơn #' + CAST(@MaHoaDon AS NVARCHAR(20));
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        SET @KetQua = 0;
+        SET @ThongBao = N'Lỗi khi xử lý hoàn tiền: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- 4. TRIGGER: trg_ChanSuaHoaDonDaThanhToan
+-- Ngăn chặn cập nhật trái phép số tiền hoặc khách hàng sau khi đơn hàng đã thanh toán thành công
+-- ----------------------------------------------------------------------------------------------------
+IF OBJECT_ID(N'[dbo].[trg_ChanSuaHoaDonDaThanhToan]', N'TR') IS NOT NULL
+    DROP TRIGGER [dbo].[trg_ChanSuaHoaDonDaThanhToan];
+GO
+
+CREATE TRIGGER [dbo].[trg_ChanSuaHoaDonDaThanhToan]
+ON dbo.tblHoaDon
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra nếu đơn hàng ĐÃ thanh toán từ trước mà bị can thiệp sửa Tổng tiền hoặc Mã KH
+    IF EXISTS (
+        SELECT 1 
+        FROM deleted d
+        INNER JOIN inserted i ON d.MaHD = i.MaHD
+        WHERE d.DaThanhToan = 1 
+          AND (d.TongTien <> i.TongTien OR ISNULL(d.MaKH, 0) <> ISNULL(i.MaKH, 0) OR ISNULL(d.TienGiam, 0) <> ISNULL(i.TienGiam, 0))
+    )
+    BEGIN
+        RAISERROR(N'Bảo mật thanh toán: Không được phép chỉnh sửa số tiền, tiền giảm hoặc khách hàng của đơn hàng đã thanh toán thành công!', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END;
+GO
+
+
+-- ====================================================================================================
+-- PHẦN IV: CÁC LỆNH TỔNG HỢP VÀ PHÂN TÍCH DỮ LIỆU ĐA CHIỀU BẰNG GROUP BY ROLLUP
+-- ====================================================================================================
+
+-- ----------------------------------------------------------------------------------------------------
+-- LỆNH ROLLUP 1: BÁO CÁO DOANH THU ĐA CẤP THEO NĂM -> QUÝ -> THÁNG -> PHƯƠNG THỨC THANH TOÁN
+-- Tính tổng phụ từng tháng, từng quý, từng năm và tổng đại trà toàn hệ thống
+-- ----------------------------------------------------------------------------------------------------
+SELECT 
+    CASE 
+        WHEN GROUPING(YEAR(h.NgayLap)) = 1 THEN N'== TỔNG TOÀN BỘ CÁC NĂM ==' 
+        ELSE CAST(YEAR(h.NgayLap) AS NVARCHAR(20)) 
+    END AS [Nam],
+    CASE 
+        WHEN GROUPING(DATEPART(QUARTER, h.NgayLap)) = 1 AND GROUPING(YEAR(h.NgayLap)) = 0 THEN N'-- TỔNG CẢ NĂM --'
+        WHEN GROUPING(DATEPART(QUARTER, h.NgayLap)) = 1 THEN N''
+        ELSE N'Quý ' + CAST(DATEPART(QUARTER, h.NgayLap) AS NVARCHAR(10)) 
+    END AS [Quy],
+    CASE 
+        WHEN GROUPING(MONTH(h.NgayLap)) = 1 AND GROUPING(DATEPART(QUARTER, h.NgayLap)) = 0 THEN N'-- TỔNG QUÝ --'
+        WHEN GROUPING(MONTH(h.NgayLap)) = 1 THEN N''
+        ELSE N'Tháng ' + CAST(MONTH(h.NgayLap) AS NVARCHAR(10)) 
+    END AS [Thang],
+    CASE 
+        WHEN GROUPING(h.HinhThucThanhToan) = 1 AND GROUPING(MONTH(h.NgayLap)) = 0 THEN N'-- TẤT CẢ PHƯƠNG THỨC --'
+        WHEN GROUPING(h.HinhThucThanhToan) = 1 THEN N''
+        ELSE ISNULL(h.HinhThucThanhToan, N'Chưa chọn') 
+    END AS [PhuongThucThanhToan],
+    COUNT(h.MaHD) AS [SoLuongDonHang],
+    SUM(h.TongTien) AS [TongDoanhThuGoc],
+    SUM(ISNULL(h.TienGiam, 0)) AS [TongTienGiamGia],
+    SUM(h.TongTien - ISNULL(h.TienGiam, 0)) AS [DoanhThuThucThu]
+FROM dbo.tblHoaDon h
+WHERE h.DaThanhToan = 1
+GROUP BY ROLLUP(YEAR(h.NgayLap), DATEPART(QUARTER, h.NgayLap), MONTH(h.NgayLap), h.HinhThucThanhToan)
+ORDER BY 
+    GROUPING(YEAR(h.NgayLap)) DESC,
+    YEAR(h.NgayLap),
+    GROUPING(DATEPART(QUARTER, h.NgayLap)) DESC,
+    DATEPART(QUARTER, h.NgayLap),
+    GROUPING(MONTH(h.NgayLap)) DESC,
+    MONTH(h.NgayLap);
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- LỆNH ROLLUP 2: BÁO CÁO DOANH SỐ BÁN LẺ THEO DANH MỤC SẢN PHẨM -> TÊN SẢN PHẨM
+-- Giúp ban giám đốc phân tích nhóm sản phẩm nào bán chạy nhất, kèm tổng phụ từng danh mục
+-- ----------------------------------------------------------------------------------------------------
+SELECT 
+    CASE 
+        WHEN GROUPING(dm.TenDanhMuc) = 1 THEN N'== TỔNG TẤT CẢ DANH MỤC ==' 
+        ELSE ISNULL(dm.TenDanhMuc, N'Chưa phân loại') 
+    END AS [DanhMuc],
+    CASE 
+        WHEN GROUPING(sp.TenSP) = 1 AND GROUPING(dm.TenDanhMuc) = 0 THEN N'-- TỔNG DANH MỤC ' + ISNULL(dm.TenDanhMuc, N'') + N' --'
+        WHEN GROUPING(sp.TenSP) = 1 THEN N''
+        ELSE sp.TenSP 
+    END AS [TenSanPham],
+    SUM(ct.SoLuong) AS [TongSoLuongBan],
+    SUM(ct.SoLuong * ct.GiaBan) AS [TongDoanhThuBan],
+    AVG(ct.GiaBan) AS [GiaBanTrungBinh]
+FROM dbo.tblChiTietHoaDon ct
+INNER JOIN dbo.tblHoaDon h ON ct.MaHD = h.MaHD
+INNER JOIN dbo.tblSanPham sp ON ct.MaSP = sp.MaSP
+LEFT JOIN dbo.tblDanhMuc dm ON sp.MaDanhMuc = dm.MaDanhMuc
+WHERE h.DaThanhToan = 1
+GROUP BY ROLLUP(dm.TenDanhMuc, sp.TenSP)
+ORDER BY 
+    GROUPING(dm.TenDanhMuc) DESC,
+    dm.TenDanhMuc,
+    GROUPING(sp.TenSP) DESC,
+    TongDoanhThuBan DESC;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- LỆNH ROLLUP 3: BÁO CÁO DOANH THU DỊCH VỤ SPA & KHÁM CHỮA BỆNH THEO NHÓM DỊCH VỤ -> TÊN DỊCH VỤ
+-- Phân tích cơ cấu doanh thu theo nhóm dịch vụ (Spa, Tiêm phòng, Khám tổng quát) và tổng toàn viện
+-- ----------------------------------------------------------------------------------------------------
+SELECT 
+    CASE 
+        WHEN GROUPING(dv.NhomDichVu) = 1 THEN N'== TỔNG TẤT CẢ DỊCH VỤ ==' 
+        ELSE ISNULL(dv.NhomDichVu, N'Chưa phân nhóm') 
+    END AS [NhomDichVu],
+    CASE 
+        WHEN GROUPING(dv.TenDichVu) = 1 AND GROUPING(dv.NhomDichVu) = 0 THEN N'-- TỔNG NHÓM ' + ISNULL(dv.NhomDichVu, N'') + N' --'
+        WHEN GROUPING(dv.TenDichVu) = 1 THEN N''
+        ELSE dv.TenDichVu 
+    END AS [TenDichVu],
+    COUNT(ct.MaChiTiet) AS [SoLuotThucHien],
+    SUM(ct.SoLuong) AS [TongSoLuongDichVu],
+    SUM(ct.ThanhTien) AS [TongDoanhThuDichVu]
+FROM dbo.tblChiTietDichVuChamSoc ct
+INNER JOIN dbo.tblDichVuChamSoc dv ON ct.MaDVCS = dv.MaDVCS
+INNER JOIN dbo.tblPhieuDichVuChamSoc p ON ct.MaPhieuDV = p.MaPhieuDV
+WHERE p.TrangThaiThanhToan = N'Đã thanh toán'
+GROUP BY ROLLUP(dv.NhomDichVu, dv.TenDichVu)
+ORDER BY 
+    GROUPING(dv.NhomDichVu) DESC,
+    dv.NhomDichVu,
+    GROUPING(dv.TenDichVu) DESC,
+    TongDoanhThuDichVu DESC;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- LỆNH ROLLUP 4: BÁO CÁO GIÁ TRỊ TỒN KHO THEO NHÀ CUNG CẤP -> DANH MỤC -> SẢN PHẨM
+-- Giám sát giá trị vốn hàng tồn theo từng đối tác cung ứng và từng mặt hàng
+-- ----------------------------------------------------------------------------------------------------
+SELECT 
+    CASE 
+        WHEN GROUPING(ncc.TenNCC) = 1 THEN N'== TỔNG TOÀN BỘ KHO HÀNG ==' 
+        ELSE ISNULL(ncc.TenNCC, N'Chưa phân bổ NCC') 
+    END AS [NhaCungCap],
+    CASE 
+        WHEN GROUPING(dm.TenDanhMuc) = 1 AND GROUPING(ncc.TenNCC) = 0 THEN N'-- TỔNG THEO NCC ' + ISNULL(ncc.TenNCC, N'') + N' --'
+        WHEN GROUPING(dm.TenDanhMuc) = 1 THEN N''
+        ELSE ISNULL(dm.TenDanhMuc, N'Chưa phân loại DM') 
+    END AS [DanhMuc],
+    CASE 
+        WHEN GROUPING(sp.TenSP) = 1 AND GROUPING(dm.TenDanhMuc) = 0 THEN N'-- TỔNG DANH MỤC ' + ISNULL(dm.TenDanhMuc, N'') + N' --'
+        WHEN GROUPING(sp.TenSP) = 1 THEN N''
+        ELSE sp.TenSP 
+    END AS [TenSanPham],
+    SUM(ISNULL(tk.SoLuongTon, 0)) AS [TongSoLuongTon],
+    SUM(ISNULL(tk.SoLuongTon, 0) * ISNULL(sp.GiaBan, 0)) AS [UocTinhGiaTriKho]
+FROM dbo.tblTonKho tk
+INNER JOIN dbo.tblSanPham sp ON tk.MaSP = sp.MaSP
+LEFT JOIN dbo.tblDanhMuc dm ON sp.MaDanhMuc = dm.MaDanhMuc
+LEFT JOIN dbo.tblNhaCungCap ncc ON sp.MaNCC = ncc.MaNCC
+GROUP BY ROLLUP(ncc.TenNCC, dm.TenDanhMuc, sp.TenSP)
+ORDER BY 
+    GROUPING(ncc.TenNCC) DESC,
+    ncc.TenNCC,
+    GROUPING(dm.TenDanhMuc) DESC,
+    dm.TenDanhMuc;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- LỆNH ROLLUP 5: BÁO CÁO KIỂM TOÁN TỶ LỆ LỖI THANH TOÁN THEO CỔNG THANH TOÁN -> TRẠNG THÁI -> MÃ LỖI
+-- Thống kê số lượng giao dịch thành công, thất bại và mã lỗi hay gặp nhất trên từng kênh thanh toán
+-- ----------------------------------------------------------------------------------------------------
+SELECT 
+    CASE 
+        WHEN GROUPING(ls.PhuongThucThanhToan) = 1 THEN N'== TỔNG TẤT CẢ PHƯƠNG THỨC ==' 
+        ELSE ls.PhuongThucThanhToan 
+    END AS [PhuongThucThanhToan],
+    CASE 
+        WHEN GROUPING(ls.TrangThaiGiaoDich) = 1 AND GROUPING(ls.PhuongThucThanhToan) = 0 THEN N'-- TỔNG TRẠNG THÁI --'
+        WHEN GROUPING(ls.TrangThaiGiaoDich) = 1 THEN N''
+        ELSE ls.TrangThaiGiaoDich 
+    END AS [TrangThaiGiaoDich],
+    CASE 
+        WHEN GROUPING(ls.MaLoi) = 1 AND GROUPING(ls.TrangThaiGiaoDich) = 0 THEN N'-- TẤT CẢ MÃ LỖI --'
+        WHEN GROUPING(ls.MaLoi) = 1 THEN N''
+        ELSE ISNULL(ls.MaLoi, N'THÀNH CÔNG (KHÔNG LỖI)') 
+    END AS [MaLoiChiTiet],
+    COUNT(ls.MaGiaoDich) AS [SoGiaoDich],
+    SUM(ls.SoTienGiaoDich) AS [TongTienGiaoDich]
+FROM dbo.tblLichSuGiaoDichThanhToan ls
+GROUP BY ROLLUP(ls.PhuongThucThanhToan, ls.TrangThaiGiaoDich, ls.MaLoi)
+ORDER BY 
+    GROUPING(ls.PhuongThucThanhToan) DESC,
+    ls.PhuongThucThanhToan,
+    GROUPING(ls.TrangThaiGiaoDich) DESC,
+    ls.TrangThaiGiaoDich;
+GO
+
+-- ----------------------------------------------------------------------------------------------------
+-- STORED PROCEDURE ĐỘNG: sp_BaoCaoTongHopDoanhThu_Rollup
+-- Báo cáo tổng hợp Rollup linh hoạt theo khoảng thời gian tùy chọn
+-- ----------------------------------------------------------------------------------------------------
+IF OBJECT_ID(N'[dbo].[sp_BaoCaoTongHopDoanhThu_Rollup]', N'P') IS NOT NULL
+    DROP PROCEDURE [dbo].[sp_BaoCaoTongHopDoanhThu_Rollup];
+GO
+
+CREATE PROCEDURE [dbo].[sp_BaoCaoTongHopDoanhThu_Rollup]
+    @TuNgay DATETIME = NULL,
+    @DenNgay DATETIME = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @TuNgay IS NULL SET @TuNgay = DATEADD(YEAR, -1, GETDATE());
+    IF @DenNgay IS NULL SET @DenNgay = GETDATE();
+
+    SELECT 
+        CASE 
+            WHEN GROUPING(YEAR(h.NgayLap)) = 1 THEN N'== TỔNG TOÀN BỘ KỲ BÁO CÁO ==' 
+            ELSE CAST(YEAR(h.NgayLap) AS NVARCHAR(10)) 
+        END AS [Nam],
+        CASE 
+            WHEN GROUPING(MONTH(h.NgayLap)) = 1 AND GROUPING(YEAR(h.NgayLap)) = 0 THEN N'-- TỔNG CẢ NĂM --'
+            WHEN GROUPING(MONTH(h.NgayLap)) = 1 THEN N''
+            ELSE N'Tháng ' + CAST(MONTH(h.NgayLap) AS NVARCHAR(10)) 
+        END AS [Thang],
+        CASE 
+            WHEN GROUPING(h.HinhThucThanhToan) = 1 AND GROUPING(MONTH(h.NgayLap)) = 0 THEN N'-- TẤT CẢ KÊNH TT --'
+            WHEN GROUPING(h.HinhThucThanhToan) = 1 THEN N''
+            ELSE ISNULL(h.HinhThucThanhToan, N'COD/Chưa chọn') 
+        END AS [KenhThanhToan],
+        COUNT(h.MaHD) AS [SoDonHangThanhCong],
+        SUM(h.TongTien) AS [DoanhThuThuThuan]
+    FROM dbo.tblHoaDon h
+    WHERE h.DaThanhToan = 1 
+      AND h.NgayLap >= @TuNgay 
+      AND h.NgayLap <= @DenNgay
+    GROUP BY ROLLUP(YEAR(h.NgayLap), MONTH(h.NgayLap), h.HinhThucThanhToan)
+    ORDER BY 
+        GROUPING(YEAR(h.NgayLap)) DESC,
+        YEAR(h.NgayLap),
+        GROUPING(MONTH(h.NgayLap)) DESC,
+        MONTH(h.NgayLap);
+END;
 GO
