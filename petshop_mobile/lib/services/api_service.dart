@@ -11,9 +11,8 @@ import '../models/pet_model.dart';
 
 class ApiService {
   // Tự động nhận diện: localhost cho Web/Windows, 10.0.2.2 cho Android Emulator
-  static String baseUrl = (kIsWeb || defaultTargetPlatform == TargetPlatform.windows)
-      ? 'http://localhost:8080'
-      : 'http://10.0.2.2:8080';
+  // Production Backend Cloud tren Render (chay 24/7)
+  static String baseUrl = 'https://petshop-2pj5.onrender.com';
 
   static void setBaseUrl(String url) {
     baseUrl = url;
@@ -28,7 +27,7 @@ class ApiService {
   // Lấy danh mục từ tblDanhMuc
   static Future<List<CategoryModel>> getCategories() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/categories'));
+      final res = await http.get(Uri.parse('$baseUrl/api/categories')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => CategoryModel.fromJson(json)).toList();
@@ -46,7 +45,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      );
+      ).timeout(const Duration(seconds: 90));
       final data = jsonDecode(utf8.decode(res.bodyBytes));
       if (res.statusCode == 200 && data['success'] == true && data['user'] != null) {
         return {
@@ -66,7 +65,7 @@ class ApiService {
       return {
         'success': false,
         'user': null,
-        'message': 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!',
+        'message': (e.toString().contains('TimeoutException')) ? 'Máy chủ Cloud đang thức dậy (mất ~30-60 giây). Vui lòng thử lại sau giây lát!' : 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!',
       };
     }
   }
@@ -74,7 +73,7 @@ class ApiService {
   // 1b. Lấy thông tin tài khoản & thành viên mới nhất
   static Future<UserModel?> getProfile(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/auth/profile?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/auth/profile?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         if (data['success'] == true && data['user'] != null) {
@@ -106,7 +105,7 @@ class ApiService {
           'dienThoai': dienThoai ?? '',
           'diaChi': diaChi ?? '',
         }),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -130,7 +129,7 @@ class ApiService {
       if (sort != null && sort.isNotEmpty) queryParams['sort'] = sort;
 
       final uri = Uri.parse('$baseUrl/api/products').replace(queryParameters: queryParams.isEmpty ? null : queryParams);
-      final res = await http.get(uri);
+      final res = await http.get(uri).timeout(const Duration(seconds: 90));
 
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
@@ -145,7 +144,7 @@ class ApiService {
   // 4. Chi tiết sản phẩm
   static Future<Map<String, dynamic>?> getProductDetail(int id) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/products/$id'));
+      final res = await http.get(Uri.parse('$baseUrl/api/products/$id')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         return jsonDecode(utf8.decode(res.bodyBytes));
       }
@@ -158,7 +157,7 @@ class ApiService {
   // 5. Danh sách dịch vụ chăm sóc
   static Future<List<ServiceModel>> getServices() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/bookings/services'));
+      final res = await http.get(Uri.parse('$baseUrl/api/bookings/services')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => ServiceModel.fromJson(json)).toList();
@@ -194,7 +193,7 @@ class ApiService {
           'maDV': maDV,
           'ghiChu': ghiChu ?? '',
         }),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -204,7 +203,7 @@ class ApiService {
   // 7. Lấy danh sách lịch hẹn của tôi
   static Future<List<BookingModel>> getMyBookings(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/bookings/my?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/bookings/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => BookingModel.fromJson(json)).toList();
@@ -235,7 +234,7 @@ class ApiService {
           'maGiamGia': cleanVoucher,
           'hinhThucThanhToan': hinhThucThanhToan,
         }),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -245,7 +244,7 @@ class ApiService {
   // 9. Danh sách đơn hàng của tôi
   static Future<List<OrderModel>> getMyOrders(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/orders/my?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/orders/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => OrderModel.fromJson(json)).toList();
@@ -259,7 +258,7 @@ class ApiService {
   // 10. Hủy đơn hàng
   static Future<Map<String, dynamic>> cancelOrder(int maHD, int maKH) async {
     try {
-      final res = await http.post(Uri.parse('$baseUrl/api/orders/$maHD/cancel?maKH=$maKH'));
+      final res = await http.post(Uri.parse('$baseUrl/api/orders/$maHD/cancel?maKH=$maKH')).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -269,7 +268,7 @@ class ApiService {
   // 11. Lấy danh sách thông báo
   static Future<List<NotificationModel>> getNotifications(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/notifications?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/notifications?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => NotificationModel.fromJson(json)).toList();
@@ -283,7 +282,7 @@ class ApiService {
   // 12. Đếm số thông báo chưa đọc
   static Future<int> getUnreadNotificationCount(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/notifications/unread-count?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/notifications/unread-count?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         return (data['unreadCount'] as num?)?.toInt() ?? 0;
@@ -297,7 +296,7 @@ class ApiService {
   // 13. Đánh dấu đã đọc
   static Future<bool> markNotificationAsRead(int id) async {
     try {
-      final res = await http.post(Uri.parse('$baseUrl/api/notifications/$id/read'));
+      final res = await http.post(Uri.parse('$baseUrl/api/notifications/$id/read')).timeout(const Duration(seconds: 90));
       return res.statusCode == 200;
     } catch (e) {
       debugPrint('markNotificationAsRead error: $e');
@@ -308,7 +307,7 @@ class ApiService {
   // 14. Đánh dấu tất cả đã đọc
   static Future<bool> markAllNotificationsAsRead(int maKH) async {
     try {
-      final res = await http.post(Uri.parse('$baseUrl/api/notifications/read-all?maKH=$maKH'));
+      final res = await http.post(Uri.parse('$baseUrl/api/notifications/read-all?maKH=$maKH')).timeout(const Duration(seconds: 90));
       return res.statusCode == 200;
     } catch (e) {
       debugPrint('markAllNotificationsAsRead error: $e');
@@ -320,7 +319,7 @@ class ApiService {
   // Lấy danh sách nhiệm vụ / ca làm việc của nhân viên
   static Future<Map<String, dynamic>> getStaffTasks(int maNV) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/staff/tasks?maNV=$maNV'));
+      final res = await http.get(Uri.parse('$baseUrl/api/staff/tasks?maNV=$maNV')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         return jsonDecode(utf8.decode(res.bodyBytes));
       }
@@ -337,7 +336,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/staff/tasks/update-booking'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'id': id, 'trangThai': trangThai, 'ghiChu': ghiChu}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -351,7 +350,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/staff/tasks/update-ticket'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'id': id, 'trangThaiDichVu': trangThaiDichVu, 'ketQuaChamSoc': ketQuaChamSoc}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -362,7 +361,7 @@ class ApiService {
   // Dashboard tổng quan
   static Future<Map<String, dynamic>?> getAdminDashboard() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/admin/dashboard'));
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/dashboard')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         return jsonDecode(utf8.decode(res.bodyBytes));
       }
@@ -375,7 +374,7 @@ class ApiService {
   // Danh sách toàn bộ đơn hàng
   static Future<List<Map<String, dynamic>>> getAdminOrders() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/admin/orders'));
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/orders')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -393,7 +392,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/admin/orders/update-status'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'maHD': maHD, 'tinhTrang': tinhTrang, 'daThanhToan': daThanhToan}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -403,7 +402,7 @@ class ApiService {
   // Danh sách phiếu dịch vụ chăm sóc
   static Future<List<Map<String, dynamic>>> getAdminCareTickets() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/admin/care-tickets'));
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/care-tickets')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -421,7 +420,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/admin/care-tickets/assign'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'maPhieuDV': maPhieuDV, 'maNV': maNV}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -431,7 +430,7 @@ class ApiService {
   // Danh sách toàn bộ lịch hẹn
   static Future<List<Map<String, dynamic>>> getAdminBookings() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/admin/bookings'));
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/bookings')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -449,7 +448,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/admin/bookings/assign'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'maDatLich': maDatLich, 'maNV': maNV}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -463,7 +462,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/admin/bookings/update-status'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'maDatLich': maDatLich, 'trangThai': trangThai}),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -473,7 +472,7 @@ class ApiService {
   // Danh sách nhân sự
   static Future<List<Map<String, dynamic>>> getAdminStaffList() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/admin/staff'));
+      final res = await http.get(Uri.parse('$baseUrl/api/admin/staff')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -498,7 +497,7 @@ class ApiService {
       if (year != null) queryParams['year'] = year.toString();
 
       final uri = Uri.parse('$baseUrl/api/admin/revenue-report').replace(queryParameters: queryParams);
-      final res = await http.get(uri);
+      final res = await http.get(uri).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         return jsonDecode(utf8.decode(res.bodyBytes));
       }
@@ -512,7 +511,7 @@ class ApiService {
   // 15. Lấy danh sách hồ sơ thú cưng của khách hàng
   static Future<List<PetModel>> getMyPets(int maKH) async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/api/pets/my?maKH=$maKH'));
+      final res = await http.get(Uri.parse('$baseUrl/api/pets/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
       if (res.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(res.bodyBytes));
         return list.map((json) => PetModel.fromJson(json)).toList();
@@ -532,7 +531,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/pets'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -546,7 +545,7 @@ class ApiService {
         Uri.parse('$baseUrl/api/pets/$id'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(petData),
-      );
+      ).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -556,7 +555,7 @@ class ApiService {
   // 18. Xóa hồ sơ thú cưng
   static Future<Map<String, dynamic>> deletePet(int id, int maKH) async {
     try {
-      final res = await http.delete(Uri.parse('$baseUrl/api/pets/$id?maKH=$maKH'));
+      final res = await http.delete(Uri.parse('$baseUrl/api/pets/$id?maKH=$maKH')).timeout(const Duration(seconds: 90));
       return jsonDecode(utf8.decode(res.bodyBytes));
     } catch (e) {
       return {'success': false, 'message': e.toString()};

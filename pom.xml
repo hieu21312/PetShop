@@ -48,6 +48,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- PostgreSQL JDBC Driver -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 		<!-- Spring Boot Validation -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -123,6 +130,15 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/webapp</directory>
+				<targetPath>static</targetPath>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
