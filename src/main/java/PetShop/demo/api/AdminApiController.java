@@ -75,7 +75,7 @@ public class AdminApiController {
 
     @GetMapping("/orders")
     public ResponseEntity<?> getOrders() {
-        List<Order> orders = orderRepository.findAllByOrderByNgayLapDesc();
+        List<Order> orders = orderRepository.findAllByOrderByMaHDDesc();
         List<Map<String, Object>> list = new ArrayList<>();
         for (Order o : orders) {
             Map<String, Object> m = new HashMap<>();

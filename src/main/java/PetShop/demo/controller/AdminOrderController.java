@@ -33,7 +33,7 @@ public class AdminOrderController {
     @GetMapping
     public String listOrders(Model model, HttpSession session) {
         if (!authService.isAdmin(session) && !authService.isCashier(session)) return authService.redirectUnauthorized(session);
-        List<Order> orders = orderRepository.findAllByOrderByNgayLapDesc();
+        List<Order> orders = orderRepository.findAllByOrderByMaHDDesc();
         model.addAttribute("orders", orders);
         return "admin/orders";
     }

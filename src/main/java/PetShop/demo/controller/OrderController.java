@@ -38,7 +38,7 @@ public class OrderController {
         if (maKH == null) {
             return "redirect:/DangNhap";
         }
-        var orders = orderRepository.findByMaKHOrderByNgayLapDesc(maKH);
+        var orders = orderRepository.findByMaKHOrderByMaHDDesc(maKH);
         model.addAttribute("orders", orders);
         return "my-orders";
     }

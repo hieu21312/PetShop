@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByMaKHOrderByNgayLapDesc(Integer maKH);
+    List<Order> findByMaKHOrderByMaHDDesc(Integer maKH);
     List<Order> findAllByOrderByNgayLapDesc();
+    List<Order> findAllByOrderByMaHDDesc();
 
     List<Order> findByHinhThucThanhToanAndDaThanhToanFalseOrderByNgayLapDesc(String hinhThucThanhToan);
 
