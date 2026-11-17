@@ -21,6 +21,7 @@ public class OrderService {
     @Autowired private InventoryRepository inventoryRepository;
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ThongBaoService thongBaoService;
+    @Autowired private MembershipService membershipService;
 
     @Transactional
     public Order createOrder(String diaChiGiaoHang, Boolean daThanhToan, String maGiamGia, BigDecimal tienGiam, String hinhThuc, HttpSession session) {
@@ -68,6 +69,13 @@ public class OrderService {
         order.setDaThanhToan(daThanhToan);
         order.setHinhThucThanhToan(hinhThuc);
         order = orderRepository.save(order);
+
+        if (Boolean.TRUE.equals(order.getDaThanhToan())) {
+            try {
+                membershipService.processOrderPoints(order);
+                customerRepository.findById(maKH).ifPresent(c -> membershipService.updateSessionMembership(session, c));
+            } catch (Exception ignored) {}
+        }
 
         for (CartItemDTO item : cart) {
             OrderDetail detail = new OrderDetail();

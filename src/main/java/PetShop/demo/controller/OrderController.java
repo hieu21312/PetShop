@@ -26,6 +26,9 @@ public class OrderController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private PetShop.demo.service.MembershipService membershipService;
+
     @GetMapping("/CuaToi")
     public String myOrders(Model model, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
@@ -116,6 +119,9 @@ public class OrderController {
             o.setDaThanhToan(DaThanhToan != null ? DaThanhToan : false);
             o.setDiaChiGiaoHang(DiaChiGiaoHang);
             orderRepository.save(o);
+            if (Boolean.TRUE.equals(o.getDaThanhToan())) {
+                membershipService.processOrderPoints(o);
+            }
         }
         return "redirect:/DonHang/Index";
     }

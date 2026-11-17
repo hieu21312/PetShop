@@ -1,7 +1,9 @@
 package PetShop.demo.config;
 
+import PetShop.demo.repository.CustomerRepository;
 import PetShop.demo.repository.OrderRepository;
 import PetShop.demo.service.BookingService;
+import PetShop.demo.service.MembershipService;
 import PetShop.demo.service.ThongBaoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,12 @@ public class GlobalModelAdvice {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private MembershipService membershipService;
 
     @ModelAttribute
     public void populateGlobalAttributes(Model model, HttpSession session) {
@@ -41,6 +49,14 @@ public class GlobalModelAdvice {
             Integer employeeId = (Integer) session.getAttribute("maNV");
 
             if (customerId != null) {
+                customerRepository.findById(customerId).ifPresent(c -> {
+                    membershipService.updateSessionMembership(session, c);
+                    model.addAttribute("currentCustomer", c);
+                    model.addAttribute("hangThanhVien", c.getHangThanhVien());
+                    model.addAttribute("diemTichLuy", c.getDiemTichLuy());
+                    model.addAttribute("phanTramGiamHang", membershipService.getDiscountPercentage(c.getHangThanhVien()));
+                });
+
                 long unreadCount = thongBaoService.demThongBaoChuaDoc(customerId);
                 model.addAttribute("unreadNotifications", unreadCount);
                 session.setAttribute("unreadNotifications", unreadCount);

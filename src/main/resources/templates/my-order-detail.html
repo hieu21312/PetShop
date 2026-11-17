@@ -78,7 +78,21 @@
                                 <strong class="fs-5 text-dark">Tổng cộng:</strong>
                                 <strong class="fs-4 text-danger" th:text="${#numbers.formatDecimal(order.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></strong>
                             </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top" th:if="${order.tongTien != null and order.tongTien >= 100000}">
+                                <span class="text-muted small">Điểm tích lũy:</span>
+                                <span class="badge" th:classappend="${order.daThanhToan ? 'bg-success' : 'bg-secondary'}"
+                                      th:text="${(order.daThanhToan ? 'Đã cộng: +' : 'Dự kiến: +') + T(java.lang.Math).floor(order.tongTien / 100000).intValue() + ' điểm'}">
+                                </span>
+                            </div>
                         </div>
+                    </div>
+
+                    <div th:if="${!order.daThanhToan and order.tinhTrang != 5}" class="card border-0 shadow-sm rounded-4 mt-4 text-center p-3 bg-light">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-qrcode me-1 text-primary"></i>Thanh toán nhanh qua VietQR</h6>
+                        <p class="small text-muted mb-2">Quét mã bên dưới để thanh toán đơn hàng này:</p>
+                        <img th:src="'https://img.vietqr.io/image/MB-0901234567-compact2.png?amount=' + ${order.tongTien.longValue()} + '&addInfo=DH' + ${order.maHD}"
+                             style="max-width: 180px; margin: 0 auto; border-radius: 10px;" class="shadow-sm">
+                        <small class="text-muted d-block mt-2">Sau khi chuyển khoản, thu ngân sẽ xác nhận và điểm thành viên sẽ tự động cộng vào tài khoản của bạn.</small>
                     </div>
                 </div>
 

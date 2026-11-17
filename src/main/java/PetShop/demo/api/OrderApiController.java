@@ -172,12 +172,18 @@ public class OrderApiController {
             order.setDiaChiGiaoHang(diaChi.trim());
             order.setMaGiamGia(cleanMaGiamGia);
             order.setTienGiam(discount);
+            Boolean daThanhToan = payload.get("daThanhToan") != null && Boolean.parseBoolean(payload.get("daThanhToan").toString());
             order.setTongTien(finalTotal);
-            order.setTinhTrang(1);
-            order.setDaThanhToan(false);
+            order.setTinhTrang(daThanhToan ? 2 : 1);
+            order.setDaThanhToan(daThanhToan);
             order.setHinhThucThanhToan(hinhThuc);
 
             Order saved = orderRepository.save(order);
+            if (Boolean.TRUE.equals(saved.getDaThanhToan())) {
+                try {
+                    membershipService.processOrderPoints(saved);
+                } catch (Exception ignored) {}
+            }
 
             for (OrderDetail d : detailList) {
                 d.getId().setMaHD(saved.getMaHD());
