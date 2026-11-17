@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import PetShop.demo.model.enity.Order;
+import PetShop.demo.model.enity.PhieuDichVuChamSoc;
 @Service
 public class AdminService {
     @Autowired private ProductRepository productRepository;
@@ -44,7 +45,7 @@ public class AdminService {
             labels.add(date.getDayOfMonth() + "/" + date.getMonthValue());
             BigDecimal revenue = BigDecimal.ZERO;
             for (Object[] row : revenueData) {
-                if (row[0] != null && row[0].toString().equals(date.toString())) {
+                if (row != null && row.length > 1 && row[0] != null && row[0].toString().startsWith(date.toString())) {
                     if (row[1] instanceof BigDecimal) {
                         revenue = (BigDecimal) row[1];
                     } else if (row[1] instanceof Number) {
@@ -54,6 +55,26 @@ public class AdminService {
                 }
             }
             revenues.add(revenue);
+        }
+
+        boolean allProductZero = revenues.stream().allMatch(r -> r == null || r.compareTo(BigDecimal.ZERO) == 0);
+        if (allProductZero) {
+            try {
+                List<Order> orders = orderRepository.findOrdersBetween(sevenDaysAgo, LocalDateTime.now().with(LocalTime.MAX));
+                if (orders != null && !orders.isEmpty()) {
+                    revenues.clear();
+                    for (int i = 0; i < 7; i++) {
+                        LocalDate date = LocalDate.now().minusDays(6 - i);
+                        BigDecimal dayRev = orders.stream()
+                                .filter(o -> o.getNgayLap() != null && o.getNgayLap().toLocalDate().equals(date))
+                                .map(Order::getTongTien)
+                                .filter(val -> val != null)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                        revenues.add(dayRev);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
         dto.setLabels(labels);
         dto.setRevenues(revenues);
@@ -115,7 +136,7 @@ public class AdminService {
             serviceLabels.add(date.getDayOfMonth() + "/" + date.getMonthValue());
             BigDecimal sRevenue = BigDecimal.ZERO;
             for (Object[] row : serviceRevenueData) {
-                if (row[0] != null && row[0].toString().equals(date.toString())) {
+                if (row != null && row.length > 1 && row[0] != null && row[0].toString().startsWith(date.toString())) {
                     if (row[1] instanceof BigDecimal) {
                         sRevenue = (BigDecimal) row[1];
                     } else if (row[1] instanceof Number) {
@@ -125,6 +146,26 @@ public class AdminService {
                 }
             }
             serviceRevenues.add(sRevenue);
+        }
+
+        boolean allServiceZero = serviceRevenues.stream().allMatch(r -> r == null || r.compareTo(BigDecimal.ZERO) == 0);
+        if (allServiceZero) {
+            try {
+                List<PhieuDichVuChamSoc> tickets = phieuRepository.findTicketsBetween(sevenDaysAgo, LocalDateTime.now().with(LocalTime.MAX));
+                if (tickets != null && !tickets.isEmpty()) {
+                    serviceRevenues.clear();
+                    for (int i = 0; i < 7; i++) {
+                        LocalDate date = LocalDate.now().minusDays(6 - i);
+                        BigDecimal dayRev = tickets.stream()
+                                .filter(p -> p.getNgayTiepNhan() != null && p.getNgayTiepNhan().toLocalDate().equals(date))
+                                .map(p -> p.getThanhToan() != null ? p.getThanhToan() : p.getTongTien())
+                                .filter(val -> val != null)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                        serviceRevenues.add(dayRev);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
         dto.setServiceLabels(serviceLabels);
         dto.setServiceRevenues(serviceRevenues);

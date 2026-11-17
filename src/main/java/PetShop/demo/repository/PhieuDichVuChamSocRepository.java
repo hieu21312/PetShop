@@ -28,7 +28,7 @@ public interface PhieuDichVuChamSocRepository extends JpaRepository<PhieuDichVuC
     @Query("SELECT p FROM PhieuDichVuChamSoc p WHERE p.trangThaiDichVu IN ('Hoàn thành chăm sóc', 'Đã bàn giao thú cưng') AND (p.trangThaiThanhToan IS NULL OR p.trangThaiThanhToan != 'Đã thanh toán') ORDER BY p.ngayTiepNhan DESC")
     List<PhieuDichVuChamSoc> findCompletedAwaitingPayment();
 
-    @Query(value = "SELECT CAST(p.NgayTiepNhan AS date) as ngay, SUM(ISNULL(p.ThanhToan, p.TongTien)) as doanhThu " +
+    @Query(value = "SELECT CAST(p.NgayTiepNhan AS date) as ngay, SUM(COALESCE(p.ThanhToan, p.TongTien)) as doanhThu " +
             "FROM tblPhieuDichVuChamSoc p WHERE p.NgayTiepNhan >= :sevenDaysAgo GROUP BY CAST(p.NgayTiepNhan AS date)",
             nativeQuery = true)
     List<Object[]> getLast7DaysRevenue(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
