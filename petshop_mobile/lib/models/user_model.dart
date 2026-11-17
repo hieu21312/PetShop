@@ -8,7 +8,7 @@ class UserModel {
   final String hangThanhVien;
   final int diemTichLuy;
   final double discountPercent;
-  final String role; // 'KhachHang', 'Admin', 'NhanVien'
+  final String role;
   final String? chucVu;
   final String? chuyenMon;
   final String? anhDaiDien;

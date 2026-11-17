@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Service
 public class EmployeeService {
-
     @Autowired
     private EmployeeRepository employeeRepository;
 
@@ -35,7 +34,7 @@ public class EmployeeService {
             employee.setTrangThai("Đang làm việc");
         }
         if (employee.getMatKhau() == null || employee.getMatKhau().isBlank()) {
-            employee.setMatKhau("123456"); // Mật khẩu mặc định khi tạo mới
+            employee.setMatKhau("123456");
         }
         return employeeRepository.save(employee);
     }

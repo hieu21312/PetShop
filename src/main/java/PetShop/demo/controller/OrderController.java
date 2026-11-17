@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/DonHang")
 public class OrderController {
-
     @Autowired
     private OrderRepository orderRepository;
 
@@ -27,7 +26,6 @@ public class OrderController {
     @Autowired
     private AuthService authService;
 
-    // Xem danh sách đơn hàng của khách hàng đang đăng nhập
     @GetMapping("/CuaToi")
     public String myOrders(Model model, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
@@ -42,7 +40,6 @@ public class OrderController {
         return "my-orders";
     }
 
-    // Xem chi tiết đơn hàng của khách hàng
     @GetMapping("/ChiTiet/{id}")
     public String customerOrderDetail(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
@@ -54,7 +51,7 @@ public class OrderController {
             return "redirect:/DonHang/CuaToi";
         }
         Order order = orderOpt.get();
-        // Kiểm tra quyền sở hữu đơn hàng hoặc là Admin
+
         if (!authService.isAdmin(session) && (maKH == null || !maKH.equals(order.getMaKH()))) {
             return "redirect:/DonHang/CuaToi";
         }
@@ -64,7 +61,6 @@ public class OrderController {
         return "my-order-detail";
     }
 
-    // Khách hàng hủy đơn hàng (chỉ khi đơn ở trạng thái Đang xử lý - ID 1)
     @PostMapping("/Huy/{id}")
     public String cancelOrder(@PathVariable Integer id,
                               HttpSession session,
@@ -78,7 +74,7 @@ public class OrderController {
             Order order = orderOpt.get();
             if (maKH != null && maKH.equals(order.getMaKH())) {
                 if (order.getTinhTrang() != null && order.getTinhTrang() == 1) {
-                    order.setTinhTrang(5); // 5 = Đã hủy
+                    order.setTinhTrang(5);
                     orderRepository.save(order);
                     redirectAttributes.addFlashAttribute("successMessage", "Hủy đơn hàng #" + id + " thành công!");
                 } else {
@@ -89,7 +85,6 @@ public class OrderController {
         return "redirect:/DonHang/ChiTiet/" + id;
     }
 
-    // Danh sách đơn hàng (Admin legacy)
     @GetMapping("/Index")
     public String listOrders(Model model) {
         var orders = orderRepository.findAllByOrderByNgayLapDesc();
@@ -97,7 +92,6 @@ public class OrderController {
         return "order-list";
     }
 
-    // Trang cập nhật đơn hàng
     @GetMapping("/CapNhat")
     public String editOrder(@RequestParam int id, Model model) {
         var orderOpt = orderRepository.findById(id);
@@ -110,7 +104,6 @@ public class OrderController {
         return "order-edit";
     }
 
-    // Lưu cập nhật đơn hàng
     @PostMapping("/CapNhat")
     public String updateOrder(@ModelAttribute Order order,
                               @RequestParam int TinhTrang,

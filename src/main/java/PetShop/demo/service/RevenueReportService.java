@@ -17,7 +17,6 @@ import java.util.*;
 
 @Service
 public class RevenueReportService {
-
     @Autowired
     private OrderRepository orderRepository;
 
@@ -85,7 +84,6 @@ public class RevenueReportService {
             processDayReport(report, target);
 
         } else {
-            // Mặc định: Theo tuần
             report.setFilterType("week");
             LocalDate target;
             try {

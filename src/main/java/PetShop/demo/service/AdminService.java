@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import PetShop.demo.model.enity.Order;
 @Service
 public class AdminService {
-
     @Autowired private ProductRepository productRepository;
     @Autowired private CustomerRepository customerRepository;
     @Autowired private OrderRepository orderRepository;
@@ -26,7 +25,6 @@ public class AdminService {
     public DashboardDTO getDashboardData() {
         DashboardDTO dto = new DashboardDTO();
 
-        // 1. Thống kê Sản phẩm
         dto.setTongSanPham((int) productRepository.count());
         dto.setTongKhachHang((int) customerRepository.count());
         dto.setTongHoaDon((int) orderRepository.count());
@@ -37,7 +35,6 @@ public class AdminService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         dto.setTongDoanhThu(tongDoanhThu);
 
-        // Doanh thu sản phẩm 7 ngày gần nhất
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(6).with(LocalTime.MIN);
         List<Object[]> revenueData = orderRepository.getLast7DaysRevenue(sevenDaysAgo);
         List<String> labels = new ArrayList<>();
@@ -61,7 +58,6 @@ public class AdminService {
         dto.setLabels(labels);
         dto.setRevenues(revenues);
 
-        // Top 5 sản phẩm bán chạy
         List<Object[]> topProducts = orderDetailRepository.findTopSellingProducts();
         List<DashboardDTO.TopProductDTO> topList = topProducts.stream().limit(5)
                 .map(row -> {
@@ -73,7 +69,6 @@ public class AdminService {
                 }).collect(Collectors.toList());
         dto.setTopProducts(topList);
 
-        // 2. Thống kê Dịch vụ
         dto.setTongDichVu((int) dichVuChamSocRepository.count());
         dto.setTongPhieuDichVu((int) phieuRepository.count());
         dto.setTongDatLich((int) bookingRepository.count());
@@ -85,7 +80,6 @@ public class AdminService {
         dto.setTongDoanhThuDichVu(tongDoanhThuDichVu);
         dto.setTongDoanhThuTongCong(tongDoanhThu.add(tongDoanhThuDichVu));
 
-        // 3. Thống kê theo ngày (Hôm nay)
         LocalDate today = LocalDate.now();
         LocalDateTime startOfToday = today.atStartOfDay();
         LocalDateTime endOfToday = today.atTime(LocalTime.MAX);
@@ -109,12 +103,10 @@ public class AdminService {
         dto.setDoanhThuDichVuHomNay(doanhThuDichVuHomNay);
         dto.setTongDoanhThuHomNay(doanhThuSPHomNay.add(doanhThuDichVuHomNay));
 
-        // Doanh thu dịch vụ 7 ngày gần nhất
         List<Object[]> serviceRevenueData = new ArrayList<>();
         try {
             serviceRevenueData = phieuRepository.getLast7DaysRevenue(sevenDaysAgo);
         } catch (Exception e) {
-            // Native query fallback
         }
         List<String> serviceLabels = new ArrayList<>();
         List<BigDecimal> serviceRevenues = new ArrayList<>();
@@ -137,7 +129,6 @@ public class AdminService {
         dto.setServiceLabels(serviceLabels);
         dto.setServiceRevenues(serviceRevenues);
 
-        // Top 5 dịch vụ phổ biến nhất
         List<DashboardDTO.TopServiceDTO> topServicesList = new ArrayList<>();
         try {
             List<Object[]> topServicesData = dichVuChamSocRepository.findTopServices();
@@ -152,7 +143,6 @@ public class AdminService {
                         }).collect(Collectors.toList());
             }
         } catch (Exception e) {
-            // Fallback
         }
         if (topServicesList.isEmpty()) {
             topServicesList = dichVuChamSocRepository.findAll().stream().limit(5)

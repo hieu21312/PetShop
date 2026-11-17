@@ -24,7 +24,7 @@ class MyPetsScreen extends StatefulWidget {
 class _MyPetsScreenState extends State<MyPetsScreen> {
   List<PetModel> _pets = [];
   bool _isLoading = true;
-  String _selectedFilter = 'all'; // 'all', 'cho', 'meo', 'khac'
+  String _selectedFilter = 'all';
   final _searchController = TextEditingController();
 
   @override
@@ -56,12 +56,10 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
 
   List<PetModel> get _filteredPets {
     return _pets.where((p) {
-      // Filter by type
       if (_selectedFilter == 'cho' && !p.isDog) return false;
       if (_selectedFilter == 'meo' && !p.isCat) return false;
       if (_selectedFilter == 'khac' && (p.isDog || p.isCat)) return false;
 
-      // Filter by search
       final q = _searchController.text.trim().toLowerCase();
       if (q.isNotEmpty) {
         final matchName = p.tenThuCung.toLowerCase().contains(q);
@@ -107,7 +105,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               ),
               child: Column(
                 children: [
-                  // Header
+
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
@@ -141,7 +139,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     ),
                   ),
 
-                  // Body form
                   Expanded(
                     child: SingleChildScrollView(
                       padding: EdgeInsets.only(
@@ -153,7 +150,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Tên thú cưng
+
                           const Text('Tên thú cưng *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -167,7 +164,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Loài thú cưng
                           const Text('Loài thú cưng *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           Row(
@@ -202,7 +198,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Giống loài
                           const Text('Giống loài', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -216,10 +211,9 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Giới tính & Triệt sản
                           Row(
                             children: [
-                              // Giới tính
+
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,7 +246,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Triệt sản
+
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +285,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Cân nặng & Tuổi
                           Row(
                             children: [
                               Expanded(
@@ -337,7 +330,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Màu lông & Ngày sinh
                           Row(
                             children: [
                               Expanded(
@@ -405,7 +397,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Tình trạng sức khỏe
                           const Text('Tình trạng sức khỏe hiện tại', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           Wrap(
@@ -429,7 +420,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Tiêm chủng
                           const Text('Lịch sử tiêm chủng', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -443,7 +433,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Dị ứng / Tiền sử bệnh
                           const Text('Dị ứng thức ăn / thuốc', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -457,7 +446,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Tiền sử bệnh lý
                           const Text('Tiền sử bệnh lý', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -471,7 +459,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Ghi chú & Đặc điểm nhận dạng
                           const Text('Ghi chú / Đặc điểm nhận dạng', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           const SizedBox(height: 6),
                           TextField(
@@ -486,7 +473,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Submit button
                           SizedBox(
                             width: double.infinity,
                             height: 48,
@@ -575,7 +561,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
   void _handleSelectPetForBooking(PetModel pet) {
     if (widget.onSelectPetForBooking != null) {
       widget.onSelectPetForBooking!(pet);
-      // Chỉ pop nếu màn hình này được mở dạng trang riêng (showAppBar == true)
+
       if (widget.showAppBar && Navigator.canPop(context)) {
         Navigator.pop(context);
       }
@@ -600,7 +586,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
           ),
           child: Column(
             children: [
-              // Header Card with Gradient
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -673,13 +659,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 ),
               ),
 
-              // Detail content
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // Quick info grid
+
                       Row(
                         children: [
                           Expanded(
@@ -697,7 +682,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Card: Sức khỏe & Y tế
                       Card(
                         elevation: 0,
                         color: Colors.grey.shade50,
@@ -732,7 +716,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Actions
                       Row(
                         children: [
                           Expanded(
@@ -914,13 +897,13 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
       ),
       body: Column(
         children: [
-          // Search & Filter
+
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               children: [
-                // Search bar
+
                 TextField(
                   controller: _searchController,
                   onChanged: (_) => setState(() {}),
@@ -947,7 +930,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // Species Filter Chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -963,7 +945,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             ),
           ),
 
-          // Pet List
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator(color: Color(0xFFE91E63)))
@@ -1043,7 +1024,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar
+
                   Container(
                     width: 64,
                     height: 64,
@@ -1064,7 +1045,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                   ),
                   const SizedBox(width: 14),
 
-                  // Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1104,7 +1084,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                         ),
                         const SizedBox(height: 8),
 
-                        // Tags
                         Wrap(
                           spacing: 6,
                           runSpacing: 4,
@@ -1124,7 +1103,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               const Divider(height: 1),
               const SizedBox(height: 8),
 
-              // Bottom card buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

@@ -10,21 +10,17 @@ import '../models/notification_model.dart';
 import '../models/pet_model.dart';
 
 class ApiService {
-  // Tự động nhận diện: localhost cho Web/Windows, 10.0.2.2 cho Android Emulator
-  // Production Backend Cloud tren Render (chay 24/7)
   static String baseUrl = 'https://petshop-2pj5.onrender.com';
 
   static void setBaseUrl(String url) {
     baseUrl = url;
   }
 
-  // URL hình ảnh đầy đủ từ backend
   static String getImageUrl(String? imageName) {
     if (imageName == null || imageName.trim().isEmpty) return '';
     return '$baseUrl/Content/HinhAnh/${imageName.trim()}';
   }
 
-  // Lấy danh mục từ tblDanhMuc
   static Future<List<CategoryModel>> getCategories() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/categories')).timeout(const Duration(seconds: 90));
@@ -38,7 +34,6 @@ class ApiService {
     return [];
   }
 
-  // 1. Đăng nhập
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final res = await http.post(
@@ -70,7 +65,6 @@ class ApiService {
     }
   }
 
-  // 1b. Lấy thông tin tài khoản & thành viên mới nhất
   static Future<UserModel?> getProfile(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/auth/profile?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -86,7 +80,6 @@ class ApiService {
     return null;
   }
 
-  // 2. Đăng ký
   static Future<Map<String, dynamic>> register({
     required String tenKH,
     required String email,
@@ -112,7 +105,6 @@ class ApiService {
     }
   }
 
-  // 3. Danh sách sản phẩm (hỗ trợ search, categoryId, type, loai, sort)
   static Future<List<ProductModel>> getProducts({
     String? search,
     String? type,
@@ -141,7 +133,6 @@ class ApiService {
     return [];
   }
 
-  // 4. Chi tiết sản phẩm
   static Future<Map<String, dynamic>?> getProductDetail(int id) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/products/$id')).timeout(const Duration(seconds: 90));
@@ -154,7 +145,6 @@ class ApiService {
     return null;
   }
 
-  // 5. Danh sách dịch vụ chăm sóc
   static Future<List<ServiceModel>> getServices() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/bookings/services')).timeout(const Duration(seconds: 90));
@@ -168,7 +158,6 @@ class ApiService {
     return [];
   }
 
-  // 6. Đặt lịch hẹn
   static Future<Map<String, dynamic>> createBooking({
     required int maKH,
     required String tenKhachHang,
@@ -200,7 +189,6 @@ class ApiService {
     }
   }
 
-  // 7. Lấy danh sách lịch hẹn của tôi
   static Future<List<BookingModel>> getMyBookings(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/bookings/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -214,7 +202,6 @@ class ApiService {
     return [];
   }
 
-  // 8. Đặt hàng
   static Future<Map<String, dynamic>> createOrder({
     required int maKH,
     required String diaChiGiaoHang,
@@ -241,7 +228,6 @@ class ApiService {
     }
   }
 
-  // 9. Danh sách đơn hàng của tôi
   static Future<List<OrderModel>> getMyOrders(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/orders/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -255,7 +241,6 @@ class ApiService {
     return [];
   }
 
-  // 10. Hủy đơn hàng
   static Future<Map<String, dynamic>> cancelOrder(int maHD, int maKH) async {
     try {
       final res = await http.post(Uri.parse('$baseUrl/api/orders/$maHD/cancel?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -265,7 +250,6 @@ class ApiService {
     }
   }
 
-  // 11. Lấy danh sách thông báo
   static Future<List<NotificationModel>> getNotifications(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/notifications?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -279,7 +263,6 @@ class ApiService {
     return [];
   }
 
-  // 12. Đếm số thông báo chưa đọc
   static Future<int> getUnreadNotificationCount(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/notifications/unread-count?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -293,7 +276,6 @@ class ApiService {
     return 0;
   }
 
-  // 13. Đánh dấu đã đọc
   static Future<bool> markNotificationAsRead(int id) async {
     try {
       final res = await http.post(Uri.parse('$baseUrl/api/notifications/$id/read')).timeout(const Duration(seconds: 90));
@@ -304,7 +286,6 @@ class ApiService {
     }
   }
 
-  // 14. Đánh dấu tất cả đã đọc
   static Future<bool> markAllNotificationsAsRead(int maKH) async {
     try {
       final res = await http.post(Uri.parse('$baseUrl/api/notifications/read-all?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -315,8 +296,6 @@ class ApiService {
     }
   }
 
-  // --- STAFF APIs ---
-  // Lấy danh sách nhiệm vụ / ca làm việc của nhân viên
   static Future<Map<String, dynamic>> getStaffTasks(int maNV) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/staff/tasks?maNV=$maNV')).timeout(const Duration(seconds: 90));
@@ -329,7 +308,6 @@ class ApiService {
     return {'bookings': [], 'careTickets': []};
   }
 
-  // Cập nhật tiến độ lịch hẹn (Staff)
   static Future<Map<String, dynamic>> updateStaffBookingProgress(int id, String trangThai, {String? ghiChu}) async {
     try {
       final res = await http.post(
@@ -343,7 +321,6 @@ class ApiService {
     }
   }
 
-  // Cập nhật tiến độ phiếu chăm sóc (Staff)
   static Future<Map<String, dynamic>> updateStaffTicketProgress(int id, String trangThaiDichVu, {String? ketQuaChamSoc}) async {
     try {
       final res = await http.post(
@@ -357,8 +334,6 @@ class ApiService {
     }
   }
 
-  // --- ADMIN APIs ---
-  // Dashboard tổng quan
   static Future<Map<String, dynamic>?> getAdminDashboard() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/admin/dashboard')).timeout(const Duration(seconds: 90));
@@ -371,7 +346,6 @@ class ApiService {
     return null;
   }
 
-  // Danh sách toàn bộ đơn hàng
   static Future<List<Map<String, dynamic>>> getAdminOrders() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/admin/orders')).timeout(const Duration(seconds: 90));
@@ -385,7 +359,6 @@ class ApiService {
     return [];
   }
 
-  // Cập nhật trạng thái đơn hàng (Admin)
   static Future<Map<String, dynamic>> updateAdminOrderStatus(int maHD, {int? tinhTrang, bool? daThanhToan}) async {
     try {
       final res = await http.post(
@@ -399,7 +372,6 @@ class ApiService {
     }
   }
 
-  // Danh sách phiếu dịch vụ chăm sóc
   static Future<List<Map<String, dynamic>>> getAdminCareTickets() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/admin/care-tickets')).timeout(const Duration(seconds: 90));
@@ -413,7 +385,6 @@ class ApiService {
     return [];
   }
 
-  // Phân công nhân viên cho phiếu chăm sóc
   static Future<Map<String, dynamic>> assignAdminCareTicketStaff(int maPhieuDV, int maNV) async {
     try {
       final res = await http.post(
@@ -427,7 +398,6 @@ class ApiService {
     }
   }
 
-  // Danh sách toàn bộ lịch hẹn
   static Future<List<Map<String, dynamic>>> getAdminBookings() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/admin/bookings')).timeout(const Duration(seconds: 90));
@@ -441,7 +411,6 @@ class ApiService {
     return [];
   }
 
-  // Phân công nhân sự cho lịch hẹn
   static Future<Map<String, dynamic>> assignAdminBookingStaff(int maDatLich, int maNV) async {
     try {
       final res = await http.post(
@@ -455,7 +424,6 @@ class ApiService {
     }
   }
 
-  // Cập nhật trạng thái lịch hẹn (Admin)
   static Future<Map<String, dynamic>> updateAdminBookingStatus(int maDatLich, String trangThai) async {
     try {
       final res = await http.post(
@@ -469,7 +437,6 @@ class ApiService {
     }
   }
 
-  // Danh sách nhân sự
   static Future<List<Map<String, dynamic>>> getAdminStaffList() async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/admin/staff')).timeout(const Duration(seconds: 90));
@@ -483,7 +450,6 @@ class ApiService {
     return [];
   }
 
-  // Báo cáo thống kê doanh thu theo ngày, tuần, tháng, năm
   static Future<Map<String, dynamic>?> getAdminRevenueReport({
     String type = 'day',
     String? date,
@@ -507,8 +473,6 @@ class ApiService {
     return null;
   }
 
-  // --- PETS APIs (HỒ SƠ THÚ CƯNG) ---
-  // 15. Lấy danh sách hồ sơ thú cưng của khách hàng
   static Future<List<PetModel>> getMyPets(int maKH) async {
     try {
       final res = await http.get(Uri.parse('$baseUrl/api/pets/my?maKH=$maKH')).timeout(const Duration(seconds: 90));
@@ -522,7 +486,6 @@ class ApiService {
     return [];
   }
 
-  // 16. Thêm mới hồ sơ thú cưng
   static Future<Map<String, dynamic>> createPet(int maKH, Map<String, dynamic> petData) async {
     try {
       final payload = Map<String, dynamic>.from(petData);
@@ -538,7 +501,6 @@ class ApiService {
     }
   }
 
-  // 17. Cập nhật hồ sơ thú cưng
   static Future<Map<String, dynamic>> updatePet(int id, Map<String, dynamic> petData) async {
     try {
       final res = await http.put(
@@ -552,7 +514,6 @@ class ApiService {
     }
   }
 
-  // 18. Xóa hồ sơ thú cưng
   static Future<Map<String, dynamic>> deletePet(int id, int maKH) async {
     try {
       final res = await http.delete(Uri.parse('$baseUrl/api/pets/$id?maKH=$maKH')).timeout(const Duration(seconds: 90));

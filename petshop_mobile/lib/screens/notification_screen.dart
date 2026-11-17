@@ -138,7 +138,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Icon tròn
+
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
@@ -148,7 +148,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   child: Icon(_getIcon(tb.loaiThongBao), color: iconColor, size: 24),
                                 ),
                                 const SizedBox(width: 14),
-                                // Nội dung
+
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -23,7 +23,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   List<Map<String, dynamic>> _bookings = [];
   List<Map<String, dynamic>> _staffList = [];
 
-  String _selectedRevenuePeriod = 'day'; // 'day', 'week', 'month', 'year'
+  String _selectedRevenuePeriod = 'day';
   DateTime _selectedDate = DateTime.now();
   Map<String, dynamic>? _revenueReport;
   bool _isLoadingReport = false;
@@ -131,7 +131,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-  // Dialog cập nhật trạng thái đơn hàng
   void _showUpdateOrderDialog(Map<String, dynamic> order) {
     int currentStatus = 1;
     if (order['tinhTrang'] != null) {
@@ -230,7 +229,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // Dialog phân công nhân sự cho phiếu chăm sóc
   void _showAssignTicketDialog(Map<String, dynamic> ticket) {
     int? currentStaff = ticket['maNVThucHien'];
 
@@ -306,7 +304,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // Dialog phân công nhân sự cho lịch hẹn
   void _showAssignBookingDialog(Map<String, dynamic> booking) {
     int? currentStaff = booking['maNV'];
 
@@ -398,7 +395,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF1E293B), // Professional Dark Navy for Admin
+        backgroundColor: const Color(0xFF1E293B),
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -457,7 +454,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // --- TAB 1: DASHBOARD ---
   Widget _buildDashboardTab() {
     final d = _dashboardData;
     if (d == null) {
@@ -491,7 +487,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Banner Doanh thu theo Ngày / Tuần / Tháng
+
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -532,7 +528,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         ],
                       ],
                     ),
-                    // Nhấn vào hình mũi tên thay cho logo đồng tiền để xem chi tiết
+
                     InkWell(
                       onTap: _showRevenueDetailModal,
                       borderRadius: BorderRadius.circular(20),
@@ -549,7 +545,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Các nút chọn Ngày, Tuần, Tháng
                 Row(
                   children: [
                     _buildCardPeriodBtn('day', 'Ngày'),
@@ -618,7 +613,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Lưới thống kê số lượng
           const Text('Hoạt động tổng quan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
           const SizedBox(height: 12),
           GridView.count(
@@ -637,7 +631,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Top sản phẩm bán chạy
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 2,
@@ -686,7 +679,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Top dịch vụ hot
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 2,
@@ -829,7 +821,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Nút chọn Ngày, Tuần, Tháng, Năm trong modal
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
@@ -847,7 +838,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Điều hướng thời gian
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -1058,7 +1048,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // --- TAB 2: QUẢN LÝ ĐƠN HÀNG ---
   Widget _buildOrdersTab() {
     if (_orders.isEmpty) {
       return RefreshIndicator(
@@ -1170,7 +1159,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // --- TAB 3: QUẢN LÝ DỊCH VỤ & LỊCH HẸN ---
   Widget _buildServicesTab() {
     return DefaultTabController(
       length: 2,
@@ -1330,7 +1318,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  // --- TAB 4: NHÂN SỰ & HỆ THỐNG ---
   Widget _buildStaffTab() {
     return RefreshIndicator(
       onRefresh: _loadAllAdminData,

@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Kiểm thử phân hệ Hạng thành viên & Điểm thưởng tích lũy (MembershipService)")
 public class MembershipServiceTest {
-
     private MembershipService membershipService;
 
     @BeforeEach
@@ -53,18 +52,14 @@ public class MembershipServiceTest {
     @Test
     @DisplayName("Tính toán số tiền giảm giá ưu đãi theo Hạng thành viên")
     void testCalculateTierDiscount() {
-        BigDecimal bill = new BigDecimal("1000000"); // 1 triệu VNĐ
+        BigDecimal bill = new BigDecimal("1000000");
 
-        // Tiêu chuẩn (0%): Giảm 0đ
         assertEquals(BigDecimal.ZERO, membershipService.calculateTierDiscount(bill, "Tiêu chuẩn"));
 
-        // Thân thiết (5%): Giảm 50.000đ
         assertEquals(new BigDecimal("50000"), membershipService.calculateTierDiscount(bill, "Thân thiết"));
 
-        // VIP (10%): Giảm 100.000đ
         assertEquals(new BigDecimal("100000"), membershipService.calculateTierDiscount(bill, "VIP"));
 
-        // VVIP (15%): Giảm 150.000đ
         assertEquals(new BigDecimal("150000"), membershipService.calculateTierDiscount(bill, "VVIP"));
     }
 }

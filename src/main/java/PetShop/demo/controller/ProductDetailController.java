@@ -6,7 +6,7 @@ import PetShop.demo.model.enity.Review;
 import PetShop.demo.repository.ProductImageRepository;
 import PetShop.demo.repository.ReviewRepository;
 import PetShop.demo.service.ProductService;
-import jakarta.servlet.http.HttpSession;    // ← THÊM DÒNG NÀY
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ProductDetailController {
-
     @Autowired
     private ProductService productService;
 
@@ -64,7 +63,6 @@ public class ProductDetailController {
                             @RequestParam Integer soSao,
                             @RequestParam String noiDung,
                             HttpSession session) {
-        // Nếu đã đăng nhập, ưu tiên lấy tên từ session
         String tenKH = (String) session.getAttribute("tenKH");
         if (tenKH != null && !tenKH.isEmpty()) {
             hoTen = tenKH;
@@ -76,7 +74,7 @@ public class ProductDetailController {
         review.setSoSao(soSao);
         review.setNoiDung(noiDung);
         review.setNgay(LocalDateTime.now());
-        review.setDaDuyet(false);   // mặc định chưa duyệt
+        review.setDaDuyet(false);
 
         reviewRepository.save(review);
         return "redirect:/ChiTiet?masp=" + maSP;

@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "tblChiTietHoaDon")
 public class OrderDetail {
-
     @EmbeddedId
     private OrderDetailId id;
 
@@ -28,7 +27,6 @@ public class OrderDetail {
 
     public OrderDetail() {}
 
-    // Getters and setters
     public OrderDetailId getId() { return id; }
     public void setId(OrderDetailId id) { this.id = id; }
 

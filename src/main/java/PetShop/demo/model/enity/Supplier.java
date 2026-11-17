@@ -23,10 +23,8 @@ public class Supplier {
     @OneToMany(mappedBy = "supplier")
     private List<Product> products;
 
-    // Constructors
     public Supplier() {}
 
-    // Getters and Setters
     public Integer getMaNCC() { return maNCC; }
     public void setMaNCC(Integer maNCC) { this.maNCC = maNCC; }
 

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/staff/my-tasks")
 public class StaffTaskController {
-
     @Autowired
     private BookingService bookingService;
 
@@ -43,7 +42,6 @@ public class StaffTaskController {
     @Autowired
     private ThongBaoService thongBaoService;
 
-    // Xem danh sách ca làm việc được phân công của Nhân sự / Bác sĩ đang đăng nhập
     @GetMapping
     public String myTasks(Model model, HttpSession session) {
         Integer maNV = (Integer) session.getAttribute("maNV");
@@ -51,20 +49,17 @@ public class StaffTaskController {
             return "redirect:/DangNhap";
         }
 
-        // Lấy danh sách lịch đặt: các lịch phân công cho bác sĩ này hoặc chưa phân công
         List<Booking> myBookings = (maNV != null)
                 ? bookingRepository.findStaffAndUnassignedBookings(maNV)
                 : bookingRepository.findAllByOrderByNgayTaoDesc();
 
-        // Lấy danh sách phiếu chăm sóc: các phiếu phân công cho bác sĩ này hoặc chưa phân công
-        List<PhieuDichVuChamSoc> myCareTickets = (maNV != null) 
+        List<PhieuDichVuChamSoc> myCareTickets = (maNV != null)
                 ? phieuRepository.findStaffAndUnassignedTickets(maNV)
                 : phieuRepository.findByOrderByNgayTiepNhanDesc();
 
         model.addAttribute("myBookings", myBookings);
         model.addAttribute("myCareTickets", myCareTickets);
 
-        // Nạp danh sách tên dịch vụ để hiển thị an toàn
         Map<Integer, String> serviceNames = petServiceRepository.findAll().stream()
                 .filter(s -> s.getMaDV() != null)
                 .collect(Collectors.toMap(PetService::getMaDV, PetService::getTenDV, (v1, v2) -> v1));
@@ -73,7 +68,6 @@ public class StaffTaskController {
         return "staff/my-tasks";
     }
 
-    // Cập nhật tiến độ ca làm việc lịch hẹn online (tblDatLich)
     @PostMapping("/updateProgress")
     public String updateProgress(@RequestParam Integer id,
                                  @RequestParam String trangThai,
@@ -93,7 +87,7 @@ public class StaffTaskController {
             }
             bookingRepository.save(booking);
 
-            String extraMsg = "Hoàn thành".equalsIgnoreCase(trangThai) 
+            String extraMsg = "Hoàn thành".equalsIgnoreCase(trangThai)
                     ? " Dịch vụ đã hoàn thành và được chuyển tự động sang quầy Thu ngân để sẵn sàng thanh toán & in hóa đơn."
                     : "";
             ra.addFlashAttribute("success", "Cập nhật tiến độ lịch hẹn #" + id + " thành công." + extraMsg);
@@ -103,7 +97,6 @@ public class StaffTaskController {
         return "redirect:/staff/my-tasks";
     }
 
-    // Cập nhật tiến độ phiếu dịch vụ chăm sóc thú cưng nhận tại quầy (tblPhieuDichVuChamSoc)
     @PostMapping("/updateCareTicket")
     public String updateCareTicket(@RequestParam Integer id,
                                   @RequestParam String trangThaiDichVu,
@@ -126,7 +119,6 @@ public class StaffTaskController {
             }
             phieuRepository.save(ticket);
 
-            // Gửi thông báo cho chủ nuôi nếu đã liên kết tài khoản
             if (ticket.getChuNuoi() != null && ticket.getChuNuoi().getMaKH() != null) {
                 String petName = ticket.getThuCung() != null ? ticket.getThuCung().getTenThuCung() : "Bé cưng";
                 String msg = "Dịch vụ của bé " + petName + " (Phiếu " + ticket.getSoPhieu() + ") đã chuyển sang trạng thái: " + trangThaiDichVu;

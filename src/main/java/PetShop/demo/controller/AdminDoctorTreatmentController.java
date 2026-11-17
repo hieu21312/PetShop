@@ -20,7 +20,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/doctor/treatment")
 public class AdminDoctorTreatmentController {
-
     @Autowired
     private NhatKyDieuTriService nhatKyDieuTriService;
 
@@ -59,7 +58,7 @@ public class AdminDoctorTreatmentController {
                                   @RequestParam(value = "nhietDo", required = false) BigDecimal nhietDo,
                                   @RequestParam(value = "trangThaiSucKhoe", required = false) String trangThaiSucKhoe,
                                   @RequestParam(value = "canTaiKham", required = false, defaultValue = "false") Boolean canTaiKham,
-                                  @RequestParam(value = "ngayTaiKham", required = false) 
+                                  @RequestParam(value = "ngayTaiKham", required = false)
                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime ngayTaiKham,
                                   @RequestParam(value = "ghiChu", required = false) String ghiChu,
                                   HttpSession session,

@@ -20,10 +20,8 @@ public class ProductImage {
     @JoinColumn(name = "MaSP", insertable = false, updatable = false)
     private Product product;
 
-    // Constructors
     public ProductImage() {}
 
-    // Getters and Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

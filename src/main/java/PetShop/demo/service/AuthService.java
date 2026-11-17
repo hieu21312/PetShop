@@ -31,7 +31,6 @@ public class AuthService {
     }
 
     public Customer loginCustomer(String email, String password, HttpSession session) {
-        // Hỗ trợ cả mật khẩu nguyên bản (dữ liệu cũ) và mật khẩu băm SHA-256
         var customerOpt = customerRepository.findFirstByEmailAndMatKhau(email, password);
         if (customerOpt.isEmpty()) {
             String hashed = hashPassword(password);
@@ -122,9 +121,9 @@ public class AuthService {
         Object role = session.getAttribute("role");
         if (role == null) return false;
         String roleStr = role.toString().trim();
-        return "Thu ngân".equalsIgnoreCase(roleStr) || 
-               "Nhân viên thu ngân".equalsIgnoreCase(roleStr) || 
-               "Nhân viên bán hàng".equalsIgnoreCase(roleStr) || 
+        return "Thu ngân".equalsIgnoreCase(roleStr) ||
+               "Nhân viên thu ngân".equalsIgnoreCase(roleStr) ||
+               "Nhân viên bán hàng".equalsIgnoreCase(roleStr) ||
                "Cashier".equalsIgnoreCase(roleStr);
     }
 

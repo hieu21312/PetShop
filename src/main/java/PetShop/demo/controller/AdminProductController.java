@@ -23,7 +23,6 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/admin/products")
 public class AdminProductController {
-
     @Autowired private ProductRepository productRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private SupplierRepository supplierRepository;
@@ -32,7 +31,6 @@ public class AdminProductController {
 
     private static final String UPLOAD_DIR = "src/main/webapp/Content/HinhAnh/";
 
-    // Danh sách sản phẩm
     @GetMapping
     public String listProducts(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -41,7 +39,6 @@ public class AdminProductController {
         return "admin/products";
     }
 
-    // Form thêm sản phẩm
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -51,13 +48,12 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // Xử lý thêm sản phẩm
     @PostMapping("/create")
     public String createProduct(@ModelAttribute Product product,
                                 @RequestParam("fileImage") MultipartFile file,
                                 HttpSession session) throws IOException {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
-        
+
         if (file.isEmpty()) {
             session.setAttribute("error", "Vui lòng chọn ảnh đại diện cho sản phẩm.");
             return "redirect:/admin/products/create";
@@ -76,7 +72,6 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    // Form sửa sản phẩm
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -88,7 +83,6 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // Xử lý sửa sản phẩm
     @PostMapping("/edit/{id}")
     public String updateProduct(@PathVariable Integer id,
                                 @ModelAttribute Product product,
@@ -117,7 +111,6 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    // Xóa sản phẩm
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Integer id, HttpSession session) throws IOException {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

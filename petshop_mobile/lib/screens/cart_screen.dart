@@ -8,7 +8,7 @@ import '../widgets/qr_payment_dialog.dart';
 
 class CartScreen extends StatefulWidget {
   final UserModel currentUser;
-  final int initialTab; // 0: Giỏ hàng, 1: Lịch sử mua hàng
+  final int initialTab;
 
   const CartScreen({
     super.key,
@@ -27,7 +27,6 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
 
   bool _isSubmitting = false;
 
-  // Lịch sử mua hàng
   List<OrderModel> _myOrders = [];
   bool _isLoadingOrders = false;
 
@@ -152,12 +151,10 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 16),
 
-                  // PHƯƠNG THỨC THANH TOÁN
                   const Text('Phương thức thanh toán *',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
                   const SizedBox(height: 8),
 
-                  // Lựa chọn 1: COD
                   InkWell(
                     onTap: () => setModalState(() => paymentMethod = 'COD'),
                     borderRadius: BorderRadius.circular(12),
@@ -198,7 +195,6 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                   ),
                   const SizedBox(height: 8),
 
-                  // Lựa chọn 2: Chuyển khoản QR (VietQR)
                   InkWell(
                     onTap: () => setModalState(() => paymentMethod = 'BankTransfer'),
                     borderRadius: BorderRadius.circular(12),
@@ -322,7 +318,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
 
                               setModalState(() => _isSubmitting = false);
                               if (!mounted) return;
-                              Navigator.pop(ctx); // Close checkout bottom sheet
+                              Navigator.pop(ctx);
 
                               if (res['success'] == true) {
                                 cartService.clearCart();
@@ -330,7 +326,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                                 final int? maHD = res['maHD'] != null ? int.tryParse(res['maHD'].toString()) : null;
 
                                 _loadMyOrders();
-                                _tabController.animateTo(1); // Chuyển sang Tab Lịch sử mua hàng
+                                _tabController.animateTo(1);
 
                                 if (paymentMethod == 'BankTransfer') {
                                   QRPaymentDialog.show(
@@ -415,10 +411,9 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabController,
         children: [
-          // TAB 0: GIỎ HÀNG
+
           _buildCartTab(items),
 
-          // TAB 1: LỊCH SỬ MUA HÀNG
           _buildOrderHistoryTab(),
         ],
       ),
@@ -469,7 +464,6 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
     );
   }
 
-  // TAB 0: GIỎ HÀNG
   Widget _buildCartTab(List items) {
     if (items.isEmpty) {
       return Center(
@@ -539,7 +533,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Ảnh sản phẩm
+
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
@@ -556,7 +550,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Thông tin sản phẩm
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,7 +569,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          // Nút giảm số lượng
+
                           InkWell(
                             onTap: () {
                               cartService.updateQuantity(p.maSP, -1);
@@ -595,7 +589,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
-                          // Nút tăng số lượng
+
                           InkWell(
                             onTap: () {
                               cartService.updateQuantity(p.maSP, 1);
@@ -616,7 +610,7 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                     ],
                   ),
                 ),
-                // Nút xóa món
+
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.grey),
                   onPressed: () {
@@ -632,7 +626,6 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
     );
   }
 
-  // TAB 1: LỊCH SỬ MUA HÀNG
   Widget _buildOrderHistoryTab() {
     if (_isLoadingOrders) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFFE91E63)));
@@ -795,7 +788,6 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                   const Divider(height: 1),
                   const SizedBox(height: 8),
 
-                  // Actions
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [

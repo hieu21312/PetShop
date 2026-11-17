@@ -15,23 +15,10 @@ import java.util.Base64;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * Lớp tiện ích tạo mã QR Code từ URL hoặc văn bản bất kỳ sử dụng thư viện ZXing
- * Hỗ trợ tạo mã VietQR chuẩn App Ngân hàng Việt Nam (Napas / EMVCo)
- */
 public class QRCodeUtils {
-
     public static final int DEFAULT_WIDTH = 300;
     public static final int DEFAULT_HEIGHT = 300;
 
-    /**
-     * Tạo mã QR Code dạng mảng byte ảnh PNG
-     *
-     * @param text Nội dung cần tạo QR (URL thanh toán VNPay)
-     * @param width Chiều rộng ảnh (pixels)
-     * @param height Chiều cao ảnh (pixels)
-     * @return Mảng byte chứa dữ liệu ảnh PNG
-     */
     public static byte[] generateQRCodeBytes(String text, int width, int height) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -49,25 +36,16 @@ public class QRCodeUtils {
         }
     }
 
-    /**
-     * Tạo mã QR Code dạng chuỗi Base64 Data URL (tiện ích hiển thị trực tiếp trong thẻ <img src="...">)
-     */
     public static String generateQRCodeBase64(String text, int width, int height) {
         byte[] imageBytes = generateQRCodeBytes(text, width, height);
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         return "data:image/png;base64," + base64Image;
     }
 
-    /**
-     * Tạo mã QR Code với kích thước mặc định (300x300)
-     */
     public static String generateQRCodeBase64(String text) {
         return generateQRCodeBase64(text, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
-    /**
-     * Tạo mã QR Code dạng BufferedImage
-     */
     public static BufferedImage generateQRCodeBufferedImage(String text, int width, int height) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -82,16 +60,6 @@ public class QRCodeUtils {
         }
     }
 
-    /**
-     * Tạo đường dẫn ảnh mã VietQR (chuẩn Napas/EMVCo tương thích 100% với các App Ngân hàng Việt Nam: VCB, MB, Techcombank, BIDV,...)
-     *
-     * @param bankId Mã ngân hàng (ví dụ: MB, VCB, ICB, TCB, VPB,...)
-     * @param accountNo Số tài khoản ngân hàng nhận tiền
-     * @param accountName Tên chủ tài khoản
-     * @param amount Số tiền chuyển khoản
-     * @param content Nội dung chuyển khoản
-     * @return URL ảnh VietQR để nhúng trực tiếp vào thẻ <img>
-     */
     public static String buildVietQrUrl(String bankId, String accountNo, String accountName, BigDecimal amount, String content) {
         String cleanBank = (bankId != null && !bankId.isBlank()) ? bankId.trim() : "MB";
         String cleanAcc = (accountNo != null && !accountNo.isBlank()) ? accountNo.trim() : "0901234567";

@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 @RequestMapping(value = "/api/orders", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class OrderApiController {
-
     @Autowired
     private OrderRepository orderRepository;
 
@@ -44,7 +43,6 @@ public class OrderApiController {
     @Autowired
     private PetShop.demo.repository.CustomerRepository customerRepository;
 
-    // Xem danh sách đơn hàng của khách
     @GetMapping("/my")
     public ResponseEntity<?> getMyOrders(@RequestParam Integer maKH) {
         List<Order> orders = orderRepository.findByMaKHOrderByNgayLapDesc(maKH);
@@ -64,7 +62,6 @@ public class OrderApiController {
         return ResponseEntity.ok(list);
     }
 
-    // Xem chi tiết đơn hàng
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(@PathVariable Integer id) {
         Optional<Order> orderOpt = orderRepository.findById(id);
@@ -103,7 +100,6 @@ public class OrderApiController {
         return ResponseEntity.ok(res);
     }
 
-    // Đặt hàng từ Mobile
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> payload) {
         Integer maKH = payload.get("maKH") != null ? Integer.parseInt(payload.get("maKH").toString()) : null;
@@ -138,14 +134,13 @@ public class OrderApiController {
             }
         }
 
-        // Xử lý mã giảm giá an toàn: kiểm tra có trong tblMaGiamGia hay không
         String cleanMaGiamGia = (rawMaGiamGia != null && !rawMaGiamGia.trim().isEmpty()) ? rawMaGiamGia.trim().toUpperCase() : null;
         BigDecimal discount = BigDecimal.ZERO;
 
         if (cleanMaGiamGia != null) {
             var vOpt = voucherRepository.findById(cleanMaGiamGia);
             if (vOpt.isEmpty()) {
-                cleanMaGiamGia = null; // Bỏ qua mã nếu không có trong database để không vi phạm FK_tblHoaDon_tblMaGiamGia
+                cleanMaGiamGia = null;
             } else {
                 PetShop.demo.model.enity.Voucher v = vOpt.get();
                 if (v.getPhanTramGiam() != null && v.getPhanTramGiam().compareTo(BigDecimal.ZERO) > 0) {
@@ -158,7 +153,6 @@ public class OrderApiController {
             }
         }
 
-        // Áp dụng thêm ưu đãi thành viên nếu có
         Optional<PetShop.demo.model.enity.Customer> custOpt = customerRepository.findById(maKH);
         if (custOpt.isPresent()) {
             PetShop.demo.model.enity.Customer c = custOpt.get();
@@ -176,10 +170,10 @@ public class OrderApiController {
             order.setMaKH(maKH);
             order.setNgayLap(LocalDateTime.now());
             order.setDiaChiGiaoHang(diaChi.trim());
-            order.setMaGiamGia(cleanMaGiamGia); // null nếu không có mã hoặc mã rỗng
+            order.setMaGiamGia(cleanMaGiamGia);
             order.setTienGiam(discount);
             order.setTongTien(finalTotal);
-            order.setTinhTrang(1); // 1 = Đang xử lý
+            order.setTinhTrang(1);
             order.setDaThanhToan(false);
             order.setHinhThucThanhToan(hinhThuc);
 
@@ -200,7 +194,6 @@ public class OrderApiController {
                     "/DonHang/ChiTiet/" + saved.getMaHD()
             );
 
-            // Tạo thông báo cho thu ngân và admin
             try {
                 String custName = custOpt.map(PetShop.demo.model.enity.Customer::getTenKH).orElse("Khách hàng");
                 String staffTitle = "BankTransfer".equalsIgnoreCase(hinhThuc)
@@ -233,7 +226,6 @@ public class OrderApiController {
         }
     }
 
-    // Hủy đơn hàng từ Mobile
     @PostMapping("/{id}/cancel")
     public ResponseEntity<?> cancelOrder(@PathVariable Integer id, @RequestParam Integer maKH) {
         Optional<Order> orderOpt = orderRepository.findById(id);
@@ -247,7 +239,7 @@ public class OrderApiController {
         }
 
         if (o.getTinhTrang() != null && o.getTinhTrang() == 1) {
-            o.setTinhTrang(5); // 5 = Đã hủy
+            o.setTinhTrang(5);
             orderRepository.save(o);
 
             thongBaoService.taoThongBaoDatLich(

@@ -14,14 +14,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/care-services")
 public class AdminDichVuChamSocController {
-
     @Autowired
     private DichVuChamSocRepository dichVuChamSocRepository;
 
     @Autowired
     private AuthService authService;
 
-    // 1. Danh sách dịch vụ chăm sóc
     @GetMapping
     public String listCareServices(@RequestParam(value = "nhom", required = false) String nhom,
                                    Model model, HttpSession session) {
@@ -39,7 +37,6 @@ public class AdminDichVuChamSocController {
         return "admin/care-services";
     }
 
-    // 2. Form thêm mới
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -47,7 +44,6 @@ public class AdminDichVuChamSocController {
         return "admin/care-service-form";
     }
 
-    // 3. Xử lý thêm mới
     @PostMapping("/create")
     public String createCareService(@ModelAttribute("service") DichVuChamSoc service, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -55,7 +51,6 @@ public class AdminDichVuChamSocController {
         return "redirect:/admin/care-services";
     }
 
-    // 4. Form sửa
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -65,7 +60,6 @@ public class AdminDichVuChamSocController {
         return "admin/care-service-form";
     }
 
-    // 5. Xử lý cập nhật
     @PostMapping("/edit/{id}")
     public String updateCareService(@PathVariable("id") Integer id, @ModelAttribute("service") DichVuChamSoc serviceForm, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -83,7 +77,6 @@ public class AdminDichVuChamSocController {
         return "redirect:/admin/care-services";
     }
 
-    // 6. Xóa dịch vụ
     @GetMapping("/delete/{id}")
     public String deleteCareService(@PathVariable("id") Integer id, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

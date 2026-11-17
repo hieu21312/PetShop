@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/QLMaGiamGia")
 public class VoucherController {
-
     @Autowired
     private VoucherService voucherService;
 

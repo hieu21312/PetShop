@@ -11,7 +11,6 @@ import org.springframework.ui.Model;
 
 @ControllerAdvice
 public class GlobalModelAdvice {
-
     @Autowired
     private BookingService bookingService;
 
@@ -23,25 +22,20 @@ public class GlobalModelAdvice {
 
     @ModelAttribute
     public void populateGlobalAttributes(Model model, HttpSession session) {
-        // Tự động nạp số lượng lịch hẹn chờ xác nhận cho Admin trên mọi trang
         try {
             long pendingCount = bookingService.countPendingBookings();
             model.addAttribute("pendingBookingCount", pendingCount);
             session.setAttribute("pendingBookingCount", pendingCount);
         } catch (Exception e) {
-            // Không làm gián đoạn request nếu DB đang khởi tạo
         }
 
-        // Tự động nạp số lượng đơn hàng chờ thanh toán / chờ xác nhận cho Thu ngân và Admin
         try {
             long pendingOrders = orderRepository.countPendingPaymentOrders();
             model.addAttribute("pendingOrdersCount", pendingOrders);
             session.setAttribute("pendingOrdersCount", pendingOrders);
         } catch (Exception e) {
-            // Không làm gián đoạn request
         }
 
-        // Tự động đồng bộ số thông báo chưa đọc cho khách hàng hoặc nhân sự đã đăng nhập
         try {
             Integer customerId = (Integer) session.getAttribute("maKH");
             Integer employeeId = (Integer) session.getAttribute("maNV");
@@ -58,7 +52,6 @@ public class GlobalModelAdvice {
                 session.setAttribute("notificationList", thongBaoService.getThongBaoStaff(employeeId));
             }
         } catch (Exception e) {
-            // Không làm gián đoạn request
         }
     }
 }

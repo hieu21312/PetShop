@@ -36,7 +36,6 @@ import java.util.*;
 @Controller
 @RequestMapping("/admin/care-tickets")
 public class AdminPhieuDichVuController {
-
     @Autowired
     private PhieuDichVuChamSocRepository phieuRepository;
 
@@ -79,13 +78,11 @@ public class AdminPhieuDichVuController {
             return false;
         }
         int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
-        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null)
                 ? emp.getRole().getTenVaiTro().trim() : "";
 
-        // Các vai trò trực tiếp làm dịch vụ chăm sóc / y tế thú cưng từ CSDL (tblVaiTro):
-        // 3: Bác sĩ thú y, 4: Nhân viên chăm sóc (hoặc Chăm sóc thú cưng)
         return roleId == 3 || roleId == 4 || roleId == 8 || roleId == 13
-                || roleName.equalsIgnoreCase("Bác sĩ thú y") 
+                || roleName.equalsIgnoreCase("Bác sĩ thú y")
                 || roleName.equalsIgnoreCase("Bác sĩ")
                 || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
                 || roleName.equalsIgnoreCase("Chăm sóc thú cưng");
@@ -97,11 +94,9 @@ public class AdminPhieuDichVuController {
             return false;
         }
         int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
-        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null)
                 ? emp.getRole().getTenVaiTro().trim() : "";
 
-        // Các vai trò phụ trách tiếp nhận khách tại quầy / tạo phiếu từ CSDL:
-        // 5: Thu ngân, 1: Admin, 2: Quản lý cửa hàng (cũng hỗ trợ roleId 6 cũ nếu có)
         return roleId == 5 || roleId == 1 || roleId == 2 || roleId == 6
                 || roleName.equalsIgnoreCase("Thu ngân")
                 || roleName.equalsIgnoreCase("Nhân viên thu ngân")
@@ -117,43 +112,35 @@ public class AdminPhieuDichVuController {
         }
 
         int roleId = emp.getVaiTro() != null ? emp.getVaiTro() : 0;
-        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null) 
+        String roleName = (emp.getRole() != null && emp.getRole().getTenVaiTro() != null)
                 ? emp.getRole().getTenVaiTro().trim() : "";
         String chuyenMon = emp.getChuyenMon() != null ? emp.getChuyenMon().trim().toLowerCase() : "";
 
         String nhom = s.getNhomDichVu() != null ? s.getNhomDichVu().trim().toLowerCase() : "";
         String name = s.getTenDichVu() != null ? s.getTenDichVu().trim().toLowerCase() : "";
 
-        // 1. Nhóm Dịch vụ Y tế / Thú y & Khám chữa bệnh
         if (nhom.contains("thú y") || nhom.contains("khám") || nhom.contains("chữa") || nhom.contains("y tế")
-                || name.contains("khám") || name.contains("tiêm") || name.contains("vắc xin") 
+                || name.contains("khám") || name.contains("tiêm") || name.contains("vắc xin")
                 || name.contains("thuốc") || name.contains("triệt sản") || name.contains("xét nghiệm") || name.contains("phẫu thuật")) {
-
-            // Bắt buộc Bác sĩ thú y (Role 3)
             return roleId == 3 || roleName.equalsIgnoreCase("Bác sĩ thú y") || roleName.equalsIgnoreCase("Bác sĩ");
         }
 
-        // 2. Nhóm Spa & Grooming (Tắm sấy, cắt tỉa lông, vệ sinh tai móng, cạo lông, gỡ rối)
         if (nhom.contains("spa") || nhom.contains("grooming")
-                || name.contains("tắm") || name.contains("cắt tỉa") || name.contains("cạo lông") 
+                || name.contains("tắm") || name.contains("cắt tỉa") || name.contains("cạo lông")
                 || name.contains("vệ sinh") || name.contains("gỡ rối")) {
-            // Chuyên viên Nhân viên chăm sóc (Role 4 hoặc Role 8 cũ)
-            return roleId == 4 || roleId == 8 
-                    || roleName.equalsIgnoreCase("Nhân viên chăm sóc") 
-                    || roleName.equalsIgnoreCase("Chăm sóc thú cưng") 
+            return roleId == 4 || roleId == 8
+                    || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
+                    || roleName.equalsIgnoreCase("Chăm sóc thú cưng")
                     || chuyenMon.contains("grooming") || chuyenMon.contains("spa");
         }
 
-        // 3. Nhóm Khách sạn thú cưng / Trông giữ Lưu trú
         if (nhom.contains("khách sạn") || nhom.contains("lưu trú") || name.contains("khách sạn") || name.contains("bán trú") || name.contains("trông giữ")) {
-            // Nhân viên chăm sóc (Role 4 hoặc Role 8)
             return roleId == 4 || roleId == 8
                     || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
                     || roleName.equalsIgnoreCase("Chăm sóc thú cưng");
         }
 
-        // Mặc định các dịch vụ khác: Nhân viên chăm sóc hoặc Bác sĩ
-        return roleId == 4 || roleId == 3 
+        return roleId == 4 || roleId == 3
                 || roleName.equalsIgnoreCase("Nhân viên chăm sóc")
                 || roleName.equalsIgnoreCase("Bác sĩ thú y");
     }
@@ -182,7 +169,6 @@ public class AdminPhieuDichVuController {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Employee emp : allEmployees) {
-            // Chỉ lấy nhân sự thuộc chuyên môn dịch vụ thú y & chăm sóc thú cưng đang làm việc
             if (!isCareServiceStaff(emp)) {
                 continue;
             }
@@ -221,13 +207,12 @@ public class AdminPhieuDichVuController {
             int tasksToday = (int) (careCount + bookingCount);
             item.put("tasksToday", tasksToday);
 
-            // Điểm sắp xếp: Khả dụng (ưu tiên 0) + số ca hôm nay; Bận (ưu tiên 1000) + số ca
             item.put("sortScore", (isAvailable ? 0 : 1000) + tasksToday);
 
             String roleBadge = isDoctor ? "[Bác sĩ thú y] " : "[Nhân viên chăm sóc] ";
 
-            String roleInfo = (emp.getChuyenMon() != null && !emp.getChuyenMon().trim().isEmpty()) 
-                    ? " (" + emp.getChuyenMon().trim() + ")" 
+            String roleInfo = (emp.getChuyenMon() != null && !emp.getChuyenMon().trim().isEmpty())
+                    ? " (" + emp.getChuyenMon().trim() + ")"
                     : (!roleName.isEmpty() ? " (" + roleName + ")" : "");
             String label;
             if (isAvailable) {
@@ -244,7 +229,6 @@ public class AdminPhieuDichVuController {
             result.add(item);
         }
 
-        // Sắp xếp danh sách nhân viên theo thứ tự tối ưu
         result.sort(Comparator.comparingInt(m -> (Integer) m.get("sortScore")));
         return result;
     }
@@ -260,7 +244,6 @@ public class AdminPhieuDichVuController {
         Integer excludeId = (ticket != null) ? ticket.getMaPhieuDV() : null;
         model.addAttribute("employees", getOptimizedStaffList(start, end, excludeId));
 
-        // Danh sách nhân sự phụ trách tiếp nhận khách tại quầy (Tư vấn viên, CSKH, Bán hàng, Quản lý)
         List<Employee> receptionStaff = employeeRepository.findAll().stream()
                 .filter(AdminPhieuDichVuController::isReceptionStaff)
                 .toList();
@@ -274,7 +257,6 @@ public class AdminPhieuDichVuController {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
         String empName = employeeRepository.findById(maNV).map(Employee::getTenNV).orElse("nhân viên");
 
-        // 1. Kiểm tra trùng lặp trong phiếu chăm sóc
         List<PhieuDichVuChamSoc> activeTickets = phieuRepository.findByMaNVThucHienAndTrangThaiDichVuIn(
                 maNV, List.of("Chờ tiếp nhận", "Đang thực hiện")
         );
@@ -283,14 +265,12 @@ public class AdminPhieuDichVuController {
             LocalDateTime pStart = p.getNgayTiepNhan() != null ? p.getNgayTiepNhan() : LocalDateTime.now();
             LocalDateTime pEnd = p.getNgayHenTra() != null ? p.getNgayHenTra() : pStart.plusHours(1);
 
-            // Kiểm tra trùng lặp thời gian: [start, end] giao [pStart, pEnd]
             if (!start.isAfter(pEnd) && !end.isBefore(pStart)) {
-                return "Trùng lịch làm việc: Nhân viên " + empName + " đang có lịch thực hiện phiếu chăm sóc " 
+                return "Trùng lịch làm việc: Nhân viên " + empName + " đang có lịch thực hiện phiếu chăm sóc "
                         + p.getSoPhieu() + " (dự kiến đến " + pEnd.format(fmt) + "). Vui lòng chọn nhân sự hoặc thời gian khác.";
             }
         }
 
-        // 2. Kiểm tra trùng lặp trong lịch hẹn đặt trước (tblDatLich)
         List<Booking> staffBookings = bookingRepository.findByMaNVOrderByNgayTaoDesc(maNV);
         for (Booking b : staffBookings) {
             String status = b.getTrangThai();
@@ -302,7 +282,7 @@ public class AdminPhieuDichVuController {
                 LocalDateTime bEnd = bStart.plusHours(1);
 
                 if (!start.isAfter(bEnd) && !end.isBefore(bStart)) {
-                    return "Trùng lịch làm việc: Nhân viên " + empName + " đã có lịch hẹn chăm sóc #" 
+                    return "Trùng lịch làm việc: Nhân viên " + empName + " đã có lịch hẹn chăm sóc #"
                             + b.getMaDatLich() + " vào lúc " + bStart.format(fmt) + ". Vui lòng chọn nhân sự hoặc thời gian khác.";
                 }
             }
@@ -311,7 +291,6 @@ public class AdminPhieuDichVuController {
         return null;
     }
 
-    // Endpoint kiểm tra trùng lịch và thời gian nhanh (AJAX)
     @GetMapping("/check-conflict")
     @ResponseBody
     public Map<String, Object> checkConflict(@RequestParam(value = "maNV", required = false) Integer maNV,
@@ -334,7 +313,6 @@ public class AdminPhieuDichVuController {
             return res;
         }
 
-        // Kiểm tra thẩm quyền y tế nếu dịch vụ có khám chữa bệnh / tiêm phòng / kê thuốc
         if (Boolean.TRUE.equals(hasMedicalService) && maNV != null) {
             Employee emp = employeeRepository.findById(maNV).orElse(null);
             if (emp != null) {
@@ -343,7 +321,7 @@ public class AdminPhieuDichVuController {
                 if (!isDoctor) {
                     res.put("hasError", true);
                     res.put("errorType", "MEDICAL_ROLE_RESTRICTION");
-                    res.put("message", "Quy định chuyên môn: Dịch vụ khám chữa bệnh / tiêm phòng / kê thuốc bắt buộc phải do Bác sĩ thú y thực hiện. Nhân sự '" 
+                    res.put("message", "Quy định chuyên môn: Dịch vụ khám chữa bệnh / tiêm phòng / kê thuốc bắt buộc phải do Bác sĩ thú y thực hiện. Nhân sự '"
                             + emp.getTenNV() + "' (" + (roleName.isEmpty() ? "Nhân viên" : roleName) + ") không có thẩm quyền y tế này!");
                     return res;
                 }
@@ -376,7 +354,6 @@ public class AdminPhieuDichVuController {
         return res;
     }
 
-    // Endpoint lấy danh sách nhân viên đã được sắp xếp theo thứ tự tối ưu (Smart Scheduling)
     @GetMapping("/optimized-staff-list")
     @ResponseBody
     public List<Map<String, Object>> getOptimizedStaffListApi(
@@ -395,7 +372,6 @@ public class AdminPhieuDichVuController {
         return getOptimizedStaffList(now, ngayHenTra, excludeTicketId);
     }
 
-    // Endpoint gợi ý nhân sự tự động thông minh (Smart Scheduling)
     @GetMapping("/suggest-staff")
     @ResponseBody
     public Map<String, Object> suggestStaff(@RequestParam(value = "ngayHenTra", required = false) String ngayHenTraStr,
@@ -472,7 +448,6 @@ public class AdminPhieuDichVuController {
         return res;
     }
 
-    // Endpoint tạo nhanh Chủ nuôi & Thú cưng trực tiếp từ modal tiếp nhận
     @PostMapping("/api/quick-create-pet")
     @ResponseBody
     public Map<String, Object> quickCreatePet(@RequestBody Map<String, String> payload) {
@@ -487,14 +462,13 @@ public class AdminPhieuDichVuController {
             String gioiTinh = payload.get("gioiTinh");
             String canNangStr = payload.get("canNang");
 
-            if (hoTenChu == null || hoTenChu.trim().isEmpty() || sdt == null || sdt.trim().isEmpty() 
+            if (hoTenChu == null || hoTenChu.trim().isEmpty() || sdt == null || sdt.trim().isEmpty()
                     || tenPet == null || tenPet.trim().isEmpty()) {
                 res.put("success", false);
                 res.put("message", "Vui lòng nhập đầy đủ tên chủ nuôi, số điện thoại và tên thú cưng.");
                 return res;
             }
 
-            // Tìm hoặc tạo mới ChuNuoi
             ChuNuoi owner = chuNuoiRepository.findAll().stream()
                     .filter(c -> c.getSoDienThoai() != null && c.getSoDienThoai().trim().equals(sdt.trim()))
                     .findFirst()
@@ -509,7 +483,6 @@ public class AdminPhieuDichVuController {
                 owner.setDiemTichLuy(0);
                 owner.setNgayDangKy(LocalDateTime.now());
 
-                // Tự động liên kết hoặc tạo Khách hàng trong tblKhachHang
                 var custOpt = customerRepository.findFirstByDienThoaiOrEmail(sdt.trim(), null);
                 if (custOpt.isPresent()) {
                     owner.setMaKH(custOpt.get().getMaKH());
@@ -528,7 +501,6 @@ public class AdminPhieuDichVuController {
                 owner = chuNuoiRepository.save(owner);
             }
 
-            // Tạo mới HoSoThuCung
             HoSoThuCung pet = new HoSoThuCung();
             pet.setMaChuNuoi(owner.getMaChuNuoi());
             pet.setTenThuCung(tenPet.trim());
@@ -565,7 +537,6 @@ public class AdminPhieuDichVuController {
         return res;
     }
 
-    // 1. Danh sách phiếu chăm sóc
     @GetMapping
     public String listTickets(@RequestParam(value = "status", required = false) String status,
                               @RequestParam(value = "keyword", required = false) String keyword,
@@ -621,14 +592,12 @@ public class AdminPhieuDichVuController {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 1. Kiểm tra ngày giờ không được trước hiện tại
         if (ticket.getNgayHenTra() != null && ticket.getNgayHenTra().isBefore(now)) {
             model.addAttribute("errorMessage", "Ngày giờ không hợp lệ: Không thể chọn thời gian trước thời điểm hiện tại.");
             populateFormModel(model, ticket);
             return "admin/care-ticket-form";
         }
 
-        // 2. Kiểm tra trùng lịch làm việc của nhân viên tiếp nhận/phụ trách chính
         if (ticket.getMaNVThucHien() != null && ticket.getNgayHenTra() != null) {
             LocalDateTime start = ticket.getNgayTiepNhan() != null ? ticket.getNgayTiepNhan() : now;
             String conflictMsg = checkScheduleConflict(ticket.getMaNVThucHien(), start, ticket.getNgayHenTra(), null);
@@ -639,13 +608,12 @@ public class AdminPhieuDichVuController {
             }
         }
 
-        // 3. Kiểm tra nếu thú cưng đang có phiếu chăm sóc khác chưa hoàn tất
         if (ticket.getMaThuCung() != null) {
             List<PhieuDichVuChamSoc> activePetTickets = phieuRepository.findByMaThuCungAndTrangThaiDichVuIn(
                     ticket.getMaThuCung(), List.of("Chờ tiếp nhận", "Đang thực hiện")
             );
             if (!activePetTickets.isEmpty()) {
-                model.addAttribute("errorMessage", "Thú cưng này đang có phiếu chăm sóc chưa hoàn tất (Phiếu: " 
+                model.addAttribute("errorMessage", "Thú cưng này đang có phiếu chăm sóc chưa hoàn tất (Phiếu: "
                         + activePetTickets.get(0).getSoPhieu() + "). Vui lòng bàn giao hoặc hủy phiếu trước đó.");
                 populateFormModel(model, ticket);
                 return "admin/care-ticket-form";
@@ -663,7 +631,6 @@ public class AdminPhieuDichVuController {
             }
         }
 
-        // Lấy danh sách dịch vụ được chọn
         List<DichVuChamSoc> chosenServices = new ArrayList<>();
         if (selectedServiceIds != null && !selectedServiceIds.isEmpty()) {
             chosenServices = dichVuChamSocRepository.findAllById(selectedServiceIds);
@@ -674,21 +641,19 @@ public class AdminPhieuDichVuController {
         BigDecimal sumPrice = BigDecimal.ZERO;
         StringBuilder sb = new StringBuilder();
 
-        // Kiểm tra từng dịch vụ và phân công nhân sự tương ứng
         for (int i = 0; i < chosenServices.size(); i++) {
             DichVuChamSoc s = chosenServices.get(i);
             if (s.getGiaDichVu() != null) {
                 sumPrice = sumPrice.add(s.getGiaDichVu());
             }
 
-            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i) 
-                    ? serviceStaffIds.get(i) 
+            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i)
+                    ? serviceStaffIds.get(i)
                     : ticket.getMaNVThucHien();
 
             Employee assignedEmp = (assignedStaffId != null) ? employeeRepository.findById(assignedStaffId).orElse(null) : null;
             String assignedEmpTitle = (assignedEmp != null) ? assignedEmp.getTenNV() : "Chưa phân công";
 
-            // Ràng buộc quy định chuyên môn từ CSDL: mỗi dịch vụ chỉ có role tương ứng mới có thể phân công
             if (assignedEmp == null) {
                 model.addAttribute("errorMessage", "Vui lòng phân công nhân sự phụ trách cho dịch vụ '" + s.getTenDichVu() + "'.");
                 populateFormModel(model, ticket);
@@ -697,8 +662,8 @@ public class AdminPhieuDichVuController {
 
             if (!isEligibleForService(assignedEmp, s)) {
                 String roleName = assignedEmp.getRole() != null ? assignedEmp.getRole().getTenVaiTro() : "Nhân viên";
-                model.addAttribute("errorMessage", "Quy định chuyên môn: Dịch vụ '" + s.getTenDichVu() 
-                        + "' không thuộc phạm vi vai trò '" + roleName + "' của nhân sự '" 
+                model.addAttribute("errorMessage", "Quy định chuyên môn: Dịch vụ '" + s.getTenDichVu()
+                        + "' không thuộc phạm vi vai trò '" + roleName + "' của nhân sự '"
                         + assignedEmp.getTenNV() + "'. Vui lòng phân công đúng nhân sự phụ trách!");
                 populateFormModel(model, ticket);
                 return "admin/care-ticket-form";
@@ -722,12 +687,10 @@ public class AdminPhieuDichVuController {
             ticket.setYeuCauCuaChuNuoi(prefix + " | " + oldReq);
         }
 
-        // Tự động gán nhân sự chính của phiếu nếu chưa có
         if (ticket.getMaNVThucHien() == null && serviceStaffIds != null && !serviceStaffIds.isEmpty() && serviceStaffIds.get(0) != null) {
             ticket.setMaNVThucHien(serviceStaffIds.get(0));
         }
 
-        // Tự động tính giảm giá theo hạng thành viên nếu chưa có giảm giá
         if (ticket.getTongTien() != null && ticket.getTongTien().compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal giam = ticket.getTienGiamGia() != null ? ticket.getTienGiamGia() : BigDecimal.ZERO;
             if (giam.compareTo(BigDecimal.ZERO) == 0 && ticket.getMaChuNuoi() != null) {
@@ -739,7 +702,6 @@ public class AdminPhieuDichVuController {
             }
         }
 
-        // Xử lý áp dụng voucher nếu có
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Optional<Voucher> vOpt = voucherService.getVoucherByCode(voucherCode.trim().toUpperCase());
             if (vOpt.isPresent()) {
@@ -754,21 +716,18 @@ public class AdminPhieuDichVuController {
             }
         }
 
-        // Ghi nhận thân nhiệt (nếu có)
         if (thanNhiet != null && !thanNhiet.trim().isEmpty()) {
             String tnStr = "Thân nhiệt: " + thanNhiet.trim() + "°C";
             String curInit = ticket.getTinhTrangBanDau();
             ticket.setTinhTrangBanDau(curInit != null && !curInit.trim().isEmpty() ? tnStr + " | " + curInit : tnStr);
         }
 
-        // Ghi nhận đồ đạc phụ kiện gửi kèm
         if (doDacGuiKem != null && !doDacGuiKem.isEmpty()) {
             String doDacStr = "Đồ gửi kèm: " + String.join(", ", doDacGuiKem);
             String note = ticket.getGhiChu();
             ticket.setGhiChu(note != null && !note.isEmpty() ? note + " | " + doDacStr : doDacStr);
         }
 
-        // Tiền đặt cọc (nếu có)
         if (tienDatCoc != null && tienDatCoc.compareTo(BigDecimal.ZERO) > 0) {
             ticket.setTrangThaiThanhToan("Đã đặt cọc");
             String cocStr = String.format("Đã cọc: %,.0fVND", tienDatCoc);
@@ -787,11 +746,10 @@ public class AdminPhieuDichVuController {
 
         PhieuDichVuChamSoc savedTicket = phieuRepository.save(ticket);
 
-        // Lưu chi tiết dịch vụ chăm sóc vào tblChiTietDichVuChamSoc cho từng mục
         for (int i = 0; i < chosenServices.size(); i++) {
             DichVuChamSoc s = chosenServices.get(i);
-            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i) 
-                    ? serviceStaffIds.get(i) 
+            Integer assignedStaffId = (serviceStaffIds != null && serviceStaffIds.size() > i)
+                    ? serviceStaffIds.get(i)
                     : savedTicket.getMaNVThucHien();
 
             Employee assignedEmp = (assignedStaffId != null) ? employeeRepository.findById(assignedStaffId).orElse(null) : null;
@@ -819,7 +777,6 @@ public class AdminPhieuDichVuController {
             chiTietDichVuChamSocRepository.save(ct);
         }
 
-        // Cập nhật lại cân nặng mới nhất vào hồ sơ thú cưng tblHoSoThuCung
         if (savedTicket.getMaThuCung() != null && savedTicket.getCanNangTiepNhan() != null) {
             hoSoThuCungRepository.findById(savedTicket.getMaThuCung()).ifPresent(p -> {
                 p.setCanNang(savedTicket.getCanNangTiepNhan());
@@ -830,7 +787,6 @@ public class AdminPhieuDichVuController {
         return "redirect:/admin/care-tickets";
     }
 
-    // 3.1. Endpoint kiểm tra voucher nhanh cho form tiếp nhận
     @PostMapping("/check-voucher")
     @ResponseBody
     public Map<String, Object> checkVoucher(@RequestParam("code") String code,
@@ -882,7 +838,6 @@ public class AdminPhieuDichVuController {
         return res;
     }
 
-    // 4. Xem chi tiết phiếu & cập nhật trạng thái
     @GetMapping("/detail/{id}")
     public String viewDetail(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.canManageCareTickets(session)) return authService.redirectUnauthorized(session);
@@ -921,7 +876,6 @@ public class AdminPhieuDichVuController {
             if (hinhThucThanhToan != null) ticket.setHinhThucThanhToan(hinhThucThanhToan);
             if (ketQuaChamSoc != null) ticket.setKetQuaChamSoc(ketQuaChamSoc);
 
-            // Xử lý áp dụng voucher nếu có lúc thanh toán
             if (voucherCode != null && !voucherCode.trim().isEmpty()) {
                 Optional<Voucher> vOpt = voucherService.getVoucherByCode(voucherCode.trim().toUpperCase());
                 if (vOpt.isPresent()) {
@@ -956,13 +910,11 @@ public class AdminPhieuDichVuController {
             }
             phieuRepository.save(ticket);
 
-            // Tự động tích lũy điểm và nâng hạng nếu phiếu đã hoàn tất hoặc thanh toán
             membershipService.processCareTicketPoints(ticket);
 
-            // Phát thông báo đến chủ nuôi khi thay đổi trạng thái phiếu
             if (ticket.getMaChuNuoi() != null && (oldStatus == null || !oldStatus.equals(trangThaiDichVu))) {
                 String tieuDe = "Cập nhật dịch vụ chăm sóc #" + ticket.getSoPhieu();
-                String noiDung = "Phiếu dịch vụ chăm sóc cho thú cưng của bạn đã được cập nhật trạng thái: '" 
+                String noiDung = "Phiếu dịch vụ chăm sóc cho thú cưng của bạn đã được cập nhật trạng thái: '"
                         + trangThaiDichVu + "'. Vui lòng kiểm tra trên hệ thống!";
                 thongBaoService.taoThongBaoNhacLich(ticket.getMaChuNuoi(), ticket.getMaThuCung(), tieuDe, noiDung, null);
             }

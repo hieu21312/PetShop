@@ -1,7 +1,6 @@
 package PetShop.demo.utils;
 
 public class VietnameseUtils {
-
     public static String removeVietnamese(String str) {
         if (str == null) return null;
         str = str.toLowerCase();

@@ -5,22 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DichVuChoThanhToanDTO {
-
-    private String loaiDichVu; // "PHIEU_CHAM_SOC" hoặc "DAT_LICH"
-    private String maDichVu;   // Ví dụ: PDV-2024-0001 hoặc BK-0001
-    private Integer maPhieuDV;  // ID của tblPhieuDichVuChamSoc nếu có
-    private Integer maDatLich;  // ID của tblDatLich nếu có
-    private Integer maKH;       // ID khách hàng nếu đã có tài khoản
+    private String loaiDichVu;
+    private String maDichVu;
+    private Integer maPhieuDV;
+    private Integer maDatLich;
+    private Integer maKH;
     private String tenKhachHang;
     private String soDienThoai;
     private String email;
     private String tenThuCung;
-    private String tenDichVu;   // Chuỗi hiển thị tên các dịch vụ
-    private Integer maNV;       // Bác sĩ / Nhân viên thực hiện
+    private String tenDichVu;
+    private Integer maNV;
     private String tenNhanSu;
     private BigDecimal tongTien;
     private BigDecimal tienGiamGia;
-    private BigDecimal thanhToan; // Tiền khách cần trả đúng với đăng ký
+    private BigDecimal thanhToan;
     private String thoiGian;
     private String ghiChu;
     private List<ChiTietDichVuItemDTO> items = new ArrayList<>();

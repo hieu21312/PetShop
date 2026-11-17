@@ -23,7 +23,6 @@ import java.util.Optional;
 
 @Controller
 public class CustomerProfileController {
-
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -39,7 +38,6 @@ public class CustomerProfileController {
     @Autowired
     private MembershipService membershipService;
 
-    // Xem thông tin cá nhân & thú cưng
     @GetMapping("/ThongTinCaNhan")
     public String viewProfile(Model model, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
@@ -58,7 +56,6 @@ public class CustomerProfileController {
 
         model.addAttribute("customer", customer);
 
-        // Tìm hồ sơ chủ nuôi liên kết
         Optional<ChuNuoi> chuNuoiOpt = chuNuoiRepository.findFirstByMaKH(maKH);
         if (chuNuoiOpt.isEmpty() && customer.getDienThoai() != null && !customer.getDienThoai().isBlank()) {
             chuNuoiOpt = chuNuoiRepository.findFirstBySoDienThoai(customer.getDienThoai().trim());
@@ -71,7 +68,6 @@ public class CustomerProfileController {
         }
         model.addAttribute("myPets", myPets);
 
-        // Hạng thành viên & quyền lợi
         model.addAttribute("hangThanhVien", customer.getHangThanhVien());
         model.addAttribute("diemTichLuy", customer.getDiemTichLuy());
         model.addAttribute("discountPercent", membershipService.getDiscountPercentage(customer.getHangThanhVien()));
@@ -79,7 +75,6 @@ public class CustomerProfileController {
         return "profile";
     }
 
-    // Cập nhật thông tin cá nhân
     @PostMapping("/ThongTinCaNhan/CapNhat")
     public String updateProfile(@RequestParam String tenKH,
                                 @RequestParam(required = false) String dienThoai,
@@ -106,10 +101,8 @@ public class CustomerProfileController {
             customer.setNamSinh(namSinh);
             customerRepository.save(customer);
 
-            // Cập nhật session
             session.setAttribute("tenKH", customer.getTenKH());
 
-            // Tự động đồng bộ hồ sơ chủ nuôi nếu đã có
             Optional<ChuNuoi> chuNuoiOpt = chuNuoiRepository.findFirstByMaKH(maKH);
             if (chuNuoiOpt.isPresent()) {
                 ChuNuoi cn = chuNuoiOpt.get();
@@ -125,7 +118,6 @@ public class CustomerProfileController {
         return "redirect:/ThongTinCaNhan";
     }
 
-    // Khách hàng tự thêm thú cưng của mình
     @PostMapping("/ThongTinCaNhan/ThemThuCung")
     public String addPet(@RequestParam String tenThuCung,
                          @RequestParam String loaiThuCung,
@@ -146,7 +138,6 @@ public class CustomerProfileController {
             return "redirect:/DangNhap";
         }
 
-        // Tìm hoặc tạo mới chủ nuôi liên kết
         Optional<ChuNuoi> chuNuoiOpt = chuNuoiRepository.findFirstByMaKH(maKH);
         ChuNuoi chuNuoi;
         if (chuNuoiOpt.isEmpty()) {

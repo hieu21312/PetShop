@@ -6,7 +6,6 @@ import java.util.Objects;
 
 @Embeddable
 public class OrderDetailId implements Serializable {
-
     private Integer maHD;
     private Integer maSP;
 

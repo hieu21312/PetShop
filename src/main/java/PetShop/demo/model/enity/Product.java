@@ -66,10 +66,8 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<Review> reviews;
 
-    // Constructors
     public Product() {}
 
-    // Getters and Setters
     public Integer getMaSP() { return maSP; }
     public void setMaSP(Integer maSP) { this.maSP = maSP; }
 

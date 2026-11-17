@@ -8,7 +8,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VNPayUtilsTest {
-
     private final String secretKey = "26QDYK2N8JUGD9051M395H3Z8J00D740";
 
     @Test
@@ -33,7 +32,6 @@ class VNPayUtilsTest {
         assertNotNull(queryUrl);
         assertTrue(queryUrl.contains("vnp_SecureHash="));
 
-        // Tách hash ra để kiểm tra verifySignature
         String[] parts = queryUrl.split("&vnp_SecureHash=");
         assertEquals(2, parts.length);
         String secureHash = parts[1];
@@ -42,7 +40,6 @@ class VNPayUtilsTest {
         boolean isValid = VNPayUtils.verifySignature(params, secretKey);
         assertTrue(isValid, "Chữ ký phải hợp lệ khi không bị thay đổi");
 
-        // Giả mạo dữ liệu
         params.put("vnp_Amount", "99999999");
         boolean isTamperedValid = VNPayUtils.verifySignature(params, secretKey);
         assertFalse(isTamperedValid, "Chữ ký phải không hợp lệ khi dữ liệu bị sửa");

@@ -20,10 +20,8 @@ public class Inventory {
     @JoinColumn(name = "MaSP")
     private Product product;
 
-    // Constructors
     public Inventory() {}
 
-    // Getters and Setters
     public Integer getMaSP() { return maSP; }
     public void setMaSP(Integer maSP) { this.maSP = maSP; }
 

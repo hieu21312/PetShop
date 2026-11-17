@@ -17,7 +17,6 @@ import java.time.LocalDate;
 @Controller
 @RequestMapping("/admin/reports")
 public class AdminRevenueReportController {
-
     @Autowired
     private RevenueReportService revenueReportService;
 
@@ -61,7 +60,7 @@ public class AdminRevenueReportController {
         response.setHeader("Content-Disposition", "attachment; filename=\"BaoCaoDoanhThu_PetShop.csv\"");
 
         var writer = response.getWriter();
-        writer.write('\ufeff'); // UTF-8 BOM for Excel
+        writer.write('\ufeff');
 
         writer.println("BÁO CÁO DOANH THU HỆ THỐNG PETSHOP");
         writer.println("Thời gian báo cáo: " + report.getSelectedTimeLabel());

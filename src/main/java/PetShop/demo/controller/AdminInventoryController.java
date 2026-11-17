@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/admin/inventory")
 public class AdminInventoryController {
-
     @Autowired
     private ProductRepository productRepository;
 
@@ -28,16 +27,14 @@ public class AdminInventoryController {
     @Autowired
     private AuthService authService;
 
-    // Danh sách sản phẩm Accessory và tồn kho
     @GetMapping
     public String listInventory(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         List<Product> accessories = productRepository.findByLoaiSanPham("Accessory");
-        // Lấy tồn kho cho từng sản phẩm
+
         for (Product p : accessories) {
             Inventory inv = inventoryRepository.findById(p.getMaSP()).orElse(null);
             if (inv == null) {
-                // Tạo mới nếu chưa có
                 inv = new Inventory();
                 inv.setMaSP(p.getMaSP());
                 inv.setSoLuongTon(0);
@@ -49,7 +46,6 @@ public class AdminInventoryController {
         return "admin/inventory";
     }
 
-    // Cập nhật tồn kho cho một sản phẩm
     @PostMapping("/update")
     public String updateInventory(@RequestParam Integer maSP,
                                   @RequestParam Integer soLuongTon,

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ThanhToanRequestDTO {
-
     @JsonProperty("phuongThucThanhToan")
     @JsonAlias({"PhuongThucThanhToan", "phuong_thuc_thanh_toan", "paymentMethod", "method"})
     private String phuongThucThanhToan;

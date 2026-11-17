@@ -20,10 +20,8 @@ public class Role {
     @OneToMany(mappedBy = "role")
     private List<Employee> employees;
 
-    // Constructors
     public Role() {}
 
-    // Getters and Setters
     public Integer getIdVaiTro() { return idVaiTro; }
     public void setIdVaiTro(Integer idVaiTro) { this.idVaiTro = idVaiTro; }
 

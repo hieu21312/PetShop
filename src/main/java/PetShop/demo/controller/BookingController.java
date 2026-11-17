@@ -19,7 +19,6 @@ import java.util.List;
 
 @Controller
 public class BookingController {
-
     @Autowired
     private BookingService bookingService;
 
@@ -29,7 +28,6 @@ public class BookingController {
     @Autowired
     private AuthService authService;
 
-    // Hiển thị form đặt lịch cho một dịch vụ
     @GetMapping("/DatLich")
     public String showBookingForm(@RequestParam Integer maDV, Model model, HttpSession session) {
         PetService service = petServiceRepository.findById(maDV).orElse(null);
@@ -38,7 +36,6 @@ public class BookingController {
         model.addAttribute("service", service);
         model.addAttribute("booking", new Booking());
 
-        // Nếu đã đăng nhập, tự động điền thông tin khách hàng
         if (authService.isLoggedIn(session)) {
             String tenKH = (String) session.getAttribute("tenKH");
             String email = (String) session.getAttribute("email");
@@ -48,7 +45,6 @@ public class BookingController {
         return "booking-form";
     }
 
-    // Xử lý đặt lịch
     @PostMapping("/DatLich")
     public String placeBooking(@ModelAttribute Booking booking,
                                @RequestParam Integer maDV,
@@ -60,7 +56,6 @@ public class BookingController {
                                @RequestParam(required = false) String ghiChu,
                                HttpSession session,
                                RedirectAttributes ra) {
-        // Kiểm tra ngày giờ hợp lệ (không được đặt quá khứ)
         LocalDate date = LocalDate.parse(ngayDat);
         LocalTime time = LocalTime.parse(gioDat);
         if (date.isBefore(LocalDate.now()) ||
@@ -69,7 +64,6 @@ public class BookingController {
             return "redirect:/DatLich?maDV=" + maDV;
         }
 
-        // Kiểm tra khung giờ còn chỗ không (tối đa 3 khách/ca)
         if (!bookingService.isSlotAvailable(date, time)) {
             ra.addFlashAttribute("error", "Khung giờ này đã kín lịch (tối đa 3 khách/ca). Vui lòng chọn khung giờ khác.");
             return "redirect:/DatLich?maDV=" + maDV;
@@ -84,11 +78,9 @@ public class BookingController {
         booking.setGhiChu(ghiChu);
         booking.setTrangThaiThanhToan("Chưa thanh toán");
 
-        // Nếu khách hàng đã đăng nhập, lưu mã KH
         Integer maKH = (Integer) session.getAttribute("maKH");
         if (maKH != null) booking.setMaKH(maKH);
 
-        // Lưu SĐT vào session để khách vãng lai tự động xem lại lịch hẹn ở trang /LichSuDatLich
         if (soDienThoai != null && !soDienThoai.isBlank()) {
             session.setAttribute("bookingPhone", soDienThoai.trim());
         }
@@ -101,7 +93,6 @@ public class BookingController {
         return "redirect:/LichSuDatLich";
     }
 
-    // KHACH HANG: Xem lịch sử đặt lịch cá nhân (Hỗ trợ cả Đã đăng nhập & Khách vãng lai qua SĐT)
     @GetMapping({"/LichSuDatLich", "/MyBookings"})
     public String myBookings(@RequestParam(required = false) String searchPhone, Model model, HttpSession session) {
         Integer maKH = (Integer) session.getAttribute("maKH");
@@ -123,7 +114,6 @@ public class BookingController {
         return "my-bookings";
     }
 
-    // KHACH HANG: Hủy lịch hẹn (khi còn ở trạng thái Chờ xác nhận)
     @PostMapping("/DatLich/Huy/{id}")
     public String cancelBooking(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
         Integer maKH = (Integer) session.getAttribute("maKH");
@@ -151,7 +141,6 @@ public class BookingController {
     @Autowired
     private EmployeeService employeeService;
 
-    // ADMIN: Xem danh sách lịch đặt (Hỗ trợ lọc trạng thái)
     @GetMapping("/admin/bookings")
     public String listBookings(@RequestParam(value = "status", required = false, defaultValue = "all") String status,
                                Model model, HttpSession session) {
@@ -166,7 +155,6 @@ public class BookingController {
         return "admin/bookings";
     }
 
-    // ADMIN: Cập nhật trạng thái lịch đặt
     @PostMapping("/admin/bookings/updateStatus")
     public String updateStatus(@RequestParam Integer id, @RequestParam String status, HttpSession session, RedirectAttributes ra) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -175,7 +163,6 @@ public class BookingController {
         return "redirect:/admin/bookings";
     }
 
-    // ADMIN: Gán Bác sĩ / Nhân viên phụ trách
     @PostMapping("/admin/bookings/assignStaff")
     public String assignStaff(@RequestParam Integer id, @RequestParam(required = false) Integer maNV, HttpSession session, RedirectAttributes ra) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -195,7 +182,6 @@ public class BookingController {
         return "redirect:/admin/bookings";
     }
 
-    // ADMIN: Xóa lịch đặt
     @GetMapping("/admin/bookings/delete/{id}")
     public String deleteBooking(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

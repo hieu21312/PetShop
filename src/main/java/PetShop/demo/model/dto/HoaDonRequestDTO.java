@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class HoaDonRequestDTO {
-
     @JsonProperty("maKH")
     @JsonAlias({"MaKH", "ma_kh", "customerId"})
     private Integer maKH;

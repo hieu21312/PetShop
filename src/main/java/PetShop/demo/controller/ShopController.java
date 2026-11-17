@@ -16,14 +16,12 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ShopController {
-
     @Autowired
     private ProductService productService;
 
     @Autowired
     private PetServiceRepository petServiceRepository;
 
-    // Trang chủ sản phẩm (hiển thị danh sách theo loại, tìm kiếm và sắp xếp)
     @GetMapping("/SanPham")
     public String shop(@RequestParam(required = false) String loai,
                        @RequestParam(required = false) String searchString,
@@ -31,7 +29,6 @@ public class ShopController {
                        Model model) {
         List<Product> allProducts = productService.getAllProducts();
 
-        // Tìm kiếm nâng cao (bỏ dấu, nhiều từ khóa)
         if (searchString != null && !searchString.isEmpty()) {
             String keyword = removeVietnamese(searchString).toLowerCase();
             String[] words = keyword.split(" ");
@@ -46,20 +43,16 @@ public class ShopController {
                     .collect(Collectors.toList());
         }
 
-        // Lọc theo danh mục (Chó, Mèo, Phụ kiện...)
         if (loai != null && !loai.isEmpty()) {
             allProducts = filterByCategory(allProducts, loai);
         }
 
-        // Sắp xếp theo giá
         if ("asc".equals(sort)) {
             allProducts.sort(Comparator.comparing(Product::getGiaBan));
         } else if ("desc".equals(sort)) {
             allProducts.sort(Comparator.comparing(Product::getGiaBan).reversed());
         }
-        // sort = default thì giữ nguyên thứ tự (không sắp xếp)
 
-        // Phân loại sản phẩm
         List<Product> pets = allProducts.stream()
                 .filter(p -> "Pet".equals(p.getLoaiSanPham()))
                 .collect(Collectors.toList());
@@ -75,12 +68,11 @@ public class ShopController {
         model.addAttribute("services", services);
         model.addAttribute("currentCategory", loai);
         model.addAttribute("searchString", searchString);
-        model.addAttribute("sort", sort); // gửi giá trị sort xuống view để active menu
+        model.addAttribute("sort", sort);
 
         return "shop";
     }
 
-    // Trang dịch vụ riêng
     @GetMapping("/DichVu")
     public String dichVu(Model model) {
         List<PetService> services = petServiceRepository.findAll();
@@ -88,13 +80,11 @@ public class ShopController {
         return "DichVu";
     }
 
-    // Trang giới thiệu
     @GetMapping("/About")
     public String about() {
         return "about";
     }
 
-    // Trang liên hệ
     @GetMapping("/Contact")
     public String contact() {
         return "contact";

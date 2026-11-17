@@ -15,7 +15,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/employees")
 public class AdminEmployeeController {
-
     @Autowired
     private EmployeeRepository employeeRepository;
 
@@ -25,7 +24,6 @@ public class AdminEmployeeController {
     @Autowired
     private AuthService authService;
 
-    // Danh sách nhân viên
     @GetMapping
     public String listEmployees(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -34,7 +32,6 @@ public class AdminEmployeeController {
         return "admin/employees";
     }
 
-    // Form thêm nhân viên
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -43,18 +40,16 @@ public class AdminEmployeeController {
         return "admin/employee-form";
     }
 
-    // Xử lý thêm nhân viên
     @PostMapping("/create")
     public String createEmployee(@ModelAttribute Employee employee,
                                  @RequestParam String password,
                                  HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
-        employee.setMatKhau(password); // plain text
+        employee.setMatKhau(password);
         employeeRepository.save(employee);
         return "redirect:/admin/employees";
     }
 
-    // Form sửa nhân viên (chỉ sửa vai trò, tên, giới tính,...)
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -65,7 +60,6 @@ public class AdminEmployeeController {
         return "admin/employee-form";
     }
 
-    // Xử lý sửa nhân viên
     @PostMapping("/edit/{id}")
     public String updateEmployee(@PathVariable Integer id,
                                  @ModelAttribute Employee updatedEmployee,
@@ -85,7 +79,6 @@ public class AdminEmployeeController {
         return "redirect:/admin/employees";
     }
 
-    // Xóa nhân viên
     @GetMapping("/delete/{id}")
     public String deleteEmployee(@PathVariable Integer id, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

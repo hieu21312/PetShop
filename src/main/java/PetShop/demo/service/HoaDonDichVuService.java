@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Service
 public class HoaDonDichVuService {
-
     @Autowired
     private HoaDonDichVuRepository hoaDonDichVuRepository;
 
@@ -39,9 +38,6 @@ public class HoaDonDichVuService {
     @Autowired
     private MembershipService membershipService;
 
-    /**
-     * Logic 1: Tạo hóa đơn dịch vụ mới với trạng thái mặc định là 'ChuaThanhToan'
-     */
     @Transactional
     public HoaDonDichVu createHoaDon(HoaDonDichVu hoaDon) {
         if (hoaDon == null) {
@@ -61,18 +57,12 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.save(hoaDon);
     }
 
-    /**
-     * Logic 1 (Overload tiện lợi): Tạo hóa đơn dịch vụ mới theo các tham số cơ bản
-     */
     @Transactional
     public HoaDonDichVu createHoaDon(Integer maKH, Integer maNV, BigDecimal tongTien,
                                      String phuongThucThanhToan, String ghiChu) {
         return createHoaDon(maKH, maNV, tongTien, phuongThucThanhToan, ghiChu, null, null);
     }
 
-    /**
-     * Logic 1 (Mở rộng): Tạo hóa đơn có liên kết trực tiếp tới Mã phiếu chăm sóc hoặc Mã đặt lịch
-     */
     @Transactional
     public HoaDonDichVu createHoaDon(Integer maKH, Integer maNV, BigDecimal tongTien,
                                      String phuongThucThanhToan, String ghiChu,
@@ -91,9 +81,6 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.save(hoaDon);
     }
 
-    /**
-     * Logic 1 (Nâng cao): Tạo hóa đơn kèm theo danh sách chi tiết các dịch vụ sử dụng
-     */
     @Transactional
     public HoaDonDichVu createHoaDonWithDetails(Integer maKH, Integer maNV, String phuongThucThanhToan,
                                                 String ghiChu, List<ChiTietHoaDonDichVu> chiTiets) {
@@ -131,19 +118,11 @@ public class HoaDonDichVuService {
         return savedHoaDon;
     }
 
-    /**
-     * Logic 2: Cập nhật trạng thái thành 'DaThanhToan' sau khi có xác nhận
-     * Tự động đồng bộ sang Phiếu dịch vụ hoặc Lịch đặt gốc!
-     */
     @Transactional
     public HoaDonDichVu xacNhanThanhToan(Integer maHDDV) {
         return xacNhanThanhToan(maHDDV, null);
     }
 
-    /**
-     * Logic 2 (Overload): Cập nhật trạng thái thành 'DaThanhToan' kèm cập nhật phương thức thanh toán
-     * Đồng thời tự động cập nhật phiếu chăm sóc / lịch đặt thành "Đã thanh toán" và cộng điểm thành viên.
-     */
     @Transactional
     public HoaDonDichVu xacNhanThanhToan(Integer maHDDV, String phuongThucThanhToan) {
         if (maHDDV == null) {
@@ -158,7 +137,6 @@ public class HoaDonDichVuService {
             hoaDon.setPhuongThucThanhToan(phuongThucThanhToan.trim());
         }
 
-        // Tự động đồng bộ trạng thái sang Phiếu dịch vụ chăm sóc gốc nếu có
         if (hoaDon.getMaPhieuDV() != null) {
             phieuRepository.findById(hoaDon.getMaPhieuDV()).ifPresent(ticket -> {
                 ticket.setTrangThaiThanhToan("Đã thanh toán");
@@ -170,7 +148,6 @@ public class HoaDonDichVuService {
             });
         }
 
-        // Tự động đồng bộ trạng thái sang Lịch đặt dịch vụ gốc nếu có
         if (hoaDon.getMaDatLich() != null) {
             bookingRepository.findById(hoaDon.getMaDatLich()).ifPresent(b -> {
                 b.setTrangThai("Đã thanh toán");
@@ -182,9 +159,6 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.save(hoaDon);
     }
 
-    /**
-     * Cập nhật trạng thái tùy chỉnh cho hóa đơn dịch vụ
-     */
     @Transactional
     public HoaDonDichVu capNhatTrangThai(Integer maHDDV, String trangThai) {
         if (maHDDV == null) {
@@ -198,16 +172,10 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.save(hoaDon);
     }
 
-    /**
-     * Tra cứu hóa đơn theo ID
-     */
     public Optional<HoaDonDichVu> getHoaDonById(Integer maHDDV) {
         return hoaDonDichVuRepository.findById(maHDDV);
     }
 
-    /**
-     * Lấy toàn bộ danh sách hóa đơn theo thứ tự mới nhất
-     */
     public List<HoaDonDichVu> getAllHoaDons() {
         return hoaDonDichVuRepository.findAllByOrderByNgaySuDungDesc();
     }
@@ -220,14 +188,9 @@ public class HoaDonDichVuService {
         return hoaDonDichVuRepository.findByTrangThaiOrderByNgaySuDungDesc(trangThai);
     }
 
-    /**
-     * THÔNG SUỐT DỊCH VỤ: Lấy danh sách toàn bộ dịch vụ đã được Bác sĩ hoặc Nhân viên chăm sóc
-     * xác nhận hoàn thành nhưng chưa thanh toán, sẵn sàng chuyển qua cho Thu ngân thanh toán.
-     */
     public List<DichVuChoThanhToanDTO> getDanhSachDichVuChoThanhToan() {
         List<DichVuChoThanhToanDTO> list = new ArrayList<>();
 
-        // 1. Phiếu dịch vụ chăm sóc tại quầy đã hoàn thành nhưng chưa thanh toán
         List<PhieuDichVuChamSoc> tickets = phieuRepository.findCompletedAwaitingPayment();
         for (PhieuDichVuChamSoc t : tickets) {
             DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
@@ -276,7 +239,6 @@ public class HoaDonDichVuService {
                 dto.setThoiGian(t.getNgayTiepNhan().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
             }
 
-            // Chi tiết dịch vụ
             List<ChiTietDichVuChamSoc> ctdvs = chiTietDichVuChamSocRepository.findByMaPhieuDV(t.getMaPhieuDV());
             if (ctdvs != null && !ctdvs.isEmpty()) {
                 for (ChiTietDichVuChamSoc c : ctdvs) {
@@ -299,7 +261,6 @@ public class HoaDonDichVuService {
             list.add(dto);
         }
 
-        // 2. Lịch đặt dịch vụ online đã được bác sĩ / nhân viên xác nhận hoàn thành nhưng chưa thanh toán
         List<Booking> bookings = bookingRepository.findCompletedAwaitingPayment();
         for (Booking b : bookings) {
             DichVuChoThanhToanDTO dto = new DichVuChoThanhToanDTO();
@@ -352,17 +313,12 @@ public class HoaDonDichVuService {
         return list;
     }
 
-    /**
-     * THÔNG SUỐT DỊCH VỤ: Tra cứu nhanh một mã dịch vụ (theo số phiếu PDV-... hoặc mã đặt lịch BK-...)
-     * để thu ngân có thể quét/gõ mã và tải dữ liệu lên thanh toán tự động ngay tức thì.
-     */
     public Optional<DichVuChoThanhToanDTO> traCuuDichVuTheoMa(String rawCode) {
         if (rawCode == null || rawCode.trim().isEmpty()) {
             return Optional.empty();
         }
         String code = rawCode.trim();
 
-        // 1. Kiểm tra Phiếu dịch vụ chăm sóc theo số phiếu
         Optional<PhieuDichVuChamSoc> ticketOpt = phieuRepository.findBySoPhieuIgnoreCase(code);
         if (ticketOpt.isEmpty()) {
             ticketOpt = phieuRepository.findBySoPhieu(code);
@@ -438,7 +394,6 @@ public class HoaDonDichVuService {
             return Optional.of(dto);
         }
 
-        // 2. Kiểm tra Booking theo mã
         Integer bookingId = null;
         if (code.toUpperCase().startsWith("BK-")) {
             try { bookingId = Integer.parseInt(code.substring(3)); } catch (Exception ignored) {}

@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 @RequestMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class AuthApiController {
-
     @Autowired
     private AuthService authService;
 
@@ -80,7 +79,6 @@ public class AuthApiController {
     @Autowired
     private PetShop.demo.repository.EmployeeRepository employeeRepository;
 
-    // Đăng nhập
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
@@ -94,24 +92,19 @@ public class AuthApiController {
         String pwd = password.trim();
         String hashedPwd = authService.hashPassword(pwd);
 
-        // 1. Kiểm tra tài khoản Khách hàng
         Optional<Customer> customerOpt = customerRepository.findByEmail(input);
         if (customerOpt.isEmpty()) {
             customerOpt = customerRepository.findByDienThoai(input);
         }
 
-        // 2. Kiểm tra tài khoản Nhân viên / Admin
         Optional<PetShop.demo.model.enity.Employee> empOpt = Optional.empty();
 
-        // 2a. Nếu nhập số ID nhân viên (MaNV)
         try {
             int maNV = Integer.parseInt(input);
             empOpt = employeeRepository.findById(maNV);
         } catch (NumberFormatException ignored) {}
 
-        // 2b. Nếu nhập "admin"
         if (empOpt.isEmpty() && "admin".equalsIgnoreCase(input)) {
-            // Tìm nhân viên vai trò Admin hoặc ID 1
             empOpt = employeeRepository.findById(1);
             if (empOpt.isEmpty()) {
                 var admins = employeeRepository.findByVaiTro(1);
@@ -119,18 +112,15 @@ public class AuthApiController {
             }
         }
 
-        // 2c. Tìm theo email nhân viên
         if (empOpt.isEmpty()) {
             empOpt = employeeRepository.findFirstByEmail(input);
         }
 
-        // Nếu không tìm thấy cả tài khoản khách hàng lẫn nhân viên
         if (customerOpt.isEmpty() && empOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("success", false, "message", "Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!"));
         }
 
-        // Xử lý xác thực Khách hàng
         if (customerOpt.isPresent()) {
             Customer c = customerOpt.get();
             boolean custPwdMatch = pwd.equals(c.getMatKhau()) || (c.getMatKhau() != null && c.getMatKhau().equalsIgnoreCase(hashedPwd));
@@ -161,7 +151,6 @@ public class AuthApiController {
             }
         }
 
-        // Xử lý xác thực Nhân viên / Admin
         if (empOpt.isPresent()) {
             PetShop.demo.model.enity.Employee emp = empOpt.get();
             boolean pwdMatch = pwd.equals(emp.getMatKhau())
@@ -197,12 +186,10 @@ public class AuthApiController {
             }
         }
 
-        // Mật khẩu không khớp hoặc thông tin không chính xác
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("success", false, "message", "Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại!"));
     }
 
-    // Đăng ký
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> payload) {
         String tenKH = payload.get("tenKH");
@@ -233,7 +220,6 @@ public class AuthApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Đăng ký tài khoản thành công!"));
     }
 
-    // Lấy thông tin cá nhân
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestParam Integer maKH) {
         Optional<Customer> customerOpt = customerRepository.findById(maKH);

@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface HoaDonDichVuRepository extends JpaRepository<HoaDonDichVu, Integer> {
-
     List<HoaDonDichVu> findByTrangThai(String trangThai);
 
     List<HoaDonDichVu> findByTrangThaiOrderByNgaySuDungDesc(String trangThai);

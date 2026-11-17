@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/QLNhanVien")
 public class EmployeeController {
-
     @Autowired
     private EmployeeRepository employeeRepository;
 

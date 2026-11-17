@@ -19,7 +19,6 @@ import java.util.*;
 @RequestMapping(value = "/api/staff", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class StaffApiController {
-
     @Autowired
     private BookingService bookingService;
 
@@ -35,7 +34,6 @@ public class StaffApiController {
     @Autowired
     private ThongBaoService thongBaoService;
 
-    // Lấy danh sách công việc / ca làm việc của nhân viên
     @GetMapping("/tasks")
     public ResponseEntity<?> getMyTasks(@RequestParam Integer maNV) {
         List<Booking> bookings = bookingService.getBookingsByStaff(maNV);
@@ -95,7 +93,6 @@ public class StaffApiController {
         return ResponseEntity.ok(response);
     }
 
-    // Cập nhật tiến độ lịch hẹn dịch vụ
     @PostMapping("/tasks/update-booking")
     public ResponseEntity<?> updateBookingProgress(@RequestBody Map<String, Object> payload) {
         Integer id = payload.get("id") != null ? Integer.parseInt(payload.get("id").toString()) : null;
@@ -115,7 +112,6 @@ public class StaffApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật tiến độ lịch hẹn #" + id + " thành công"));
     }
 
-    // Cập nhật tiến độ phiếu dịch vụ chăm sóc thú cưng
     @PostMapping("/tasks/update-ticket")
     public ResponseEntity<?> updateTicketProgress(@RequestBody Map<String, Object> payload) {
         Integer id = payload.get("id") != null ? Integer.parseInt(payload.get("id").toString()) : null;
@@ -142,7 +138,6 @@ public class StaffApiController {
         }
         phieuRepository.save(ticket);
 
-        // Gửi thông báo cho chủ nuôi nếu đã liên kết
         if (ticket.getChuNuoi() != null && ticket.getChuNuoi().getMaKH() != null) {
             String petName = ticket.getThuCung() != null ? ticket.getThuCung().getTenThuCung() : "Bé cưng";
             String msg = "Dịch vụ của bé " + petName + " (" + ticket.getSoPhieu() + ") đã chuyển sang trạng thái: " + trangThaiDichVu;

@@ -29,15 +29,12 @@ public class Review {
     @Column(name = "DaDuyet")
     private Boolean daDuyet = false;
 
-    // Thêm quan hệ ManyToOne với Product
     @ManyToOne
     @JoinColumn(name = "MaSP", insertable = false, updatable = false)
     private Product product;
 
-    // Constructors
     public Review() {}
 
-    // Getters and Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

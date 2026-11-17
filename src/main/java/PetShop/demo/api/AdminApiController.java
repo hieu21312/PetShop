@@ -19,7 +19,6 @@ import java.util.*;
 @RequestMapping(value = "/api/admin", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class AdminApiController {
-
     @Autowired
     private AdminService adminService;
 
@@ -56,14 +55,12 @@ public class AdminApiController {
     @Autowired
     private PetShop.demo.service.RevenueReportService revenueReportService;
 
-    // 1. Dashboard tổng quan
     @GetMapping("/dashboard")
     public ResponseEntity<?> getDashboard() {
         DashboardDTO dto = adminService.getDashboardData();
         return ResponseEntity.ok(dto);
     }
 
-    // Báo cáo doanh thu theo ngày, tuần, tháng, năm
     @GetMapping("/revenue-report")
     public ResponseEntity<?> getRevenueReport(
             @RequestParam(defaultValue = "day") String type,
@@ -76,7 +73,6 @@ public class AdminApiController {
         return ResponseEntity.ok(report);
     }
 
-    // 2. Danh sách toàn bộ đơn hàng
     @GetMapping("/orders")
     public ResponseEntity<?> getOrders() {
         List<Order> orders = orderRepository.findAllByOrderByNgayLapDesc();
@@ -105,7 +101,6 @@ public class AdminApiController {
         return ResponseEntity.ok(list);
     }
 
-    // 3. Cập nhật trạng thái đơn hàng
     @PostMapping("/orders/update-status")
     public ResponseEntity<?> updateOrderStatus(@RequestBody Map<String, Object> payload) {
         Integer maHD = payload.get("maHD") != null ? Integer.parseInt(payload.get("maHD").toString()) : null;
@@ -132,17 +127,14 @@ public class AdminApiController {
         }
         orderRepository.save(order);
 
-        // Khôi phục kho & voucher nếu đơn hủy
         if (tinhTrang != null && tinhTrang == 5 && (oldStatus == null || oldStatus != 5)) {
             orderService.cancelOrderAndRestoreStock(order);
         }
 
-        // Tích điểm nếu đã thanh toán
         if (Boolean.TRUE.equals(order.getDaThanhToan())) {
             membershipService.processOrderPoints(order);
         }
 
-        // Gửi thông báo cho khách
         if (order.getMaKH() != null && tinhTrang != null && !tinhTrang.equals(oldStatus)) {
             String statusText = "đã được cập nhật";
             if (tinhTrang == 2) statusText = "đã được XÁC NHẬN";
@@ -158,7 +150,6 @@ public class AdminApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật đơn hàng #" + maHD + " thành công"));
     }
 
-    // 4. Danh sách toàn bộ phiếu dịch vụ chăm sóc thú cưng
     @GetMapping("/care-tickets")
     public ResponseEntity<?> getCareTickets() {
         List<PhieuDichVuChamSoc> tickets = phieuRepository.findByOrderByNgayTiepNhanDesc();
@@ -200,7 +191,6 @@ public class AdminApiController {
         return ResponseEntity.ok(list);
     }
 
-    // 5. Phân công nhân viên thực hiện phiếu chăm sóc
     @PostMapping("/care-tickets/assign")
     public ResponseEntity<?> assignCareTicketStaff(@RequestBody Map<String, Object> payload) {
         Integer maPhieuDV = payload.get("maPhieuDV") != null ? Integer.parseInt(payload.get("maPhieuDV").toString()) : null;
@@ -220,7 +210,6 @@ public class AdminApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Phân công nhân viên thành công"));
     }
 
-    // 6. Danh sách toàn bộ lịch hẹn
     @GetMapping("/bookings")
     public ResponseEntity<?> getBookings() {
         List<Booking> bookings = bookingRepository.findAllByOrderByNgayTaoDesc();
@@ -251,7 +240,6 @@ public class AdminApiController {
         return ResponseEntity.ok(list);
     }
 
-    // 7. Phân công nhân viên phụ trách lịch hẹn
     @PostMapping("/bookings/assign")
     public ResponseEntity<?> assignBookingStaff(@RequestBody Map<String, Object> payload) {
         Integer maDatLich = payload.get("maDatLich") != null ? Integer.parseInt(payload.get("maDatLich").toString()) : null;
@@ -265,7 +253,6 @@ public class AdminApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Phân công nhân sự cho lịch hẹn thành công"));
     }
 
-    // 8. Cập nhật trạng thái lịch hẹn
     @PostMapping("/bookings/update-status")
     public ResponseEntity<?> updateBookingStatus(@RequestBody Map<String, Object> payload) {
         Integer maDatLich = payload.get("maDatLich") != null ? Integer.parseInt(payload.get("maDatLich").toString()) : null;
@@ -279,7 +266,6 @@ public class AdminApiController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật trạng thái lịch hẹn thành công"));
     }
 
-    // 9. Danh sách nhân sự đang làm việc (để phân công)
     @GetMapping("/staff")
     public ResponseEntity<?> getStaffList() {
         List<Employee> allStaff = employeeRepository.findAll();

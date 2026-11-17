@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "tblChiTietHoaDonDichVu")
 public class ChiTietHoaDonDichVu {
-
     @EmbeddedId
     private ChiTietHoaDonDichVuId id;
 

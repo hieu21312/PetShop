@@ -16,7 +16,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/owners")
 public class AdminChuNuoiController {
-
     @Autowired
     private ChuNuoiRepository chuNuoiRepository;
 
@@ -29,7 +28,6 @@ public class AdminChuNuoiController {
     @Autowired
     private AuthService authService;
 
-    // 1. Danh sách chủ nuôi
     @GetMapping
     public String listOwners(@RequestParam(value = "keyword", required = false) String keyword,
                              Model model, HttpSession session) {
@@ -46,7 +44,6 @@ public class AdminChuNuoiController {
         return "admin/owners";
     }
 
-    // 2. Form thêm mới chủ nuôi
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -54,7 +51,6 @@ public class AdminChuNuoiController {
         return "admin/owner-form";
     }
 
-    // 3. Xử lý thêm mới (Tự động liên kết tài khoản Khách hàng nếu khớp SĐT hoặc Email)
     @PostMapping("/create")
     public String createOwner(@ModelAttribute("owner") ChuNuoi owner, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -68,7 +64,6 @@ public class AdminChuNuoiController {
         return "redirect:/admin/owners";
     }
 
-    // 4. Form sửa chủ nuôi
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -78,7 +73,6 @@ public class AdminChuNuoiController {
         return "admin/owner-form";
     }
 
-    // 5. Xử lý cập nhật (Tự động cập nhật liên kết MaKH)
     @PostMapping("/edit/{id}")
     public String updateOwner(@PathVariable("id") Integer id, @ModelAttribute("owner") ChuNuoi ownerForm, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -107,7 +101,6 @@ public class AdminChuNuoiController {
         return "redirect:/admin/owners";
     }
 
-    // 6. Xóa chủ nuôi
     @GetMapping("/delete/{id}")
     public String deleteOwner(@PathVariable("id") Integer id, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -115,7 +108,6 @@ public class AdminChuNuoiController {
         return "redirect:/admin/owners";
     }
 
-    // 7. Xem danh sách thú cưng của chủ nuôi
     @GetMapping("/{id}/pets")
     public String viewOwnerPets(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

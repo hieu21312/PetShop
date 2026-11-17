@@ -6,7 +6,6 @@ import java.util.Objects;
 
 @Embeddable
 public class ChiTietHoaDonDichVuId implements Serializable {
-
     private Integer maHDDV;
     private Integer maDV;
 

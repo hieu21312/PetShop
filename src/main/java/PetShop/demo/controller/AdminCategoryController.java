@@ -13,14 +13,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
-
     @Autowired
     private CategoryRepository categoryRepository;
 
     @Autowired
     private AuthService authService;
 
-    // Danh sách danh mục
     @GetMapping
     public String listCategories(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -28,7 +26,6 @@ public class AdminCategoryController {
         return "admin/categories";
     }
 
-    // Form thêm mới
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -36,7 +33,6 @@ public class AdminCategoryController {
         return "admin/category-form";
     }
 
-    // Xử lý thêm
     @PostMapping("/create")
     public String createCategory(@ModelAttribute Category category,
                                  RedirectAttributes ra,
@@ -47,7 +43,6 @@ public class AdminCategoryController {
         return "redirect:/admin/categories";
     }
 
-    // Form sửa
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -57,7 +52,6 @@ public class AdminCategoryController {
         return "admin/category-form";
     }
 
-    // Xử lý sửa
     @PostMapping("/edit/{id}")
     public String updateCategory(@PathVariable Integer id,
                                  @ModelAttribute Category category,
@@ -73,13 +67,12 @@ public class AdminCategoryController {
         return "redirect:/admin/categories";
     }
 
-    // Xóa
     @GetMapping("/delete/{id}")
     public String deleteCategory(@PathVariable Integer id,
                                  RedirectAttributes ra,
                                  HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
-        // Kiểm tra xem danh mục có sản phẩm nào không? Nếu có, không cho xóa
+
         Category cat = categoryRepository.findById(id).orElse(null);
         if (cat != null && !cat.getProducts().isEmpty()) {
             ra.addFlashAttribute("error", "Danh mục đang có sản phẩm, không thể xóa!");

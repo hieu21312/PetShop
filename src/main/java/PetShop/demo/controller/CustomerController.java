@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/QLKhachHang")
 public class CustomerController {
-
     @Autowired
     private CustomerRepository customerRepository;
 

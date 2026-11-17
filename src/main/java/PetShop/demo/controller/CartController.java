@@ -23,7 +23,6 @@ import java.util.Map;
 
 @Controller
 public class CartController {
-
     @Autowired
     private CartService cartService;
 
@@ -51,7 +50,6 @@ public class CartController {
     @Autowired
     private PetShop.demo.service.ThongBaoService thongBaoService;
 
-    // Thêm vào giỏ hàng
     @GetMapping("/ThemGioHang")
     public Object addToCart(@RequestParam int iMaSP,
                             @RequestParam(required = false) String strURL,
@@ -63,7 +61,6 @@ public class CartController {
         String referer = request.getHeader("Referer");
         String targetUrl = (strURL != null && !strURL.isBlank()) ? strURL : (referer != null && !referer.isBlank() ? referer : "/GioHang");
 
-        // Kiểm tra đăng nhập
         if (session.getAttribute("role") == null) {
             if (isAjax) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -72,7 +69,6 @@ public class CartController {
             return "redirect:/DangNhap?returnUrl=" + targetUrl;
         }
 
-        // Thêm vào giỏ
         cartService.addToCart(iMaSP, session);
 
         if (isAjax) {
@@ -84,7 +80,6 @@ public class CartController {
         return "redirect:" + targetUrl;
     }
 
-    // Xem giỏ hàng
     @GetMapping("/GioHang")
     public String viewCart(@RequestParam(value = "tab", required = false, defaultValue = "products") String activeTab,
                            Model model, HttpSession session) {
@@ -95,11 +90,9 @@ public class CartController {
 
         Integer customerId = (Integer) session.getAttribute("maKH");
         if (customerId != null) {
-            // Load danh sách lịch đặt & phiếu dịch vụ của khách hàng
             model.addAttribute("userBookings", bookingService.getBookingsByCustomer(customerId));
             model.addAttribute("userCareTickets", phieuDichVuChamSocRepository.findByMaChuNuoi(customerId));
 
-            // Populate thông báo vào Session để header.html hiển thị
             session.setAttribute("unreadNotifications", thongBaoService.demThongBaoChuaDoc(customerId));
             session.setAttribute("notificationList", thongBaoService.getThongBaoByCustomer(customerId));
         }
@@ -107,35 +100,30 @@ public class CartController {
         return "cart";
     }
 
-    // Xóa sản phẩm khỏi giỏ
     @GetMapping("/XoaGioHang")
     public String removeFromCart(@RequestParam int iMaSP, HttpSession session) {
         cartService.removeFromCart(iMaSP, session);
         return "redirect:/GioHang";
     }
 
-    // Tăng số lượng
     @GetMapping("/TangSoLuong")
     public String increaseQuantity(@RequestParam int iMaSP, HttpSession session) {
         cartService.updateQuantity(iMaSP, 1, session);
         return "redirect:/GioHang";
     }
 
-    // Giảm số lượng
     @GetMapping("/GiamSoLuong")
     public String decreaseQuantity(@RequestParam int iMaSP, HttpSession session) {
         cartService.updateQuantity(iMaSP, -1, session);
         return "redirect:/GioHang";
     }
 
-    // Partial view cho số lượng giỏ hàng (hiển thị trên header)
     @GetMapping("/GioHangPartial")
     @ResponseBody
     public String cartPartial(HttpSession session) {
         return String.valueOf(cartService.getTotalQuantity(session));
     }
 
-    // Trang thanh toán
     @GetMapping("/DatHang")
     public String checkoutPage(Model model, HttpSession session) {
         if (!authService.isLoggedIn(session)) {
@@ -156,7 +144,6 @@ public class CartController {
         BigDecimal tongSauGiamHang = tongTien.subtract(tienGiamHang);
         int diemTichDuKien = membershipService.calculatePoints(tongSauGiamHang);
 
-        // Cập nhật session nếu có thay đổi
         if (customer != null) {
             membershipService.updateSessionMembership(session, customer);
         }
@@ -174,7 +161,6 @@ public class CartController {
         return "checkout";
     }
 
-    // Kiểm tra mã giảm giá (AJAX)
     @PostMapping("/KiemTraMaGiamGia")
     @ResponseBody
     public Map<String, Object> checkVoucher(@RequestParam String maGiamGia, HttpSession session) {
@@ -208,7 +194,6 @@ public class CartController {
         return response;
     }
 
-    // Xử lý đặt hàng
     @PostMapping("/DatHang")
     public String placeOrder(@RequestParam String DiaChiGiaoHang,
                              @RequestParam(value = "HinhThucThanhToan", defaultValue = "COD") String hinhThuc,
@@ -217,7 +202,6 @@ public class CartController {
                              HttpSession session,
                              RedirectAttributes ra) {
         if (!authService.isLoggedIn(session)) return "redirect:/DangNhap";
-
 
         boolean daThanhToan = false;
 
@@ -241,7 +225,6 @@ public class CartController {
         }
     }
 
-    // Xác nhận đơn hàng thành công
     @GetMapping("/XacNhanDonHang")
     public String orderConfirmation(@ModelAttribute("orderId") Integer orderId,
                                     @ModelAttribute("hinhThuc") String hinhThuc,

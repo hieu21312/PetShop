@@ -38,16 +38,14 @@ public class Employee {
     private String anhDaiDien;
 
     @Column(name = "TrangThai")
-    private String trangThai; // 'Đang làm việc', 'Tạm nghỉ'
+    private String trangThai;
 
     @ManyToOne
     @JoinColumn(name = "VaiTro", insertable = false, updatable = false)
     private Role role;
 
-    // Constructors
     public Employee() {}
 
-    // Getters and Setters
     public Integer getMaNV() { return maNV; }
     public void setMaNV(Integer maNV) { this.maNV = maNV; }
 

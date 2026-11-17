@@ -19,8 +19,7 @@ import java.util.Optional;
 
 @Service
 public class MembershipService {
-
-    public static final BigDecimal BASE_UNIT = new BigDecimal("100000"); // 100.000VND = 1 Điểm
+    public static final BigDecimal BASE_UNIT = new BigDecimal("100000");
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -34,10 +33,6 @@ public class MembershipService {
     @Autowired
     private PhieuDichVuChamSocRepository phieuRepository;
 
-    /**
-     * Tính điểm tích lũy dựa trên số tiền thanh toán thực tế:
-     * Cứ mỗi 100.000VND = 1 điểm.
-     */
     public int calculatePoints(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             return 0;
@@ -45,13 +40,6 @@ public class MembershipService {
         return amount.divideToIntegralValue(BASE_UNIT).intValue();
     }
 
-    /**
-     * Xác định hạng thành viên theo số điểm tích lũy:
-     * - Dưới 50 điểm: Tiêu chuẩn
-     * - Từ 50 - 199 điểm: Thân thiết
-     * - Từ 200 - 499 điểm: VIP
-     * - Từ 500 điểm trở lên: VVIP
-     */
     public String determineTier(int points) {
         if (points >= 500) {
             return "VVIP";
@@ -64,13 +52,6 @@ public class MembershipService {
         }
     }
 
-    /**
-     * Lấy % giảm giá ưu đãi tương ứng với từng hạng:
-     * - Tiêu chuẩn: 0%
-     * - Thân thiết: 5%
-     * - VIP: 10%
-     * - VVIP: 15%
-     */
     public BigDecimal getDiscountPercentage(String tier) {
         if (tier == null) return BigDecimal.ZERO;
         String t = tier.trim().toUpperCase();
@@ -84,9 +65,6 @@ public class MembershipService {
         return BigDecimal.ZERO;
     }
 
-    /**
-     * Tính số tiền giảm giá ưu đãi theo hạng thành viên.
-     */
     public BigDecimal calculateTierDiscount(BigDecimal totalAmount, String tier) {
         if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) <= 0) {
             return BigDecimal.ZERO;
@@ -98,9 +76,6 @@ public class MembershipService {
         return totalAmount.multiply(pct).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Tích điểm và thăng hạng khi hoàn tất đơn hàng mua sản phẩm.
-     */
     @Transactional
     public void processOrderPoints(Order order) {
         if (order == null || Boolean.TRUE.equals(order.getDaCongDiem()) || !Boolean.TRUE.equals(order.getDaThanhToan())) {
@@ -118,7 +93,6 @@ public class MembershipService {
                 customer.setHangThanhVien(determineTier(newPoints));
                 customerRepository.save(customer);
 
-                // Đồng bộ sang bảng ChuNuoi nếu đã tồn tại chủ nuôi tương ứng
                 syncToChuNuoi(customer);
             }
         }
@@ -127,9 +101,6 @@ public class MembershipService {
         orderRepository.save(order);
     }
 
-    /**
-     * Tích điểm và thăng hạng khi hoàn tất/thanh toán phiếu dịch vụ chăm sóc.
-     */
     @Transactional
     public void processCareTicketPoints(PhieuDichVuChamSoc ticket) {
         if (ticket == null || Boolean.TRUE.equals(ticket.getDaCongDiem())) {
@@ -155,7 +126,6 @@ public class MembershipService {
                 owner.setLoaiChuNuoi(determineTier(newPoints));
                 chuNuoiRepository.save(owner);
 
-                // Đồng bộ sang tài khoản Customer nếu có liên kết
                 syncToCustomer(owner);
             }
         }
@@ -164,9 +134,6 @@ public class MembershipService {
         phieuRepository.save(ticket);
     }
 
-    /**
-     * Cập nhật thông tin hạng và điểm vào session sau khi đăng nhập hoặc sau khi mua sắm.
-     */
     public void updateSessionMembership(HttpSession session, Customer customer) {
         if (session != null && customer != null) {
             session.setAttribute("hangThanhVien", customer.getHangThanhVien());

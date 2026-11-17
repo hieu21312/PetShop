@@ -20,7 +20,6 @@ import org.springframework.http.MediaType;
 @RequestMapping(value = "/api/bookings", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class BookingApiController {
-
     @Autowired
     private BookingRepository bookingRepository;
 
@@ -33,7 +32,6 @@ public class BookingApiController {
     @Autowired
     private PetShop.demo.service.ThongBaoService thongBaoService;
 
-    // Lấy danh mục dịch vụ chăm sóc
     @GetMapping("/services")
     public ResponseEntity<?> getServices() {
         List<DichVuChamSoc> list = dichVuChamSocRepository.findAll();
@@ -49,7 +47,6 @@ public class BookingApiController {
         return ResponseEntity.ok(result);
     }
 
-    // Lấy lịch hẹn của khách hàng
     @GetMapping("/my")
     public ResponseEntity<?> getMyBookings(@RequestParam Integer maKH) {
         List<Booking> bookings = bookingService.getBookingsByCustomer(maKH);
@@ -72,7 +69,6 @@ public class BookingApiController {
         return ResponseEntity.ok(result);
     }
 
-    // Tạo lịch hẹn mới từ Mobile
     @PostMapping
     public ResponseEntity<?> createBooking(@RequestBody Map<String, Object> payload) {
         String tenKhachHang = (String) payload.get("tenKhachHang");

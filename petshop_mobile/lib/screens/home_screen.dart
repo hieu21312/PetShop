@@ -30,17 +30,15 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final currencyFormat = NumberFormat('#,###', 'vi_VN');
 
-  // Tab 0: Sản phẩm & Danh mục
   List<ProductModel> _products = [];
   List<CategoryModel> _categories = [];
   bool _isLoadingProducts = true;
-  int? _selectedCategoryId; // null = Tất cả
-  String? _selectedCategoryGroup; // null = Tất cả, 'cho' = Chó, 'meo' = Mèo, 'phukien' = Phụ kiện
+  int? _selectedCategoryId;
+  String? _selectedCategoryGroup;
   final _searchController = TextEditingController();
   bool _isSearching = false;
   int _unreadNotificationCount = 0;
 
-  // Tab 1: Dịch vụ & Đặt lịch
   List<ServiceModel> _services = [];
   ServiceModel? _selectedService;
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
@@ -52,11 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController? _autocompletePetController;
   bool _isBookingSubmitting = false;
 
-  // Tab 2: Lịch hẹn & Đơn hàng
   List<BookingModel> _myBookings = [];
   List<OrderModel> _myOrders = [];
   List<PetModel> _myPets = [];
-  
+
   late UserModel _currentUser;
 
   @override
@@ -144,17 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _loadHistory() async {
     if (_currentUser.maKH <= 0) {
-      
       return;
     }
-    
+
     final bookings = await ApiService.getMyBookings(_currentUser.maKH);
     final orders = await ApiService.getMyOrders(_currentUser.maKH);
     if (mounted) {
       setState(() {
         _myBookings = bookings;
         _myOrders = orders;
-        
+
       });
     }
   }
@@ -277,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         actions: [
           if (_currentIndex == 0) ...[
-            // 1. Kính lúp tìm kiếm
+
             IconButton(
               icon: Icon(_isSearching ? Icons.close : Icons.search),
               tooltip: _isSearching ? 'Đóng tìm kiếm' : 'Tìm kiếm',
@@ -291,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
             ),
-            // 2. Icon Chuông thông báo
+
             Badge.count(
               count: _unreadNotificationCount,
               isLabelVisible: _unreadNotificationCount > 0,
@@ -311,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            // 3. Icon Giỏ hàng
+
             ValueListenableBuilder<int>(
               valueListenable: CartService().cartCountNotifier,
               builder: (context, count, _) {
@@ -406,7 +402,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // TAB 2: HỒ SƠ THÚ CƯNG CỦA BẢN THÂN
   Widget _buildPetsTab() {
     return MyPetsScreen(
       currentUser: _currentUser,
@@ -423,11 +418,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // TAB 0: SẢN PHẨM & TÌM KIẾM
   Widget _buildProductsTab() {
     return Column(
       children: [
-        // Thanh hiển thị danh mục đang lọc (nếu đã chọn trong menu Drawer)
+
         if (_selectedCategoryGroup != null || _selectedCategoryId != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -491,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-        // Thanh thông báo từ khóa đang tìm kiếm
+
         if (_searchController.text.trim().isNotEmpty)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -518,7 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-        // Grid View
+
         Expanded(
           child: _isLoadingProducts
               ? const Center(child: CircularProgressIndicator(color: Color(0xFFE91E63)))
@@ -544,9 +538,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           const double spacing = 10.0;
                           final itemWidth = (availableWidth - (padding * 2) - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
 
-                          // Chiều cao ảnh cân đối theo chiều rộng thẻ
                           final imageHeight = (itemWidth * 0.72).clamp(100.0, 145.0);
-                          // Chiều cao phần thông tin chữ (tên 32 + khoảng cách 4 + giá/nút 30 + padding 12) = 78
+
                           const double infoHeight = 78.0;
                           final itemHeight = imageHeight + infoHeight;
                           final childAspectRatio = itemWidth / itemHeight;
@@ -586,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Ảnh sản phẩm
+
                                       SizedBox(
                                         height: imageHeight,
                                         width: double.infinity,
@@ -647,13 +640,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ],
                                         ),
                                       ),
-                                      // Thông tin sản phẩm
+
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            // Tên sản phẩm cố định chiều cao 32px (2 dòng)
+
                                             SizedBox(
                                               height: 32,
                                               child: Text(
@@ -669,7 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             ),
                                             const SizedBox(height: 4),
-                                            // Hàng giá tiền & nút Thêm vào giỏ hàng
+
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -743,7 +736,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // TAB 1: ĐẶT LỊCH HẸN DỊCH VỤ
   Widget _buildBookingTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -837,7 +829,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onChanged: (val) => setState(() => _selectedService = val),
                 ),
               const SizedBox(height: 16),
-              // Thông tin người đặt lịch
+
               Row(
                 children: [
                   Expanded(
@@ -870,13 +862,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Gợi ý khi nhập tên thú cưng (Autocomplete thông minh)
               Autocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   final query = textEditingValue.text.toLowerCase().trim();
                   final List<String> list = [];
 
-                  // 1. Gợi ý từ Hồ sơ thú cưng của khách hàng
                   for (final p in _myPets) {
                     final desc = p.giongLoai != null && p.giongLoai!.isNotEmpty
                         ? p.giongLoai!
@@ -890,7 +880,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   }
 
-                  // 2. Gợi ý các giống chó/mèo phổ biến
                   final commonBreeds = [
                     'Chó Poodle',
                     'Chó Corgi',
@@ -1181,7 +1170,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   void _showMyBookingsBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -1298,7 +1286,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // TAB 3: TÀI KHOẢN & HỘI VIÊN
   Widget _buildProfileTab() {
     final isVip = _currentUser.hangThanhVien.toUpperCase() == 'VIP';
     final isVvip = _currentUser.hangThanhVien.toUpperCase() == 'VVIP';
@@ -1341,7 +1328,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          // Membership Card
+
           Container(
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
@@ -1438,7 +1425,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // Card: Hồ sơ thú cưng của tôi
+
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             elevation: 1.5,
@@ -1702,12 +1689,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // DRAWER: DANH MỤC SẢN PHẨM (ẨN / HIỆN QUA MENU 3 GẠCH)
   Widget _buildCategoryDrawer() {
     return Drawer(
       child: Column(
         children: [
-          // Header Menu Drawer
+
           Container(
             width: double.infinity,
             padding: EdgeInsets.only(
@@ -1760,12 +1746,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          // Danh sách danh mục (Chó, Mèo, Phụ kiện, Dịch vụ giống bản web)
+
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                // 1. Tất cả sản phẩm
+
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1797,7 +1783,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // 2. Chó
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1825,7 +1810,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // 3. Mèo
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1853,7 +1837,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // 4. Thức ăn
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1881,7 +1864,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // 5. Phụ kiện
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1909,7 +1891,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // Menu Hồ sơ thú cưng
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   leading: Container(
@@ -1939,13 +1920,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
                   onTap: () {
-                    Navigator.pop(context); // Close drawer
+                    Navigator.pop(context);
                     setState(() => _currentIndex = 2);
                   },
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // Menu Lịch sử mua hàng
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   leading: Container(
@@ -1971,7 +1951,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
 
-                // 5. Dịch vụ (chuyển sang tab Đặt Lịch Dịch Vụ)
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                   title: Text(
@@ -1986,9 +1965,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   selected: _currentIndex == 1,
                   selectedTileColor: Colors.teal.shade50,
                   onTap: () {
-                    Navigator.pop(context); // Đóng menu drawer
+                    Navigator.pop(context);
                     setState(() {
-                      _currentIndex = 1; // Chuyển sang Tab 1: Đặt lịch dịch vụ
+                      _currentIndex = 1;
                     });
                   },
                 ),

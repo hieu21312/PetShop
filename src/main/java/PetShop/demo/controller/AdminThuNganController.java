@@ -31,7 +31,6 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/thu-ngan")
 public class AdminThuNganController {
-
     @Autowired
     private PetServiceRepository petServiceRepository;
 
@@ -62,46 +61,35 @@ public class AdminThuNganController {
     @Autowired
     private AuthService authService;
 
-    /**
-     * Màn hình Quầy Thu ngân - Bán dịch vụ & POS & Xác nhận đơn hàng online
-     */
     @GetMapping
     public String showCashierScreen(Model model, HttpSession session) {
-        // Kiểm tra quyền: Admin hoặc Thu ngân / Nhân viên bán hàng
         if (!authService.isLoggedIn(session) || (!authService.isAdmin(session) && !authService.isCashier(session))) {
             return authService.redirectUnauthorized(session);
         }
 
-        // Lấy danh sách dịch vụ đang cung cấp
         List<PetService> services = petServiceRepository.findAll();
         model.addAttribute("services", services);
 
-        // Lấy danh sách khách hàng để chọn nhanh
         List<Customer> customers = customerRepository.findAll();
         model.addAttribute("customers", customers);
 
-        // Lấy danh sách nhân viên phục vụ / thu ngân
         List<Employee> employees = employeeRepository.findAll();
         model.addAttribute("employees", employees);
 
-        // Lấy danh sách hóa đơn gần đây
         List<HoaDonDichVu> recentInvoices = hoaDonDichVuRepository.findAllByOrderByNgaySuDungDesc();
         if (recentInvoices.size() > 10) {
             recentInvoices = recentInvoices.subList(0, 10);
         }
         model.addAttribute("recentInvoices", recentInvoices);
 
-        // THÔNG SUỐT DỊCH VỤ: Danh sách dịch vụ bác sĩ/nhân viên chăm sóc đã hoàn thành chờ thu ngân thanh toán
         List<DichVuChoThanhToanDTO> pendingServices = hoaDonDichVuService.getDanhSachDichVuChoThanhToan();
         model.addAttribute("pendingServices", pendingServices);
         model.addAttribute("pendingCount", pendingServices.size());
 
-        // ĐƠN HÀNG ONLINE CHỜ XÁC NHẬN THANH TOÁN (Chuyển khoản BankTransfer / Đơn hàng mới)
         List<Order> pendingOrders = orderRepository.findPendingPaymentOrders();
         model.addAttribute("pendingOrders", pendingOrders);
         model.addAttribute("pendingOrdersCount", pendingOrders.size());
 
-        // Thông tin nhân viên hiện tại đang trực thu ngân
         Integer currentMaNV = (Integer) session.getAttribute("maNV");
         String currentTenNV = (String) session.getAttribute("tenNV");
         model.addAttribute("currentMaNV", currentMaNV);
@@ -110,10 +98,6 @@ public class AdminThuNganController {
         return "admin/thu-ngan";
     }
 
-    /**
-     * Xác nhận thanh toán đơn hàng online (Chuyển khoản / Đơn hàng chờ thanh toán)
-     * POST /admin/thu-ngan/don-hang/{id}/xac-nhan-thanh-toan
-     */
     @PostMapping("/don-hang/{id}/xac-nhan-thanh-toan")
     public String confirmOrderPayment(@PathVariable("id") Integer id,
                                       HttpSession session,
@@ -131,16 +115,14 @@ public class AdminThuNganController {
         Order order = orderOpt.get();
         order.setDaThanhToan(true);
         if (order.getTinhTrang() == null || order.getTinhTrang() == 1) {
-            order.setTinhTrang(2); // 2 = Đã xác nhận / Chuẩn bị giao hàng
+            order.setTinhTrang(2);
         }
         orderRepository.save(order);
 
-        // Tự động tích điểm thành viên
         try {
             membershipService.processOrderPoints(order);
         } catch (Exception ignored) {}
 
-        // Gửi thông báo cho khách hàng
         if (order.getMaKH() != null) {
             String formattedTotal = (order.getTongTien() != null) ? String.format("%,d", order.getTongTien().longValue()) : "0";
             thongBaoService.taoThongBaoDatLich(
@@ -157,10 +139,6 @@ public class AdminThuNganController {
         return "redirect:/admin/thu-ngan?tab=orders";
     }
 
-    /**
-     * Màn hình Xuất & In Hóa Đơn Dịch Vụ
-     * GET /admin/thu-ngan/hoa-don/{id}
-     */
     @GetMapping("/hoa-don/{id}")
     public String viewInvoiceDetail(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isLoggedIn(session) || (!authService.isAdmin(session) && !authService.isCashier(session))) {
@@ -175,27 +153,20 @@ public class AdminThuNganController {
         HoaDonDichVu hd = hdOpt.get();
         model.addAttribute("hoaDon", hd);
 
-        // Thông tin khách hàng
         if (hd.getMaKH() != null) {
             customerRepository.findById(hd.getMaKH()).ifPresent(c -> model.addAttribute("customer", c));
         }
 
-        // Thông tin nhân viên thực hiện / lập phiếu
         if (hd.getMaNV() != null) {
             employeeRepository.findById(hd.getMaNV()).ifPresent(e -> model.addAttribute("employee", e));
         }
 
-        // Danh sách dịch vụ chi tiết trong hóa đơn
         List<ChiTietHoaDonDichVu> details = chiTietHoaDonDichVuRepository.findById_MaHDDV(hd.getMaHDDV());
         model.addAttribute("details", details);
 
         return "admin/hoa-don-detail";
     }
 
-    /**
-     * Xác nhận thanh toán trực tiếp từ trang chi tiết hóa đơn (cho các đơn Chưa thanh toán)
-     * POST /admin/thu-ngan/hoa-don/{id}/xac-nhan
-     */
     @PostMapping("/hoa-don/{id}/xac-nhan")
     public String confirmPaymentFromDetail(@PathVariable("id") Integer id,
                                            @RequestParam(name = "phuongThuc", required = false, defaultValue = "TienMat") String phuongThuc,

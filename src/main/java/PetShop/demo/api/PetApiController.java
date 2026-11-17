@@ -22,7 +22,6 @@ import java.util.*;
 @RequestMapping(value = "/api/pets", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class PetApiController {
-
     @Autowired
     private HoSoThuCungRepository hoSoThuCungRepository;
 
@@ -62,7 +61,6 @@ public class PetApiController {
         return m;
     }
 
-    // 1. Lấy danh sách thú cưng của khách hàng
     @GetMapping("/my")
     public ResponseEntity<?> getMyPets(@RequestParam Integer maKH) {
         if (maKH == null) {
@@ -74,7 +72,6 @@ public class PetApiController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Không tìm thấy khách hàng"));
         }
 
-        // Tìm ChuNuoi liên kết
         Optional<ChuNuoi> chuNuoiOpt = chuNuoiRepository.findFirstByMaKH(maKH);
         if (chuNuoiOpt.isEmpty() && customer.getDienThoai() != null && !customer.getDienThoai().isBlank()) {
             chuNuoiOpt = chuNuoiRepository.findFirstBySoDienThoai(customer.getDienThoai().trim());
@@ -93,7 +90,6 @@ public class PetApiController {
         return ResponseEntity.ok(result);
     }
 
-    // 2. Chi tiết 1 thú cưng
     @GetMapping("/{id}")
     public ResponseEntity<?> getPetDetail(@PathVariable Integer id) {
         Optional<HoSoThuCung> petOpt = hoSoThuCungRepository.findById(id);
@@ -103,7 +99,6 @@ public class PetApiController {
         return ResponseEntity.ok(mapPet(petOpt.get()));
     }
 
-    // 3. Khách hàng thêm mới thú cưng
     @PostMapping
     public ResponseEntity<?> createPet(@RequestBody Map<String, Object> payload) {
         try {
@@ -120,7 +115,6 @@ public class PetApiController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Không tìm thấy khách hàng"));
             }
 
-            // Tìm hoặc tự tạo hồ sơ chủ nuôi cho khách hàng
             Optional<ChuNuoi> chuNuoiOpt = chuNuoiRepository.findFirstByMaKH(maKH);
             if (chuNuoiOpt.isEmpty() && customer.getDienThoai() != null && !customer.getDienThoai().isBlank()) {
                 chuNuoiOpt = chuNuoiRepository.findFirstBySoDienThoai(customer.getDienThoai().trim());
@@ -188,7 +182,6 @@ public class PetApiController {
         }
     }
 
-    // 4. Cập nhật hồ sơ thú cưng
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePet(@PathVariable Integer id, @RequestBody Map<String, Object> payload) {
         try {
@@ -250,7 +243,6 @@ public class PetApiController {
         }
     }
 
-    // 5. Xóa hồ sơ thú cưng
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePet(@PathVariable Integer id, @RequestParam(required = false) Integer maKH) {
         try {
@@ -259,7 +251,6 @@ public class PetApiController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "message", "Không tìm thấy thú cưng"));
             }
 
-            // Nếu truyền maKH, kiểm tra quyền sở hữu
             if (maKH != null) {
                 ChuNuoi owner = chuNuoiRepository.findById(petOpt.get().getMaChuNuoi()).orElse(null);
                 if (owner != null && owner.getMaKH() != null && !owner.getMaKH().equals(maKH)) {

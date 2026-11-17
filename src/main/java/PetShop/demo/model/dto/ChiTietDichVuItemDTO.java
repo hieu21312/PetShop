@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 
 public class ChiTietDichVuItemDTO {
-
     @JsonProperty("maDV")
     @JsonAlias({"MaDV", "ma_dv", "serviceId"})
     private Integer maDV;

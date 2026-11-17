@@ -8,14 +8,13 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "tblDatLich")
 public class Booking {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaDatLich")
     private Integer maDatLich;
 
     @Column(name = "MaDV")
-    private Integer maDV;  // dịch vụ được đặt
+    private Integer maDV;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaDV", insertable = false, updatable = false)
@@ -40,7 +39,7 @@ public class Booking {
     private String ghiChu;
 
     @Column(name = "TrangThai")
-    private String trangThai;  // Chờ xác nhận, Đã xác nhận, Đang thực hiện, Hoàn thành, Đã thanh toán, Đã hủy
+    private String trangThai;
 
     @Column(name = "TrangThaiThanhToan")
     private String trangThaiThanhToan = "Chưa thanh toán";
@@ -48,29 +47,26 @@ public class Booking {
     @Column(name = "NgayTao")
     private LocalDateTime ngayTao;
 
-    @Column(name = "MaKH")  // nếu khách hàng đã đăng nhập, lưu mã KH
+    @Column(name = "MaKH")
     private Integer maKH;
 
-    @Column(name = "MaNV")  // Bác sĩ / Nhân viên chăm sóc phụ trách
+    @Column(name = "MaNV")
     private Integer maNV;
 
     @ManyToOne
     @JoinColumn(name = "MaNV", insertable = false, updatable = false)
     private Employee employee;
 
-    // Constructors
     public Booking() {
         this.ngayTao = LocalDateTime.now();
         this.trangThaiThanhToan = "Chưa thanh toán";
     }
 
-    // Helper: Trả về mã dịch vụ hiển thị chuẩn hoá (ví dụ BK-0001)
     public String getMaDichVu() {
         if (maDatLich == null) return "BK-NEW";
         return "BK-" + String.format("%04d", maDatLich);
     }
 
-    // Getters and Setters
     public Integer getMaDatLich() { return maDatLich; }
     public void setMaDatLich(Integer maDatLich) { this.maDatLich = maDatLich; }
     public Integer getMaDV() { return maDV; }

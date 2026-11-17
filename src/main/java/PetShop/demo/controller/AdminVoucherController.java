@@ -14,14 +14,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/vouchers")
 public class AdminVoucherController {
-
     @Autowired
     private VoucherRepository voucherRepository;
 
     @Autowired
     private AuthService authService;
 
-    // Danh sách mã giảm giá
     @GetMapping
     public String listVouchers(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -30,7 +28,6 @@ public class AdminVoucherController {
         return "admin/vouchers";
     }
 
-    // Form thêm mới
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -38,19 +35,16 @@ public class AdminVoucherController {
         return "admin/voucher-form";
     }
 
-    // Xử lý thêm mới
     @PostMapping("/create")
     public String createVoucher(@ModelAttribute Voucher voucher, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
         if (voucherRepository.existsById(voucher.getMaGiamGia())) {
-            // Xử lý lỗi trùng mã (có thể dùng flash attribute)
             return "redirect:/admin/vouchers/create?error=duplicate";
         }
         voucherRepository.save(voucher);
         return "redirect:/admin/vouchers";
     }
 
-    // Form sửa
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable String id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -60,7 +54,6 @@ public class AdminVoucherController {
         return "admin/voucher-form";
     }
 
-    // Xử lý cập nhật
     @PostMapping("/edit/{id}")
     public String updateVoucher(@PathVariable String id, @ModelAttribute Voucher voucher, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -75,7 +68,6 @@ public class AdminVoucherController {
         return "redirect:/admin/vouchers";
     }
 
-    // Xóa
     @GetMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable String id, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

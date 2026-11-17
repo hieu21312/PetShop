@@ -23,7 +23,6 @@ public class PetService {
     @Column(name = "HinhAnh")
     private String hinhAnh;
 
-    // Constructors
     public PetService() {}
 
     public String getHinhAnh() {
@@ -88,7 +87,6 @@ public class PetService {
         return "default-service.jpg";
     }
 
-    // Getters and Setters
     public Integer getMaDV() { return maDV; }
     public void setMaDV(Integer maDV) { this.maDV = maDV; }
 

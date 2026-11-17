@@ -26,8 +26,8 @@
                                     <td class="ps-3 fw-bold text-danger" th:text="'#HD' + ${order.maHD}">#HD1</td>
                                     <td>
                                         <div class="fw-semibold text-dark" th:text="${order.customer != null ? order.customer.tenKH : 'Khách lẻ'}">Khách hàng</div>
-                                        <div class="small text-muted" th:if="${order.customer != null and order.customer.soDienThoai != null}">
-                                            <i class="fas fa-phone small text-success me-1"></i><span th:text="${order.customer.soDienThoai}"></span>
+                                        <div class="small text-muted" th:if="${order.customer != null and (order.customer.dienThoai != null or order.customer.soDienThoai != null)}">
+                                            <i class="fas fa-phone small text-success me-1"></i><span th:text="${order.customer.dienThoai ?: order.customer.soDienThoai}"></span>
                                         </div>
                                     </td>
                                     <td th:text="${#temporals.format(order.ngayLap, 'dd/MM/yyyy HH:mm')}">...</td>

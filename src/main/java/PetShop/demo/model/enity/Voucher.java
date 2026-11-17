@@ -30,10 +30,8 @@ public class Voucher {
     @OneToMany(mappedBy = "voucher")
     private List<Order> orders;
 
-    // Constructors
     public Voucher() {}
 
-    // Getters and setters
     public String getMaGiamGia() { return maGiamGia; }
     public void setMaGiamGia(String maGiamGia) { this.maGiamGia = maGiamGia; }
 

@@ -5,5 +5,4 @@ import org.springframework.session.web.context.AbstractHttpSessionApplicationIni
 
 @Configuration
 public class SessionConfig extends AbstractHttpSessionApplicationInitializer {
-
 }

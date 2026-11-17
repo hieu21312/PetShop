@@ -10,7 +10,6 @@ import java.util.List;
 @Entity
 @Table(name = "tblHoaDonDichVu")
 public class HoaDonDichVu {
-
     public static final String TRANG_THAI_CHUA_THANH_TOAN = "ChuaThanhToan";
     public static final String TRANG_THAI_DA_THANH_TOAN = "DaThanhToan";
 
@@ -34,19 +33,15 @@ public class HoaDonDichVu {
     @Column(name = "GhiChu")
     private String ghiChu;
 
-    // Trường TrangThai (String) - Mặc định: 'ChuaThanhToan'
     @Column(name = "TrangThai", length = 50)
     private String trangThai = TRANG_THAI_CHUA_THANH_TOAN;
 
-    // Trường PhuongThucThanhToan (String)
     @Column(name = "PhuongThucThanhToan", length = 100)
     private String phuongThucThanhToan;
 
-    // Liên kết trực tiếp tới Phiếu dịch vụ chăm sóc (nếu thanh toán từ phiếu)
     @Column(name = "MaPhieuDV")
     private Integer maPhieuDV;
 
-    // Liên kết trực tiếp tới Lịch đặt dịch vụ (nếu thanh toán từ lịch đặt)
     @Column(name = "MaDatLich")
     private Integer maDatLich;
 
@@ -64,7 +59,6 @@ public class HoaDonDichVu {
     @OneToMany(mappedBy = "hoaDonDichVu", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ChiTietHoaDonDichVu> chiTietHoaDonDichVus = new ArrayList<>();
 
-    // Constructors
     public HoaDonDichVu() {
         this.ngaySuDung = LocalDateTime.now();
         this.trangThai = TRANG_THAI_CHUA_THANH_TOAN;
@@ -80,7 +74,6 @@ public class HoaDonDichVu {
         this.trangThai = TRANG_THAI_CHUA_THANH_TOAN;
     }
 
-    // Getters and Setters
     public Integer getMaHDDV() {
         return maHDDV;
     }

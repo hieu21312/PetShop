@@ -296,7 +296,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         child: Row(
           children: [
-            // Nút Thêm vào giỏ
+
             Expanded(
               child: SizedBox(
                 height: 48,
@@ -330,7 +330,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            // Nút Mua ngay
+
             Expanded(
               child: SizedBox(
                 height: 48,

@@ -18,7 +18,6 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/staff")
 public class AdminStaffController {
-
     @Autowired
     private EmployeeService employeeService;
 
@@ -28,7 +27,6 @@ public class AdminStaffController {
     @Autowired
     private AuthService authService;
 
-    // Hiển thị danh sách Bác sĩ thú y & Nhân viên chăm sóc (Hỗ trợ lọc roleFilter và statusFilter)
     @GetMapping
     public String listStaff(
             @RequestParam(required = false) String roleFilter,
@@ -38,7 +36,6 @@ public class AdminStaffController {
 
         List<Employee> allStaff = employeeService.getAllEmployees();
 
-        // Thống kê tổng số lượng nhân sự
         long totalCount = allStaff.size();
         long workingCount = allStaff.stream()
                 .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))
@@ -49,7 +46,6 @@ public class AdminStaffController {
 
         List<Employee> filteredList = allStaff;
 
-        // 1. Lọc theo vai trò (roleFilter)
         if ("admin".equalsIgnoreCase(roleFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getRole() != null && "Admin".equalsIgnoreCase(e.getRole().getTenVaiTro()))
@@ -100,7 +96,6 @@ public class AdminStaffController {
             roleFilter = "all";
         }
 
-        // 2. Lọc theo trạng thái làm việc (statusFilter)
         if ("active".equalsIgnoreCase(statusFilter) || "working".equalsIgnoreCase(statusFilter) || "Đang làm việc".equalsIgnoreCase(statusFilter)) {
             filteredList = filteredList.stream()
                     .filter(e -> e.getTrangThai() == null || "Đang làm việc".equalsIgnoreCase(e.getTrangThai()))
@@ -130,7 +125,6 @@ public class AdminStaffController {
         return "admin/staff";
     }
 
-    // Trang form thêm mới nhân sự
     @GetMapping("/add")
     public String showAddForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -140,7 +134,6 @@ public class AdminStaffController {
         return "admin/staff-form";
     }
 
-    // Trang form sửa thông tin nhân sự
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -153,12 +146,10 @@ public class AdminStaffController {
         return "admin/staff-form";
     }
 
-    // Xử lý lưu thông tin nhân sự (thêm/sửa)
     @PostMapping("/save")
     public String saveStaff(@ModelAttribute Employee employee, RedirectAttributes ra, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
 
-        // Nếu sửa, giữ nguyên mật khẩu cũ nếu không nhập mật khẩu mới
         if (employee.getMaNV() != null) {
             Optional<Employee> existing = employeeService.getEmployeeById(employee.getMaNV());
             if (existing.isPresent() && (employee.getMatKhau() == null || employee.getMatKhau().isBlank())) {
@@ -171,7 +162,6 @@ public class AdminStaffController {
         return "redirect:/admin/staff";
     }
 
-    // Bật / Tắt trạng thái làm việc (Đang làm việc <-> Tạm nghỉ)
     @PostMapping("/toggleStatus/{id}")
     public String toggleStatus(
             @PathVariable Integer id,
@@ -197,7 +187,6 @@ public class AdminStaffController {
         return res;
     }
 
-    // Reset mật khẩu nhân sự về mặc định 123456
     @PostMapping("/resetPassword/{id}")
     public String resetPassword(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -207,7 +196,6 @@ public class AdminStaffController {
         return "redirect:/admin/staff";
     }
 
-    // Xóa hồ sơ nhân sự
     @GetMapping("/delete/{id}")
     public String deleteStaff(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

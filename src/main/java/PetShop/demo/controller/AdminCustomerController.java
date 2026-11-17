@@ -17,7 +17,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/customers")
 public class AdminCustomerController {
-
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -27,7 +26,6 @@ public class AdminCustomerController {
     @Autowired
     private AuthService authService;
 
-    // Danh sách khách hàng
     @GetMapping
     public String listCustomers(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -36,7 +34,6 @@ public class AdminCustomerController {
         return "admin/customers";
     }
 
-    // Xem đơn hàng của khách hàng
     @GetMapping("/orders/{id}")
     public String viewOrders(@PathVariable Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

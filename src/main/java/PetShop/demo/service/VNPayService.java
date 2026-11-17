@@ -14,7 +14,6 @@ import java.util.*;
 
 @Service
 public class VNPayService {
-
     @Value("${vnpay.tmn-code:DEMOVNP1}")
     private String tmnCode;
 
@@ -45,16 +44,6 @@ public class VNPayService {
     @Autowired
     private HoaDonDichVuService hoaDonDichVuService;
 
-    /**
-     * 1. Hàm tạo URL thanh toán VNPay (sử dụng mã hóa HMAC SHA512)
-     *
-     * @param maHDDV Mã hóa đơn dịch vụ
-     * @param amount Số tiền cần thanh toán (VNĐ)
-     * @param orderInfo Nội dung thanh toán
-     * @param ipAddress Địa chỉ IP của client
-     * @param customReturnUrl Return URL tùy chọn (nếu null sẽ lấy cấu hình mặc định)
-     * @return Đường link thanh toán VNPay đầy đủ chữ ký bảo mật
-     */
     public String createPaymentUrl(Integer maHDDV, BigDecimal amount, String orderInfo,
                                    String ipAddress, String customReturnUrl) {
         if (maHDDV == null || amount == null) {
@@ -91,9 +80,6 @@ public class VNPayService {
         return payUrl + "?" + queryUrl;
     }
 
-    /**
-     * 1. Hàm tạo URL thanh toán tiện lợi trực tiếp từ Entity HoaDonDichVu
-     */
     public String createPaymentUrl(HoaDonDichVu hoaDon, HttpServletRequest request) {
         String ip = VNPayUtils.getIpAddress(request);
         String info = "Thanh toan hoa don dich vu #" + hoaDon.getMaHDDV();
@@ -103,31 +89,19 @@ public class VNPayService {
         return createPaymentUrl(hoaDon.getMaHDDV(), hoaDon.getTongTien(), info, ip, null);
     }
 
-    /**
-     * 2. Hàm tạo mã QR Code dạng chuỗi Base64 Data URL từ URL thanh toán VNPay
-     */
     public String createPaymentQRCodeBase64(String paymentUrl, int width, int height) {
         return QRCodeUtils.generateQRCodeBase64(paymentUrl, width, height);
     }
 
-    /**
-     * 2. Hàm tạo mã QR Code dạng mảng byte PNG từ URL thanh toán VNPay
-     */
     public byte[] createPaymentQRCodeBytes(String paymentUrl, int width, int height) {
         return QRCodeUtils.generateQRCodeBytes(paymentUrl, width, height);
     }
 
-    /**
-     * Tạo mã VietQR chuẩn App Ngân hàng Việt Nam (VCB, MB, Techcombank, BIDV,...)
-     */
     public String createVietQrUrl(Integer maHDDV, BigDecimal amount) {
         String content = "HDDV" + maHDDV;
         return QRCodeUtils.buildVietQrUrl(bankId, accountNo, accountName, amount, content);
     }
 
-    /**
-     * 2. Tiện ích: Tạo mã QR Code Base64 trực tiếp cho hóa đơn dịch vụ
-     */
     public String createQRCodeForHoaDon(Integer maHDDV, HttpServletRequest request) {
         HoaDonDichVu hd = hoaDonDichVuService.getHoaDonById(maHDDV)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn dịch vụ với mã: " + maHDDV));
@@ -135,9 +109,6 @@ public class VNPayService {
         return createPaymentQRCodeBase64(paymentUrl, QRCodeUtils.DEFAULT_WIDTH, QRCodeUtils.DEFAULT_HEIGHT);
     }
 
-    /**
-     * 3. Xử lý IPN (Instant Payment Notification) từ cổng thanh toán VNPay
-     */
     public Map<String, String> processIpn(Map<String, String> vnpParams) {
         Map<String, String> response = new HashMap<>();
 

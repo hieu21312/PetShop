@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ChiTietHoaDonDichVuRepository extends JpaRepository<ChiTietHoaDonDichVu, ChiTietHoaDonDichVuId> {
-
     List<ChiTietHoaDonDichVu> findById_MaHDDV(Integer maHDDV);
 
     void deleteById_MaHDDV(Integer maHDDV);

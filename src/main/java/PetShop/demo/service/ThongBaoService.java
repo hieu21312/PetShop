@@ -10,7 +10,6 @@ import java.util.List;
 
 @Service
 public class ThongBaoService {
-
     @Autowired
     private ThongBaoRepository thongBaoRepository;
 
@@ -45,7 +44,6 @@ public class ThongBaoService {
         return thongBaoRepository.save(tb);
     }
 
-    // Tạo thông báo cho toàn bộ nhân sự (Thu ngân, Admin, v.v...) hoặc cho một nhân viên cụ thể
     public ThongBao taoThongBaoStaff(String tieuDe, String noiDung, String loaiThongBao, String lienKet) {
         return taoThongBaoStaff(null, tieuDe, noiDung, loaiThongBao, lienKet);
     }

@@ -17,10 +17,8 @@ public class OrderStatus {
     @OneToMany(mappedBy = "orderStatus")
     private List<Order> orders;
 
-    // Constructors
     public OrderStatus() {}
 
-    // Getters and Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

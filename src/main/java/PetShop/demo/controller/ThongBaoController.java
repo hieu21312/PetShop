@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ThongBaoController {
-
     @Autowired
     private ThongBaoService thongBaoService;
 
@@ -38,7 +37,6 @@ public class ThongBaoController {
         String targetUrl = redirect;
         boolean isDefaultFallback = (targetUrl == null || targetUrl.trim().isEmpty() || !targetUrl.startsWith("/") || targetUrl.equals("/GioHang?tab=services"));
 
-        // Nếu thông báo có link riêng hợp lệ thì luôn ưu tiên link của thông báo
         if (tb != null && tb.getLienKet() != null && !tb.getLienKet().trim().isEmpty()) {
             targetUrl = tb.getLienKet();
         } else if (isDefaultFallback) {

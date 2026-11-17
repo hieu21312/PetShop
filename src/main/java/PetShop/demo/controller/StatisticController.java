@@ -19,7 +19,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/ThongKe")
 public class StatisticController {
-
     @Autowired
     private StatisticService statisticService;
 

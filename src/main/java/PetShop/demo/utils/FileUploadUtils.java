@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 public class FileUploadUtils {
-
     private static final String UPLOAD_DIR = "src/main/webapp/Content/HinhAnh/";
 
     public static String saveFile(MultipartFile file) throws IOException {

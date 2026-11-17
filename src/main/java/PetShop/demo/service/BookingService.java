@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Service
 public class BookingService {
-
     private static final int MAX_BOOKINGS_PER_SLOT = 3;
 
     @Autowired
@@ -38,7 +37,6 @@ public class BookingService {
     }
 
     public Booking saveBooking(Booking booking) {
-        // Tra cứu tự động MaKH theo SĐT hoặc Email nếu MaKH chưa được gán
         if (booking.getMaKH() == null) {
             Optional<Customer> customerOpt = Optional.empty();
             if (booking.getSoDienThoai() != null && !booking.getSoDienThoai().isBlank()) {
@@ -118,7 +116,6 @@ public class BookingService {
             b.setTrangThai(trangThai);
             bookingRepository.save(b);
 
-            // Tự động sinh thông báo cho khách hàng nếu có MaKH và trạng thái thay đổi
             if (b.getMaKH() != null && trangThai != null && !trangThai.equalsIgnoreCase(oldStatus)) {
                 LocalDateTime ngayHen = null;
                 if (b.getNgayDat() != null && b.getGioDat() != null) {
@@ -126,7 +123,7 @@ public class BookingService {
                 }
 
                 if ("Đã xác nhận".equalsIgnoreCase(trangThai)) {
-                    String timeStr = (b.getGioDat() != null ? b.getGioDat().toString() : "") + 
+                    String timeStr = (b.getGioDat() != null ? b.getGioDat().toString() : "") +
                                      (b.getNgayDat() != null ? " ngày " + b.getNgayDat().toString() : "");
                     String tieuDe = "Lịch hẹn dịch vụ #" + b.getMaDatLich() + " đã được xác nhận!";
                     String noiDung = "Lịch hẹn dịch vụ của bạn (" + timeStr + ") đã được tiếp nhận và xác nhận thành công. PetShop rất mong được đón tiếp bạn và bé!";
@@ -163,7 +160,6 @@ public class BookingService {
             b.setMaNV(maNV);
             bookingRepository.save(b);
 
-            // Tự động gửi thông báo phân công bác sĩ/nhân sự cho khách hàng
             if (b.getMaKH() != null && maNV != null) {
                 String staffName = "nhân sự chuyên môn";
                 Optional<Employee> empOpt = employeeRepository.findById(maNV);

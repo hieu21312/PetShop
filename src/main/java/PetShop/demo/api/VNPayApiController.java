@@ -17,23 +17,16 @@ import java.util.*;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class VNPayApiController {
-
     @Autowired
     private VNPayService vnPayService;
 
     @Autowired
     private HoaDonDichVuService hoaDonDichVuService;
 
-    /**
-     * 1. API tạo URL thanh toán VNPay và VietQR cho hóa đơn dịch vụ
-     * POST /api/hoa-don/{id}/vnpay-url
-     * Trả về cả URL thanh toán VNPay, mã QR VNPay và mã VietQR chuẩn ngân hàng
-     */
     @PostMapping("/api/hoa-don/{id}/vnpay-url")
     public ResponseEntity<?> createPaymentUrl(
             @PathVariable("id") Integer id,
             HttpServletRequest request) {
-
         Optional<HoaDonDichVu> hdOpt = hoaDonDichVuService.getHoaDonById(id);
         if (hdOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
@@ -61,16 +54,11 @@ public class VNPayApiController {
         return ResponseEntity.ok(res);
     }
 
-    /**
-     * 2. API tạo mã QR Code cho hóa đơn dịch vụ
-     * GET /api/hoa-don/{id}/vnpay-qr?format=json (trả về Base64) hoặc format=image (trả về file ảnh PNG)
-     */
     @GetMapping("/api/hoa-don/{id}/vnpay-qr")
     public ResponseEntity<?> getPaymentQRCode(
             @PathVariable("id") Integer id,
             @RequestParam(name = "format", defaultValue = "json") String format,
             HttpServletRequest request) {
-
         Optional<HoaDonDichVu> hdOpt = hoaDonDichVuService.getHoaDonById(id);
         if (hdOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
@@ -101,19 +89,12 @@ public class VNPayApiController {
         ));
     }
 
-    /**
-     * 3. API nhận callback (IPN) từ VNPay
-     */
     @RequestMapping(value = "/api/vnpay/ipn", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<?> handleVNPayIpn(@RequestParam Map<String, String> allParams) {
         Map<String, String> result = vnPayService.processIpn(allParams);
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Callback Return URL: Nhận điều hướng từ trình duyệt sau khi khách hoàn tất thanh toán trên VNPay
-     * GET /api/vnpay/return
-     */
     @GetMapping("/api/vnpay/return")
     public ResponseEntity<?> handleVNPayReturn(@RequestParam Map<String, String> allParams) {
         Map<String, String> ipnResult = vnPayService.processIpn(allParams);

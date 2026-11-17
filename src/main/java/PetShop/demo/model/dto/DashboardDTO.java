@@ -12,7 +12,6 @@ public class DashboardDTO {
     private List<BigDecimal> revenues;
     private List<TopProductDTO> topProducts;
 
-    // Thống kê dịch vụ
     private int tongDichVu;
     private int tongPhieuDichVu;
     private int tongDatLich;
@@ -21,18 +20,14 @@ public class DashboardDTO {
     private List<BigDecimal> serviceRevenues;
     private List<TopServiceDTO> topServices;
 
-    // Tổng doanh thu kết hợp (Sản phẩm + Dịch vụ)
     private BigDecimal tongDoanhThuTongCong;
 
-    // Doanh thu theo ngày (Hôm nay)
     private BigDecimal doanhThuHomNay;
     private BigDecimal doanhThuDichVuHomNay;
     private BigDecimal tongDoanhThuHomNay;
 
-    // Constructors
     public DashboardDTO() {}
 
-    // Getters and Setters
     public int getTongSanPham() { return tongSanPham; }
     public void setTongSanPham(int tongSanPham) { this.tongSanPham = tongSanPham; }
 

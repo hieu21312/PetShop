@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VNPayServiceTest {
-
     @Mock
     private HoaDonDichVuService hoaDonDichVuService;
 
@@ -79,7 +78,7 @@ class VNPayServiceTest {
         vnpParams.put("vnp_Version", "2.1.0");
         vnpParams.put("vnp_Command", "pay");
         vnpParams.put("vnp_TmnCode", "DEMOVNP1");
-        vnpParams.put("vnp_Amount", "30000000"); // 300,000 VND
+        vnpParams.put("vnp_Amount", "30000000");
         vnpParams.put("vnp_TxnRef", "HDDV_20_123456789");
         vnpParams.put("vnp_ResponseCode", "00");
         vnpParams.put("vnp_TransactionStatus", "00");

@@ -22,11 +22,9 @@ public interface PhieuDichVuChamSocRepository extends JpaRepository<PhieuDichVuC
     Optional<PhieuDichVuChamSoc> findBySoPhieu(String soPhieu);
     Optional<PhieuDichVuChamSoc> findBySoPhieuIgnoreCase(String soPhieu);
 
-    // Lấy danh sách phiếu theo nhân sự phụ trách hoặc chưa phân công
     @Query("SELECT p FROM PhieuDichVuChamSoc p WHERE p.maNVThucHien = :maNV OR p.maNVThucHien IS NULL ORDER BY p.ngayTiepNhan DESC")
     List<PhieuDichVuChamSoc> findStaffAndUnassignedTickets(@Param("maNV") Integer maNV);
 
-    // Lấy danh sách phiếu dịch vụ đã hoàn thành hoặc đã bàn giao nhưng chưa thanh toán (chờ Thu ngân thanh toán)
     @Query("SELECT p FROM PhieuDichVuChamSoc p WHERE p.trangThaiDichVu IN ('Hoàn thành chăm sóc', 'Đã bàn giao thú cưng') AND (p.trangThaiThanhToan IS NULL OR p.trangThaiThanhToan != 'Đã thanh toán') ORDER BY p.ngayTiepNhan DESC")
     List<PhieuDichVuChamSoc> findCompletedAwaitingPayment();
 

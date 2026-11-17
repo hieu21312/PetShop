@@ -23,7 +23,6 @@ public class CartItemDTO {
         return giaBan.multiply(BigDecimal.valueOf(soLuong));
     }
 
-    // Getters and Setters
     public Integer getMaSP() { return maSP; }
     public void setMaSP(Integer maSP) { this.maSP = maSP; }
 

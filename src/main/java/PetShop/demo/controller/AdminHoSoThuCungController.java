@@ -16,7 +16,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/pets")
 public class AdminHoSoThuCungController {
-
     @Autowired
     private HoSoThuCungRepository hoSoThuCungRepository;
 
@@ -26,7 +25,6 @@ public class AdminHoSoThuCungController {
     @Autowired
     private AuthService authService;
 
-    // 1. Danh sách hồ sơ thú cưng
     @GetMapping
     public String listPets(@RequestParam(value = "keyword", required = false) String keyword,
                            @RequestParam(value = "loai", required = false) String loai,
@@ -48,7 +46,6 @@ public class AdminHoSoThuCungController {
         return "admin/pets";
     }
 
-    // 2. Form thêm mới thú cưng
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -57,7 +54,6 @@ public class AdminHoSoThuCungController {
         return "admin/pet-form";
     }
 
-    // 3. Xử lý thêm mới thú cưng
     @PostMapping("/create")
     public String createPet(@ModelAttribute("pet") HoSoThuCung pet, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -65,7 +61,6 @@ public class AdminHoSoThuCungController {
         return "redirect:/admin/pets";
     }
 
-    // 4. Form sửa thú cưng
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -76,7 +71,6 @@ public class AdminHoSoThuCungController {
         return "admin/pet-form";
     }
 
-    // 5. Xử lý cập nhật thú cưng
     @PostMapping("/edit/{id}")
     public String updatePet(@PathVariable("id") Integer id, @ModelAttribute("pet") HoSoThuCung petForm, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);
@@ -105,7 +99,6 @@ public class AdminHoSoThuCungController {
         return "redirect:/admin/pets";
     }
 
-    // 6. Xóa hồ sơ thú cưng
     @GetMapping("/delete/{id}")
     public String deletePet(@PathVariable("id") Integer id, HttpSession session) {
         if (!authService.isAdmin(session)) return authService.redirectUnauthorized(session);

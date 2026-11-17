@@ -57,7 +57,7 @@ class QRPaymentDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -112,7 +112,7 @@ class QRPaymentDialog extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                 child: Column(
                   children: [
-                    // Số tiền cần chuyển
+
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
@@ -141,7 +141,6 @@ class QRPaymentDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Khung ảnh QR VietQR
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -216,7 +215,6 @@ class QRPaymentDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Bảng chi tiết thông tin chuyển khoản (có nút sao chép)
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
@@ -237,7 +235,6 @@ class QRPaymentDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Cảnh báo xác nhận giống web order-confirmation
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -261,7 +258,6 @@ class QRPaymentDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
 
-                    // Nút hoàn tất
                     SizedBox(
                       width: double.infinity,
                       height: 46,

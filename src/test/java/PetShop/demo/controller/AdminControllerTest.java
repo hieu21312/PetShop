@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminControllerTest {
-
     @Mock
     private AdminService adminService;
 

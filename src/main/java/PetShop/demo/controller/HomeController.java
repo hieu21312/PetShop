@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
-
     @Autowired
     private ProductService productService;
 
     @GetMapping({"/", "/CuaHang"})
     public String home(Model model) {
         model.addAttribute("products", productService.getAllProducts());
-        model.addAttribute("page", "shop :: content"); // fragment
+        model.addAttribute("page", "shop :: content");
         return "redirect:/SanPham";
     }
 }

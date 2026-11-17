@@ -24,7 +24,7 @@ public class HoSoThuCung {
     private String tenThuCung;
 
     @Column(name = "LoaiThuCung", nullable = false)
-    private String loaiThuCung; // Chó, Mèo, ...
+    private String loaiThuCung;
 
     @Column(name = "GiongLoai", nullable = false)
     private String giongLoai;

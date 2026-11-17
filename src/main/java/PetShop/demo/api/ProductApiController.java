@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin(origins = "*")
 public class ProductApiController {
-
     @Autowired
     private ProductService productService;
 
@@ -27,7 +26,6 @@ public class ProductApiController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Lấy danh mục sản phẩm từ tblDanhMuc
     @GetMapping(value = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<?> getCategories() {
         List<Category> categories = categoryRepository.findAll();
@@ -42,7 +40,6 @@ public class ProductApiController {
         return ResponseEntity.ok(result);
     }
 
-    // Lấy danh sách sản phẩm (có tìm kiếm, lọc theo loại / danh mục, sắp xếp)
     @GetMapping(value = "/api/products", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<?> getProducts(@RequestParam(required = false) String search,
                                          @RequestParam(required = false) String type,
@@ -64,21 +61,18 @@ public class ProductApiController {
         if (loai != null && !loai.isBlank()) {
             String l = loai.trim().toLowerCase();
             if ("cho".equals(l)) {
-                // Chỉ bao gồm thú cưng Chó (loại Pet, không có thức ăn hay phụ kiện)
                 products = products.stream()
                         .filter(p -> "Pet".equalsIgnoreCase(p.getLoaiSanPham()) &&
                                 ((p.getTenSP() != null && p.getTenSP().toLowerCase().contains("chó"))
                                         || (p.getMaDanhMuc() != null && p.getMaDanhMuc() == 1)))
                         .collect(Collectors.toList());
             } else if ("meo".equals(l)) {
-                // Chỉ bao gồm thú cưng Mèo (loại Pet, không có thức ăn hay phụ kiện)
                 products = products.stream()
                         .filter(p -> "Pet".equalsIgnoreCase(p.getLoaiSanPham()) &&
                                 ((p.getTenSP() != null && p.getTenSP().toLowerCase().contains("mèo"))
                                         || (p.getMaDanhMuc() != null && p.getMaDanhMuc() == 2)))
                         .collect(Collectors.toList());
             } else if ("thucan".equals(l)) {
-                // Thức ăn cho chó & mèo (pate, thức ăn hạt...)
                 products = products.stream()
                         .filter(p -> {
                             if (p.getMaDanhMuc() != null && (p.getMaDanhMuc() == 3 || p.getMaDanhMuc() == 4)) return true;
@@ -87,7 +81,6 @@ public class ProductApiController {
                         })
                         .collect(Collectors.toList());
             } else if ("phukien".equals(l)) {
-                // Phụ kiện thú cưng (đồ chơi, vòng cổ, chuồng, sữa tắm... không bao gồm thức ăn)
                 products = products.stream()
                         .filter(p -> {
                             if (!"Accessory".equalsIgnoreCase(p.getLoaiSanPham())) return false;
@@ -136,7 +129,6 @@ public class ProductApiController {
         return ResponseEntity.ok(result);
     }
 
-    // Chi tiết sản phẩm kèm đánh giá
     @GetMapping(value = "/api/products/{id}", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<?> getProductDetail(@PathVariable int id) {
         Product p = productService.getProductById(id).orElse(null);

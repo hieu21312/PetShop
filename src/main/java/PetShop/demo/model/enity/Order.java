@@ -35,7 +35,7 @@ public class Order {
     }
 
     public Order() {}
-    // Getters and setters (generate all)
+
     public Integer getMaHD() { return maHD; }
     public void setMaHD(Integer maHD) { this.maHD = maHD; }
     public Integer getMaKH() { return maKH; }

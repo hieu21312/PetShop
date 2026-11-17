@@ -27,7 +27,6 @@ import java.util.*;
 @RequestMapping(value = "/api/hoa-don", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class HoaDonApiController {
-
     @Autowired
     private HoaDonDichVuService hoaDonDichVuService;
 
@@ -43,11 +42,6 @@ public class HoaDonApiController {
     @Autowired
     private PetServiceRepository petServiceRepository;
 
-    /**
-     * 1. POST /api/hoa-don: Tạo một hóa đơn mới cho chức năng Thu ngân
-     * Nhận vào: MaKH, MaNV, TongTien, GhiChu, PhuongThucThanhToan, Items (danh sách dịch vụ), MaPhieuDV, MaDatLich
-     * Trả về: Mã hóa đơn vừa tạo (maHDDV / maHoaDon)
-     */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createHoaDon(@RequestBody HoaDonRequestDTO request) {
         if (request == null) {
@@ -83,7 +77,6 @@ public class HoaDonApiController {
             );
         }
 
-        // Lưu danh sách chi tiết dịch vụ vào tblChiTietHoaDonDichVu
         if (request.getItems() != null && !request.getItems().isEmpty()) {
             for (ChiTietDichVuItemDTO item : request.getItems()) {
                 if (item != null && item.getMaDV() != null) {
@@ -113,9 +106,6 @@ public class HoaDonApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * 2. GET /api/hoa-don/{id}: Lấy thông tin chi tiết hóa đơn
-     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getHoaDonDetail(@PathVariable("id") Integer id) {
         Optional<HoaDonDichVu> opt = hoaDonDichVuService.getHoaDonById(id);
@@ -133,7 +123,6 @@ public class HoaDonApiController {
         res.put("maHoaDon", hd.getMaHDDV());
         res.put("maKH", hd.getMaKH());
 
-        // Thông tin khách hàng
         if (hd.getMaKH() != null) {
             Optional<Customer> custOpt = customerRepository.findById(hd.getMaKH());
             if (custOpt.isPresent()) {
@@ -145,7 +134,7 @@ public class HoaDonApiController {
         }
 
         res.put("maNV", hd.getMaNV());
-        // Thông tin nhân viên lập / thực hiện
+
         if (hd.getMaNV() != null) {
             Optional<Employee> empOpt = employeeRepository.findById(hd.getMaNV());
             if (empOpt.isPresent()) {
@@ -161,7 +150,6 @@ public class HoaDonApiController {
         res.put("maPhieuDV", hd.getMaPhieuDV());
         res.put("maDatLich", hd.getMaDatLich());
 
-        // Danh sách dịch vụ chi tiết (nếu có)
         List<ChiTietHoaDonDichVu> details = chiTietHoaDonDichVuRepository.findById_MaHDDV(hd.getMaHDDV());
         List<Map<String, Object>> items = new ArrayList<>();
         for (ChiTietHoaDonDichVu ct : details) {
@@ -185,16 +173,11 @@ public class HoaDonApiController {
         return ResponseEntity.ok(res);
     }
 
-    /**
-     * 3. POST /api/hoa-don/{id}/thanh-toan: Xác nhận thanh toán (hỗ trợ cả Tiền mặt và VNPay)
-     * Cập nhật trạng thái thành 'DaThanhToan' và tự động đồng bộ sang Phiếu chăm sóc/Lịch đặt.
-     */
     @PostMapping(value = "/{id}/thanh-toan")
     public ResponseEntity<?> xacNhanThanhToan(
             @PathVariable("id") Integer id,
             @RequestBody(required = false) ThanhToanRequestDTO body,
             @RequestParam(name = "phuongThuc", required = false) String phuongThucParam) {
-
         Optional<HoaDonDichVu> opt = hoaDonDichVuService.getHoaDonById(id);
         if (opt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
@@ -203,7 +186,6 @@ public class HoaDonApiController {
             ));
         }
 
-        // Lấy phương thức thanh toán từ Body hoặc RequestParam
         String phuongThuc = null;
         if (body != null && body.getPhuongThucThanhToan() != null && !body.getPhuongThucThanhToan().isBlank()) {
             phuongThuc = body.getPhuongThucThanhToan().trim();
@@ -231,18 +213,12 @@ public class HoaDonApiController {
         return ResponseEntity.ok(res);
     }
 
-    /**
-     * 4. GET /api/hoa-don/cho-thanh-toan: Lấy danh sách dịch vụ đã hoàn thành chờ thu ngân thanh toán
-     */
     @GetMapping("/cho-thanh-toan")
     public ResponseEntity<?> getDanhSachChoThanhToan() {
         List<DichVuChoThanhToanDTO> list = hoaDonDichVuService.getDanhSachDichVuChoThanhToan();
         return ResponseEntity.ok(list);
     }
 
-    /**
-     * 5. GET /api/hoa-don/tra-cuu?maDichVu=...: Tra cứu dịch vụ chờ thanh toán theo mã dịch vụ (PDV-..., BK-..., ID)
-     */
     @GetMapping("/tra-cuu")
     public ResponseEntity<?> traCuuDichVu(@RequestParam("maDichVu") String maDichVu) {
         Optional<DichVuChoThanhToanDTO> opt = hoaDonDichVuService.traCuuDichVuTheoMa(maDichVu);
@@ -256,9 +232,6 @@ public class HoaDonApiController {
         }
     }
 
-    /**
-     * API hỗ trợ quầy Thu ngân: GET /api/hoa-don (Xem danh sách hóa đơn theo trạng thái)
-     */
     @GetMapping
     public ResponseEntity<?> getAllHoaDon(@RequestParam(name = "trangThai", required = false) String trangThai) {
         List<HoaDonDichVu> list;

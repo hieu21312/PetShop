@@ -16,13 +16,11 @@ import java.util.*;
 @RequestMapping(value = "/api/notifications", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
 @CrossOrigin(origins = "*")
 public class NotificationApiController {
-
     @Autowired
     private ThongBaoService thongBaoService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Lấy danh sách thông báo của khách hàng hoặc nhân viên
     @GetMapping
     public ResponseEntity<?> getNotifications(@RequestParam(required = false) Integer maKH, HttpSession session) {
         Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;
@@ -33,7 +31,7 @@ public class NotificationApiController {
         List<ThongBao> list;
         if (maKH != null) {
             list = thongBaoService.getThongBaoByCustomer(maKH);
-            // Nếu khách chưa có thông báo nào, tự động tạo 1 thông báo chào mừng & ưu đãi
+
             if (list.isEmpty()) {
                 thongBaoService.taoThongBaoDatLich(
                         maKH,
@@ -68,7 +66,6 @@ public class NotificationApiController {
         return ResponseEntity.ok(result);
     }
 
-    // Đếm số thông báo chưa đọc
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount(@RequestParam(required = false) Integer maKH, HttpSession session) {
         Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;
@@ -84,7 +81,6 @@ public class NotificationApiController {
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
 
-    // Đánh dấu 1 thông báo đã đọc
     @RequestMapping(value = "/{id}/read", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<?> markAsRead(@PathVariable Integer id, HttpSession session) {
         thongBaoService.danhDauDaDoc(id);
@@ -111,7 +107,6 @@ public class NotificationApiController {
         ));
     }
 
-    // Đánh dấu tất cả đã đọc
     @PostMapping("/read-all")
     public ResponseEntity<?> markAllAsRead(@RequestParam(required = false) Integer maKH, HttpSession session) {
         Integer employeeId = (session != null) ? (Integer) session.getAttribute("maNV") : null;

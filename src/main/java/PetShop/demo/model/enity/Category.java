@@ -20,10 +20,8 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 
-    // Constructors
     public Category() {}
 
-    // Getters and Setters
     public Integer getMaDanhMuc() { return maDanhMuc; }
     public void setMaDanhMuc(Integer maDanhMuc) { this.maDanhMuc = maDanhMuc; }
 

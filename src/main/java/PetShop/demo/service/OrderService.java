@@ -30,7 +30,6 @@ public class OrderService {
         List<CartItemDTO> cart = cartService.getCart(session);
         if (cart.isEmpty()) return null;
 
-        // 1. Kiểm tra tồn kho trước khi đặt hàng
         for (CartItemDTO item : cart) {
             Product product = productRepository.findById(item.getMaSP())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + item.getMaSP()));
@@ -73,14 +72,11 @@ public class OrderService {
         for (CartItemDTO item : cart) {
             OrderDetail detail = new OrderDetail();
 
-            // 1. Tạo OrderDetailId và set giá trị
             OrderDetailId id = new OrderDetailId(order.getMaHD(), item.getMaSP());
             detail.setId(id);
 
-            // 2. Set order
             detail.setOrder(order);
 
-            // 3. Lấy Product từ database
             Product product = productRepository.findById(item.getMaSP())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + item.getMaSP()));
             detail.setProduct(product);
@@ -89,7 +85,6 @@ public class OrderService {
 
             orderDetailRepository.save(detail);
 
-            // Trừ số lượng tồn kho thực tế trong tblTonKho
             inventoryRepository.findById(item.getMaSP()).ifPresent(inv -> {
                 if (inv.getSoLuongTon() != null) {
                     inv.setSoLuongTon(Math.max(0, inv.getSoLuongTon() - item.getSoLuong()));
@@ -98,7 +93,6 @@ public class OrderService {
             });
         }
 
-        // Giảm số lượng voucher
         if (cleanMaGiamGia != null) {
             voucherRepository.findById(cleanMaGiamGia).ifPresent(v -> {
                 if (v.getSoLuong() != null && v.getSoLuong() > 0) {
@@ -108,7 +102,6 @@ public class OrderService {
             });
         }
 
-        // Tạo thông báo cho khách hàng
         String paymentDesc = "BankTransfer".equalsIgnoreCase(hinhThuc) ? "Chuyển khoản ngân hàng" : ("COD".equalsIgnoreCase(hinhThuc) ? "Thanh toán khi nhận hàng (COD)" : hinhThuc);
         String formattedPrice = (tongSauGiam != null) ? String.format("%,d", tongSauGiam.longValue()) : "0";
         try {
@@ -121,7 +114,6 @@ public class OrderService {
                     "/DonHang/ChiTiet/" + order.getMaHD()
             );
 
-            // Tạo thông báo cho nhân sự / thu ngân
             String customerName = "Khách hàng";
             var cOpt = customerRepository.findById(maKH);
             if (cOpt.isPresent() && cOpt.get().getTenKH() != null) {
@@ -150,7 +142,6 @@ public class OrderService {
         return order;
     }
 
-    // Hoàn trả số lượng tồn kho và hoàn voucher khi hủy đơn hàng
     @Transactional
     public void cancelOrderAndRestoreStock(Order order) {
         if (order == null) return;

@@ -9,7 +9,6 @@ class CartService {
 
   final List<CartItemModel> _items = [];
 
-  // Notifier để các widget AppBar tự động cập nhật badge số lượng
   final ValueNotifier<int> cartCountNotifier = ValueNotifier<int>(0);
 
   List<CartItemModel> get items => List.unmodifiable(_items);

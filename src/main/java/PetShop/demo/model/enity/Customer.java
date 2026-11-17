@@ -22,11 +22,10 @@ public class Customer {
     @OneToMany(mappedBy = "customer") private List<Order> orders;
 
     public Customer() {}
-    
+
     public Boolean getIsLocked() { return isLocked; }
     public void setIsLocked(Boolean isLocked) { this.isLocked = isLocked; }
 
-    // Getters and setters (bạn tự generate trong IntelliJ: Alt+Insert -> Getter and Setter)
     public Integer getMaKH() { return maKH; }
     public void setMaKH(Integer maKH) { this.maKH = maKH; }
     public String getTenKH() { return tenKH; }
@@ -41,6 +40,8 @@ public class Customer {
     public void setAvarta(String avarta) { this.avarta = avarta; }
     public String getDienThoai() { return dienThoai; }
     public void setDienThoai(String dienThoai) { this.dienThoai = dienThoai; }
+    public String getSoDienThoai() { return dienThoai; }
+    public void setSoDienThoai(String soDienThoai) { this.dienThoai = soDienThoai; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getDiaChi() { return diaChi; }

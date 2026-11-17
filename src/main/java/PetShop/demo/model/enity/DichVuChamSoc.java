@@ -15,7 +15,7 @@ public class DichVuChamSoc {
     private String tenDichVu;
 
     @Column(name = "NhomDichVu", nullable = false)
-    private String nhomDichVu; // 'Spa - Grooming', 'Thú y & Khám chữa', 'Khách sạn thú cưng'
+    private String nhomDichVu;
 
     @Column(name = "DoiTuongApDung")
     private String doiTuongApDung;
@@ -24,7 +24,7 @@ public class DichVuChamSoc {
     private BigDecimal giaDichVu;
 
     @Column(name = "ThoiGianThucHien")
-    private Integer thoiGianThucHien; // phút
+    private Integer thoiGianThucHien;
 
     @Column(name = "MoTaChiTiet", columnDefinition = "NVARCHAR(MAX)")
     private String moTaChiTiet;

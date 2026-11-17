@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RevenueReportDTO {
-
-    private String filterType; // "week", "month", "year", "custom"
+    private String filterType;
     private String selectedDate;
     private String selectedMonth;
     private Integer selectedYear;
@@ -17,7 +16,6 @@ public class RevenueReportDTO {
     private String customTo;
     private String selectedTimeLabel;
 
-    // Tổng hợp doanh thu
     private BigDecimal tongDoanhThuSanPham = BigDecimal.ZERO;
     private BigDecimal tongDoanhThuDichVu = BigDecimal.ZERO;
     private BigDecimal tongDoanhThuHopNhat = BigDecimal.ZERO;
@@ -25,16 +23,13 @@ public class RevenueReportDTO {
     private int soPhieuDichVu = 0;
     private int tongGiaoDich = 0;
 
-    // Biểu đồ
     private List<String> chartLabels = new ArrayList<>();
     private List<BigDecimal> productRevenues = new ArrayList<>();
     private List<BigDecimal> serviceRevenues = new ArrayList<>();
     private List<BigDecimal> totalRevenues = new ArrayList<>();
 
-    // Bảng chi tiết theo từng mốc (ngày/tháng)
     private List<PeriodStat> breakdownList = new ArrayList<>();
 
-    // Danh sách giao dịch phát sinh trong kỳ
     private List<Order> orders = new ArrayList<>();
     private List<PhieuDichVuChamSoc> tickets = new ArrayList<>();
 
@@ -78,7 +73,6 @@ public class RevenueReportDTO {
         public void setServiceCount(int serviceCount) { this.serviceCount = serviceCount; }
     }
 
-    // Getters and Setters
     public String getFilterType() { return filterType; }
     public void setFilterType(String filterType) { this.filterType = filterType; }
 

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("Kiểm thử phân hệ Xác thực, Mã hóa & Đổi mật khẩu (AuthService)")
 public class AuthServiceTest {
-
     @InjectMocks
     private AuthService authService;
 
@@ -40,7 +39,7 @@ public class AuthServiceTest {
         assertNotNull(hash1);
         assertEquals(hash1, hash2);
         assertNotEquals(raw, hash1);
-        assertEquals(64, hash1.length()); // Độ dài chuỗi SHA-256 là 64 hex chars
+        assertEquals(64, hash1.length());
     }
 
     @Test

@@ -7,14 +7,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình phục vụ ảnh từ cả thư mục file bên ngoài lẫn bên trong JAR classpath
         registry.addResourceHandler(
-                "/Content/HinhAnh/**", 
-                "/content/hinhanh/**", 
-                "/content/HinhAnh/**", 
+                "/Content/HinhAnh/**",
+                "/content/hinhanh/**",
+                "/content/HinhAnh/**",
                 "/Content/hinhanh/**",
                 "/images/**"
         ).addResourceLocations(
