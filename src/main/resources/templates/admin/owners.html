@@ -68,9 +68,9 @@
                                         </td>
                                         <td class="text-nowrap">
                                             <span class="badge" 
-                                                  th:classappend="${o.loaiChuNuoi == 'VVIP' ? 'bg-danger' : (o.loaiChuNuoi == 'VIP' ? 'bg-warning text-dark' : (o.loaiChuNuoi == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
-                                                  th:text="${o.loaiChuNuoi}"></span>
-                                            <div class="small text-muted mt-1"><i class="fas fa-star text-warning me-1"></i><span th:text="${o.diemTichLuy}"></span> điểm</div>
+                                                  th:classappend="${o.loaiChuNuoi == 'VVIP' ? 'bg-danger' : (o.loaiChuNuoi == 'VIP' ? 'bg-warning text-dark' : (o.loaiChuNuoi != null and o.loaiChuNuoi.contains('Thân') ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                                  th:text="${o.loaiChuNuoi != null and o.loaiChuNuoi.contains('Thân') ? 'Thân thiết' : (o.loaiChuNuoi != null and o.loaiChuNuoi.contains('Tiêu') ? 'Tiêu chuẩn' : (o.loaiChuNuoi ?: 'Tiêu chuẩn'))}"></span>
+                                            <div class="small text-muted mt-1"><i class="fas fa-star text-warning me-1"></i><span th:text="${o.diemTichLuy ?: 0}"></span> điểm</div>
                                         </td>
                                         <td class="text-center text-nowrap">
                                             <a th:href="@{/admin/owners/{id}/pets(id=${o.maChuNuoi})}" class="btn btn-sm btn-outline-info rounded-pill px-2 me-1" title="Xem thú cưng">

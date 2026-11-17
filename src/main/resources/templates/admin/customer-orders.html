@@ -24,8 +24,8 @@
                           th:text="${customer.tenKH}">
                     </span>
                     <span class="badge ms-2"
-                          th:classappend="${customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (customer.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
-                          th:text="${customer.hangThanhVien ?: 'Tiêu chuẩn'}">
+                          th:classappend="${customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (customer.hangThanhVien != null and customer.hangThanhVien.contains('Thân') ? 'bg-info text-dark' : 'bg-secondary'))}"
+                          th:text="${customer.hangThanhVien != null and customer.hangThanhVien.contains('Thân') ? 'Thân thiết' : (customer.hangThanhVien != null and customer.hangThanhVien.contains('Tiêu') ? 'Tiêu chuẩn' : (customer.hangThanhVien ?: 'Tiêu chuẩn'))}">
                     </span>
                     <span class="ms-2 small text-muted">
                         <i class="fas fa-star text-warning"></i> <span th:text="${customer.diemTichLuy ?: 0}"></span> điểm tích lũy

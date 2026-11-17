@@ -51,8 +51,8 @@
                             Khách hàng
                             <span th:if="${order.customer != null}"
                                   class="badge ms-2"
-                                  th:classappend="${order.customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (order.customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (order.customer.hangThanhVien == 'Thân thiết' ? 'bg-info text-dark' : 'bg-secondary'))}"
-                                  th:text="${order.customer.hangThanhVien ?: 'Tiêu chuẩn'}">
+                                  th:classappend="${order.customer.hangThanhVien == 'VVIP' ? 'bg-danger' : (order.customer.hangThanhVien == 'VIP' ? 'bg-warning text-dark' : (order.customer.hangThanhVien != null and order.customer.hangThanhVien.contains('Thân') ? 'bg-info text-dark' : 'bg-secondary'))}"
+                                  th:text="${order.customer.hangThanhVien != null and order.customer.hangThanhVien.contains('Thân') ? 'Thân thiết' : (order.customer.hangThanhVien != null and order.customer.hangThanhVien.contains('Tiêu') ? 'Tiêu chuẩn' : (order.customer.hangThanhVien ?: 'Tiêu chuẩn'))}">
                             </span>
                             <span th:if="${order.customer != null}" class="text-muted small fw-normal ms-1">
                                 (<i class="fas fa-star text-warning"></i> <span th:text="${order.customer.diemTichLuy ?: 0}"></span> điểm)
