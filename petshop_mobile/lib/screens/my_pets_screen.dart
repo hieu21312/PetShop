@@ -114,22 +114,9 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFCE4EC),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.pets, color: Color(0xFFE91E63), size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              isEditing ? 'Chỉnh sửa hồ sơ bé cưng' : 'Thêm hồ sơ bé cưng mới',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        Text(
+                          isEditing ? 'Chỉnh sửa hồ sơ bé cưng' : 'Thêm hồ sơ bé cưng mới',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -157,7 +144,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             controller: nameCtrl,
                             decoration: InputDecoration(
                               hintText: 'Ví dụ: Lu Lu, Miu Miu, Cún...',
-                              prefixIcon: const Icon(Icons.badge, color: Color(0xFFE91E63)),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -173,18 +159,11 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 6),
                                   child: ChoiceChip(
-                                    label: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(type == 'Chó' ? '🐶' : (type == 'Mèo' ? '🐱' : '🐾')),
-                                        const SizedBox(width: 4),
-                                        Text(type, style: TextStyle(
-                                          color: isSelected ? Colors.white : Colors.black87,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                          fontSize: 12,
-                                        )),
-                                      ],
-                                    ),
+                                    label: Text(type, style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.black87,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 12,
+                                    )),
                                     selected: isSelected,
                                     selectedColor: const Color(0xFFE91E63),
                                     backgroundColor: Colors.grey.shade100,
@@ -204,7 +183,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             controller: breedCtrl,
                             decoration: InputDecoration(
                               hintText: selectedLoai == 'Chó' ? 'Ví dụ: Poodle, Corgi, Husky...' : (selectedLoai == 'Mèo' ? 'Ví dụ: Mèo Anh, Ba Tư, Xiêm...' : 'Ví dụ: Hamster, Thỏ...'),
-                              prefixIcon: const Icon(Icons.category, color: Colors.orange),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -227,7 +205,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                           child: Padding(
                                             padding: const EdgeInsets.only(right: 4),
                                             child: ChoiceChip(
-                                              label: Text(g == 'Đực' ? '♂ Đực' : '♀ Cái', style: TextStyle(
+                                              label: Text(g, style: TextStyle(
                                                 color: isSel ? Colors.white : Colors.black87,
                                                 fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
                                               )),
@@ -257,24 +235,19 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                       onTap: () => setSheetState(() => trietSan = !trietSan),
                                       borderRadius: BorderRadius.circular(12),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                         decoration: BoxDecoration(
-                                          border: Border.all(color: trietSan ? Colors.teal : Colors.grey.shade300),
+                                          border: Border.all(color: trietSan ? const Color(0xFFE91E63) : Colors.grey.shade300),
                                           borderRadius: BorderRadius.circular(12),
-                                          color: trietSan ? Colors.teal.shade50 : Colors.transparent,
+                                          color: trietSan ? const Color(0xFFFCE4EC) : Colors.transparent,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            Icon(trietSan ? Icons.check_circle : Icons.radio_button_unchecked,
-                                                color: trietSan ? Colors.teal : Colors.grey, size: 20),
-                                            const SizedBox(width: 6),
-                                            Text(trietSan ? 'Đã triệt sản' : 'Chưa triệt sản',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: trietSan ? FontWeight.bold : FontWeight.normal,
-                                                  color: trietSan ? Colors.teal : Colors.black87,
-                                                )),
-                                          ],
+                                        child: Center(
+                                          child: Text(trietSan ? 'Đã triệt sản' : 'Chưa triệt sản',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: trietSan ? FontWeight.bold : FontWeight.normal,
+                                                color: trietSan ? const Color(0xFFE91E63) : Colors.black87,
+                                              )),
                                         ),
                                       ),
                                     ),
@@ -298,7 +271,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       decoration: InputDecoration(
                                         hintText: 'Ví dụ: 4.5',
-                                        prefixIcon: const Icon(Icons.scale, color: Colors.blueGrey),
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                       ),
@@ -318,7 +290,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                       keyboardType: TextInputType.number,
                                       decoration: InputDecoration(
                                         hintText: 'Ví dụ: 12',
-                                        prefixIcon: const Icon(Icons.cake, color: Colors.purple),
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                       ),
@@ -342,7 +313,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                       controller: colorCtrl,
                                       decoration: InputDecoration(
                                         hintText: 'Ví dụ: Trắng kem, Vàng...',
-                                        prefixIcon: const Icon(Icons.color_lens, color: Colors.teal),
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                       ),
@@ -375,18 +345,14 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                           border: Border.all(color: Colors.grey.shade400),
                                           borderRadius: BorderRadius.circular(12),
                                         ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.calendar_today, size: 18, color: Colors.blue),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              birthDate != null ? DateFormat('dd/MM/yyyy').format(birthDate!) : 'Chọn ngày',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: birthDate != null ? Colors.black87 : Colors.grey,
-                                              ),
+                                        child: Center(
+                                          child: Text(
+                                            birthDate != null ? DateFormat('dd/MM/yyyy').format(birthDate!) : 'Chọn ngày',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: birthDate != null ? Colors.black87 : Colors.grey,
                                             ),
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -426,7 +392,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             controller: vaccineCtrl,
                             decoration: InputDecoration(
                               hintText: 'Ví dụ: Đã tiêm 7 bệnh, dại (08/2026)...',
-                              prefixIcon: const Icon(Icons.vaccines, color: Colors.green),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -439,7 +404,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             controller: allergyCtrl,
                             decoration: InputDecoration(
                               hintText: 'Ví dụ: Dị ứng thịt gà, dị ứng sữa...',
-                              prefixIcon: const Icon(Icons.warning_amber, color: Colors.redAccent),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -452,7 +416,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             controller: medicalCtrl,
                             decoration: InputDecoration(
                               hintText: 'Ví dụ: Từng bị nấm da, viêm tai...',
-                              prefixIcon: const Icon(Icons.healing, color: Colors.indigo),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -466,7 +429,6 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             maxLines: 2,
                             decoration: InputDecoration(
                               hintText: 'Ví dụ: Đốm trắng ở ngực, sợ tiếng sấm sét...',
-                              prefixIcon: const Icon(Icons.notes, color: Colors.grey),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             ),
@@ -476,7 +438,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           SizedBox(
                             width: double.infinity,
                             height: 48,
-                            child: ElevatedButton.icon(
+                            child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFE91E63),
                                 foregroundColor: Colors.white,
@@ -538,8 +500,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                                   }
                                 }
                               },
-                              icon: Icon(isEditing ? Icons.save : Icons.add),
-                              label: Text(
+                              child: Text(
                                 isEditing ? 'LƯU THAY ĐỔI' : 'TẠO HỒ SƠ BÉ CƯNG',
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               ),
